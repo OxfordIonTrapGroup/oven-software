@@ -1,0 +1,18 @@
+
+echo am33xx_pwm > /sys/devices/bone_capemgr.?/slots
+echo bspwm_P9_14_e > /sys/devices/bone_capemgr.?/slots
+sleep 1
+echo 0 > /sys/devices/ocp.?/bs_pwm_test_P9_14.*/run
+echo 125 > /sys/devices/ocp.?/bs_pwm_test_P9_14.*/period
+echo 62 > /sys/devices/ocp.?/bs_pwm_test_P9_14.*/duty
+echo 1 > /sys/devices/ocp.?/bs_pwm_test_P9_14.*/run
+
+
+echo BB-SPI1-01 > /sys/devices/bone_capemgr.?/slots
+
+echo 14 > /sys/class/gpio/export
+sleep 1
+echo out > /sys/class/gpio/gpio14/direction
+echo 0 > /sys/class/gpio/gpio14/value
+sleep 0.1
+echo 1 > /sys/class/gpio/gpio14/value
