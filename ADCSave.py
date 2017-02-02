@@ -211,31 +211,33 @@ a.readGains()
 a.readChannelErrors()
 
 a.enableReadout(True)
+import numpy as np 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+nSamples = 1000
+sampleValues = np.zeros(nSamples)
+sampleTimes = np.zeros(nSamples)
+nextSample = 0
+
 tStart = time.time()
-while(1):
+while(nextSample < nSamples):
     #a.waitForEdge()
     channels, values = a.readSamples()
     try:
-        index = channels.index(4)
-        value = values[index]
-        index2 = channels.index(5)
-        value2 = values[index2]        
-        index3 = channels.index(7)
-        value3 = values[index3]
-        I = value2*2.5*10.0
-        VOven = -value3*3*2.5
-        VOut = value*3*2.5
-        #print value*3*2.5, value2*2.5*10,value3*3*2.5
+        # index = channels.index(4)
+        # value = values[index]
+        # index2 = channels.index(5)
+        # value2 = values[index2]        
+        # index3 = channels.index(7)
+        # value3 = values[index3]
+        # print value*3*2.5, value3*3*2.5,value2*4.6
         index = channels.index(6)
         value = values[index]
-        TCVoltageMV = value*2.5*1000.0/51.
-        R = VOven/I
-
-        print '%0.2f'%((-TCVoltageMV*1000.0/40.0) + 20),
-        print '%0.4f'%(VOven),
-        print '%0.4f'%(VOut),
-        print '%0.2f'%(I),
-        print '%0.2f'%(R*1000.0)
+        sampleValues[nextSample] = value*2.5
+        sampleTimes[nextSample] = (time.time()-tStart)*1000.0
+        nextSample += 1
+        #print value*2.5, (time.time()-tStart)*1000.0
         #print channels
     except ValueError:
         pass
@@ -243,8 +245,12 @@ while(1):
     #print [c for c in values]
     
     #break
-    time.sleep(0.1)
+    #time.sleep(0.1)
  
+np.savetxt('samples.txt',zip(sampleTimes,sampleValues))
+plt.plot(sampleTimes, sampleValues, '.')
+plt.ylim(-0.52,-0.5)
+plt.savefig('samples.pdf')
 # selectReference()
 # setDecimation()
 # readReg(0x5C)
