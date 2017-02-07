@@ -1,6 +1,6 @@
 
 
-OVERLAYS=OvenOverlay
+OVERLAYS=Overlay/OvenOverlay
 OVERLAYS_DTBO=$(OVERLAYS:=-00A0.dtbo)
 
 .PHONY: all
@@ -18,3 +18,8 @@ install: all
 	cp $(OVERLAYS_DTBO) /lib/firmware/
 	grep -q am33xx_pwm /sys/devices/bone_capemgr.9/slots || echo am33xx_pwm > /sys/devices/bone_capemgr.9/slots
 	echo OvenOverlay > /sys/devices/bone_capemgr.9/slots
+
+.PHONY: clean
+clean: 
+	rm -f $(OVERLAYS_DTBO)
+
