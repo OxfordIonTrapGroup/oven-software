@@ -306,7 +306,7 @@ if __name__ == "__main__":
         except ValueError:
             pass
  
-        time.sleep(0.1)
+        #time.sleep(0.1)
      
 
 

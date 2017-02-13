@@ -1,25 +1,36 @@
 
 
-OVERLAYS=Overlay/OvenOverlay
-OVERLAYS_DTBO=$(OVERLAYS:=-00A0.dtbo)
 
-.PHONY: all
-all: overlays makefile
+PRU_SUPPORT_INCLUDE_PATH = /home/debian/TestCode/pru-software-support-package/include
+PRU_LIB_PATH = /usr/share/ti/cgt-pru/lib
+PRU_INC_PATH = /usr/share/ti/cgt-pru/include
 
-.PHONY: overlays
-overlays: $(OVERLAYS_DTBO) makefile
+C_FLAGS = -i $(PRU_LIB_PATH) -i $(PRU_INC_PATH) -i $(PRU_SUPPORT_INCLUDE_PATH) -i . --endian=little --define am3359 --define pru0 --silicon_version=3 -o1 -k
 
-$(OVERLAYS_DTBO): makefile ${@:-00A0.dtbo=.dts}
-	dtc -O dtb -o $@ -b 0 -@ $(@:-00A0.dtbo=.dts)
+C_SRCS = main.c spi.c
+C_OBJS = $(C_SRCS:.c=.obj)
+
+TARGET = firmware.out
 
 
-.PHONY: install
-install: all
-	cp $(OVERLAYS_DTBO) /lib/firmware/
-	grep -q am33xx_pwm /sys/devices/bone_capemgr.9/slots || echo am33xx_pwm > /sys/devices/bone_capemgr.9/slots
-	echo OvenOverlay > /sys/devices/bone_capemgr.9/slots
 
-.PHONY: clean
-clean: 
-	rm -f $(OVERLAYS_DTBO)
+all: makefile pru_loader $(TARGET) text.bin
 
+pru_loader: pru_loader.c 
+	gcc -o pru_loader pru_loader.c -lprussdrv
+
+$(TARGET): $(C_OBJS)
+	clpru  $(C_FLAGS) -z lnk.cmd -o $(TARGET) $(C_OBJS)
+
+%.obj: %.c
+	clpru $(C_FLAGS) -c $<   
+
+text.bin: $(TARGET)
+	hexpru bin.cmd $(TARGET)
+
+clean:
+	rm -f $(C_OBJS)
+	rm -f $(TARGET)
+	rm -f pru_loader
+	rm -f text.bin data.bin
+	rm -f $(C_OBJS:.obj=.asm)

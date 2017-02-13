@@ -26,7 +26,8 @@
             };
             spi_pins: pinmux_spi_pins {
                 pinctrl-single,pins = <
-                    0x190 0x33      /* P9.31 mcasp0_aclkx.spi1_sclk, INPUT_PULLUP | MODE3 */
+                    0x190 0x33      /* P9.31 mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
+                    /*0x190 0x13*/      /* P9.31 mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
                     0x194 0x13      /* P9.29 mcasp0_fsx.spi1_d0, OUTPUT_PULLUP | MODE3 */
                     0x198 0x33      /* P9.30 mcasp0_axr0.spi1_d1, INPUT_PULLUP | MODE3 */
                     0x19c 0x13      /* P9.28 mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
@@ -85,11 +86,12 @@
              pinctrl-names = "default";
              pinctrl-0 = <&spi_pins>;
              ti,pindir-d0-out-d1-in = <1>;
-             spidev@1 {
+             spidev@0 {
                  spi-max-frequency = <24000000>;
                  reg = <0>;
                  compatible = "linux,spidev";
             };
+
         };
     };
     fragment@4 {
