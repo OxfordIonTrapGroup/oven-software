@@ -35,7 +35,7 @@ void __ISR(_UART_1_VECTOR, IPL2AUTO) uart_interrupt() {
         //if(RPA0R != 0b0001) {
         //    U1STAbits.UTXEN = 1; // Enable TX
             //RPA0R = 0b0001; // RA0 = U1TX
-            LED_GREEN = 1;
+            //LED_GREEN = 1;
         //}
 
         // Copy the data into the RX buffer

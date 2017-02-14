@@ -43,6 +43,11 @@ void adc_streaming_interrupt() {
     int i;
     // Cat the streaming_channels byte
     uart_write(&streaming_channels, 1);
+    
+    // HACK
+    //uart_write_blocking(&last_samples[6], 4);
+    //return;
+    
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
             // Cat the data to the uart if the channel is enabled
@@ -106,17 +111,17 @@ void adc_config() {
     INTCONbits.INT0EP = 0; // Set polarity to falling edge   
     IFS0bits.INT0IF = 0; // Clear the flag
     IEC0bits.INT0IE = 1; // Enable the interrupt
-    IPC0bits.INT0IP = 1; // Set the priority to 1
+    IPC0bits.INT0IP = 3; // Set the priority to 1
 
 }
 
-void __ISR( _EXTERNAL_0_VECTOR, IPL1AUTO) adc_ext_interrupt() {
+void __ISR( _EXTERNAL_0_VECTOR, IPL3AUTO) adc_ext_interrupt() {
 
     // Read the samples
     adc_read_samples(last_samples);
-    //LED_GREEN = !LED_GREEN;
+    LED_GREEN = !LED_GREEN;
 
-    if(streaming_channels > 0)
+    if(streaming_channels != 0)
         adc_streaming_interrupt();
     
     IFS0bits.INT0IF = 0; // Clear the flag

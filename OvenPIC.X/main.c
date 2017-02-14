@@ -5,6 +5,7 @@
 #include <string.h>
 #include "HardwareProfile.h"
 #include "AD7770.h"
+#include "uart.h"
 
 #pragma config FNOSC = PRIPLL // Primary oscillator
 #pragma config POSCMOD = XT // 'XT' mode for xtals, ours is 8MHz
@@ -19,9 +20,6 @@
 
 
 
-void uart_config();
-void uart_write( char* buffer, int len);
-void timer_config();
 void ins_read_next();
 
 void main() {
@@ -41,6 +39,7 @@ void main() {
     uart_config();
 
     adc_config();
+    pwm_config();
  //   timer_config();
 //    asm("ei");
    
@@ -99,20 +98,3 @@ void timer_config() {
 }
 
 
-#define OVEN_PWM_CLOCK_FREQ 1000000
-
-// Use Timer 3 and OC2 to generate oven pwm on RB5
-void oven_0_config() {
-    
-    PR3 = (SYSCLK/OVEN_PWM_CLOCK_FREQ) - 1;
- 
-    OC2RS = (PR3 + 1)*0.05;
-    T3CONbits.ON = 1;
-    
-    
-    OC2CONbits.OCTSEL = 1;
-    OC2CONbits.OCM = 6;
-    OC2CONbits.ON = 1;
-    
-    RPB5R = 0b101; // OC2 on RB5 (pin 14)
-}
