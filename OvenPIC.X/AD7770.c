@@ -1,7 +1,10 @@
 
+#include "HardwareProfile.h"
+
 #include <plib.h>
 #include <stdint.h>
-#include "HardwareProfile.h"
+#include "AD7770.h"
+#include "feedback.h"
 
 #define ADC_CLOCK_FREQ 8000000
 #define ADC_RESET LATBbits.LATB5
@@ -27,6 +30,11 @@
 #define _SRC_UPDATE         0x64
 
 uint32_t last_samples[8]; // Storage of samples
+int32_t last_samples_signed[8]; // Storage of samples
+
+uint32_t streaming_decimation = 0; // How many samples to skip before sending the next
+                                    // sample whilst streaming
+uint32_t streaming_decimation_counter = 0; // Counter for decimation
 
 char streaming_channels = 0;
 
@@ -39,14 +47,25 @@ void adc_streaming_stop() {
     streaming_channels = 0;
 }
 
+void adc_set_streaming_decimation(uint32_t decimation) {
+    streaming_decimation = decimation;
+}
+
 void adc_streaming_interrupt() {
     int i;
+    if(streaming_decimation > 0) {
+        // If we need to decimate
+        if(streaming_decimation_counter != 0) {
+            // If the counter is not yet at zero, decrement and leave
+            streaming_decimation_counter--;
+            return;
+        } else {
+            // Otherwise, reset the counter and continue with the streaming
+            streaming_decimation_counter = streaming_decimation;
+        }
+    }
     // Cat the streaming_channels byte
     uart_write(&streaming_channels, 1);
-    
-    // HACK
-    //uart_write_blocking(&last_samples[6], 4);
-    //return;
     
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
@@ -118,8 +137,11 @@ void adc_config() {
 void __ISR( _EXTERNAL_0_VECTOR, IPL3AUTO) adc_ext_interrupt() {
 
     // Read the samples
-    adc_read_samples(last_samples);
+    adc_read_samples(last_samples, last_samples_signed);
     LED_GREEN = !LED_GREEN;
+    
+    // Update the feedback loop
+    fb_update();
 
     if(streaming_channels != 0)
         adc_streaming_interrupt();
@@ -174,7 +196,7 @@ void adc_enable_readout(char enable) {
     LATBbits.LATB10 = 1;
 }
 
-void adc_read_samples(uint32_t* data) {
+void adc_read_samples(uint32_t* data, int32_t* data_signed) {
     int i;
     
     //SPI2CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
@@ -193,11 +215,17 @@ void adc_read_samples(uint32_t* data) {
         data[i] |= (SPI2BUF & 0xFFFF);
     }
     LATBbits.LATB10 = 1;
-
+        
+    for(i=0; i<8; i++) {
+        data_signed[i] = (data[i] & 0x7FFFFF);
+        if(data[i] & (1<<23))
+            data_signed[i] = data_signed[i] - 0x800000;
+    }
+    
     //SPI2CONbits.FRMEN = 0; // Disable framed mode
     //SPI2CONbits.FRMCNT = 0b000; // Return SS to normal behaviour
     
-    return data;
+    //return data;
 }
 
 uint8_t calculate_crc(uint32_t* data) {

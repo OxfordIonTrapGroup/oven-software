@@ -1,8 +1,8 @@
 
+#include "HardwareProfile.h"
 
 #include <plib.h>
 #include <stdint.h>
-#include "HardwareProfile.h"
 
 #define UART_TX_BUFFER_LEN 256
 char uart_tx_buffer[UART_TX_BUFFER_LEN];

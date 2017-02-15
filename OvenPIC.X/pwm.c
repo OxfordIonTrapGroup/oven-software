@@ -1,15 +1,15 @@
 
+#include "HardwareProfile.h"
 
 #include <plib.h>
 #include <stdint.h>
-#include "HardwareProfile.h"
 #include "uart.h"
 
 
 //#define OVEN_PWM_CLOCK_FREQ 500000
 
 #define OVEN_PWM_PERIOD 199
-#define OVEN_MAX_DUTY (int)(0.10*OVEN_PWM_PERIOD)
+#define OVEN_MAX_DUTY (int)(0.30*OVEN_PWM_PERIOD)
 
 uint16_t pwm_0_duty = 0;
 
@@ -17,7 +17,7 @@ uint16_t pwm_0_duty = 0;
 void pwm_set_duty(uint16_t duty) {
     
     if(duty > OVEN_MAX_DUTY)
-        return;
+        duty = OVEN_MAX_DUTY;
     
     pwm_0_duty = duty;
     OC4RS = duty;

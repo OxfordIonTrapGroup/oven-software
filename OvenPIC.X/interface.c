@@ -1,9 +1,12 @@
 
+#include "HardwareProfile.h"
+
 #include <plib.h>
 #include <stdint.h>
-#include "HardwareProfile.h"
 #include "uart.h"
 #include "AD7770.h"
+#include "feedback.h"
+#include "commands.h"
 
 #define INS_BUFFER_LEN 100
 char instruction_buffer[INS_BUFFER_LEN];
@@ -12,74 +15,13 @@ int instruction_buffer_end = 0;
 #define INS_MAGIC_START (char)0xA5
 #define INS_MAGIC_END   (char)0x5A
 
-#define CMD_ECHO                    0x00
-#define CMD_READ_LAST_CONVERSION    0x01
-#define CMD_STREAM_ADC              0x02
-#define CMD_SET_PWM                 0x03
 
-
-typedef struct cmd_set_pwm_args_s {
-    uint16_t new_duty;
-}cmd_set_pwm_args_t;
-
-typedef struct ins_header_s {
-    char magic_start;
-    char command;
-    char len;
-    char crc;
-    char magic_end;
-}ins_header_t __attribute__((packed));
 
 
 void ins_report_error(char* message) {
     // Report an error to the uart 
     uart_write(message, strlen(message));
 }
-
-void cmd_echo(ins_header_t* header, char* data) {
-    uart_write(data, header->len);
-}
-
-void cmd_read_last_conversion(ins_header_t* header, char* data) {
-    float floatData[8];
-    char buffer[120];
-    adc_convert_samples(last_samples, floatData);
-
-    sprintf(&buffer[0],"%f %f %f %f \n", floatData[4], floatData[5], floatData[6], floatData[7]);
-    uart_write(buffer,strlen(buffer));
-}
-
-void cmd_stream_adc(ins_header_t* header, char* data) {
-    // args: 1 byte, each bit represents channel mask
-
-    // If the packet is not the length we expect, do nothing
-    if(header->len == 1)
-        adc_streaming_start(data[0]);
-    else
-        ins_report_error("bad length in stream_adc");
-}
-
-
-void cmd_set_pwm(ins_header_t* header, char* data) {
-    if(header->len != sizeof(cmd_set_pwm_args_t)) {
-        ins_report_error("bad length in set_pwm");
-        return;
-    }
-
-    //char message[50];
-    uint16_t new_duty = (data[0]<<8) + data[1];
-
-    //sprintf(&message[0], "%x %x %i %i\n", data[0], data[1], new_duty, PR3);
-    //sprintf(&message[0], "%x %x %i\n", data[0], data[1], PR3);
-    //uart_write(message, strlen(message));    
-    
-    //char message2[50];
-    pwm_set_duty(new_duty);
-    
-    //sprintf(&message2[0], "%i\n", (int)(new_duty[0]*100.0) );
-    //uart_write(message2, strlen(message2));    
-}
-
 
 
 void ins_process_packet(ins_header_t* header, char* data) {
@@ -88,16 +30,42 @@ void ins_process_packet(ins_header_t* header, char* data) {
         case CMD_ECHO: 
             cmd_echo(header, data); 
             break;
-        case CMD_READ_LAST_CONVERSION: 
-            cmd_read_last_conversion(header, data); 
+            
+        // PWM commands
+        case CMD_PWM_SET_DUTY: 
+            cmd_pwm_set_duty(header, data); 
+            break;     
+            
+        // ADC commands
+
+        case CMD_ADC_STREAM: 
+            cmd_adc_stream(header, data); 
             break;
-        case CMD_STREAM_ADC: 
-            cmd_stream_adc(header, data); 
+        case CMD_ADC_DECIMATE: 
+            cmd_adc_decimate(header, data); 
             break;
-        case CMD_SET_PWM: 
-            cmd_set_pwm(header, data); 
+        case CMD_ADC_READ_LAST_CONVERSION: 
+            cmd_adc_read_last_conversion(header, data); 
+            break;  
+            
+        // Feedback commands
+            
+        case CMD_FEEDBACK_CONFIG: 
+            cmd_feedback_config(header, data); 
             break;
-        
+        case CMD_FEEDBACK_START: 
+            cmd_feedback_start(header, data); 
+            break;
+        case CMD_FEEDBACK_STOP: 
+            cmd_feedback_stop(header, data); 
+            break;
+        case CMD_FEEDBACK_SETPOINT: 
+            cmd_feedback_setpoint(header, data); 
+            break;
+        case CMD_FEEDBACK_READ_STATUS: 
+            fb_read_status();
+            break;
+
         default:
             ins_report_error("bad command code");
             break;
@@ -129,7 +97,7 @@ void ins_invalidate_buffer() {
 void ins_read_next() {
     // Reads from the uart rx buffer and checks for an instruction
     
-    instruction_buffer_end = uart_read(&instruction_buffer[instruction_buffer_end], INS_BUFFER_LEN-instruction_buffer_end);
+    instruction_buffer_end += uart_read(&instruction_buffer[instruction_buffer_end], INS_BUFFER_LEN-instruction_buffer_end);
 
     // Search for packet start symbol
     int i_start = 0;
@@ -168,7 +136,7 @@ void ins_read_next() {
     }
     
     // Now we have a valid header and packet
-    char* data = &instruction_buffer[i_start + sizeof(ins_header_t)];
+    uint8_t* data = &instruction_buffer[i_start + sizeof(ins_header_t)];
     ins_process_packet(header, data);
     // Rebase to the end of the packet
     ins_rebase_buffer(i_start + sizeof(ins_header_t) + header->len);

@@ -1,11 +1,12 @@
 
+#include "HardwareProfile.h"
 
 #include <plib.h>
 #include <stdint.h>
 #include <string.h>
-#include "HardwareProfile.h"
 #include "AD7770.h"
 #include "uart.h"
+#include "feedback.h"
 
 #pragma config FNOSC = PRIPLL // Primary oscillator
 #pragma config POSCMOD = XT // 'XT' mode for xtals, ours is 8MHz
@@ -40,6 +41,7 @@ void main() {
 
     adc_config();
     pwm_config();
+    fb_config(0,0,0);
  //   timer_config();
 //    asm("ei");
    
