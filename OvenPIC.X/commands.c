@@ -55,18 +55,29 @@ int _parse_args(ins_header_t* header, uint8_t* data, void* args) {
 
 
 void cmd_echo(ins_header_t* header, uint8_t* data) {
-    uart_write(data, header->len);
+    
+    ins_send_reply(header, data, header->len);
 }
 
 // ADC commands
 
 void cmd_adc_read_last_conversion(ins_header_t* header, uint8_t* data) {
-    float floatData[8];
-    char buffer[120];
-    adc_convert_samples(last_samples, floatData);
+    
+    cmd_adc_read_last_conversion_reply_t reply;
+    int i;
+    
+    for(i=0;i<8;i++)
+        reply.samples[i] = last_samples_signed[i];
+    
+    ins_send_reply(header, &reply, sizeof(reply));
 
-    sprintf(&buffer[0],"%f %f %f %f \n", floatData[4], floatData[5], floatData[6], floatData[7]);
-    uart_write(buffer,strlen(buffer));
+    
+//    float floatData[8];
+//    char buffer[120];
+//    //adc_convert_samples(last_samples, floatData);
+//
+//    //sprintf(&buffer[0],"%f %f %f %f \n", floatData[4], floatData[5], floatData[6], floatData[7]);
+//    uart_write(buffer,strlen(buffer));
 }
 
 void cmd_adc_stream(ins_header_t* header, uint8_t* data) {

@@ -9,20 +9,36 @@
 #include "commands.h"
 
 #define INS_BUFFER_LEN 100
-char instruction_buffer[INS_BUFFER_LEN];
+uint8_t instruction_buffer[INS_BUFFER_LEN];
 int instruction_buffer_end = 0;
 
-#define INS_MAGIC_START (char)0xA5
-#define INS_MAGIC_END   (char)0x5A
+#define INS_MAGIC_START (uint8_t)0xA5
+#define INS_MAGIC_END   (uint8_t)0x5A
 
 
-
-
-void ins_report_error(char* message) {
+void ins_report_error(uint8_t* message) {
     // Report an error to the uart 
     uart_write(message, strlen(message));
 }
 
+void ins_send_reply(ins_header_t* header, void* reply, uint8_t length) {
+    
+    uint8_t message[INS_BUFFER_LEN];
+    
+    ins_header_t new_header;
+    
+    new_header.magic_start = INS_MAGIC_START;
+    new_header.magic_end = INS_MAGIC_END;
+    
+    new_header.len = length;
+    new_header.command = header->command;
+    
+    new_header.crc = 0;
+    
+    memcpy(&message[0], &new_header, sizeof(ins_header_t));
+    memcpy(&message[sizeof(ins_header_t)], reply, length);
+    uart_write(message, sizeof(ins_header_t) + length);
+}
 
 void ins_process_packet(ins_header_t* header, char* data) {
     

@@ -44,6 +44,9 @@ typedef struct  {
     int32_t decimation;
 } __attribute__((packed)) cmd_adc_decimate_args_t;
 
+typedef struct  {
+    int32_t samples[8];
+} __attribute__((packed)) cmd_adc_read_last_conversion_reply_t;
 
 // Feedback commands
 
