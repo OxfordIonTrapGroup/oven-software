@@ -2,15 +2,17 @@
 import serial
 import time
 import numpy as np
-import matplotlib 
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+#import matplotlib 
+#matplotlib.use('Agg')
+#import matplotlib.pyplot as plt
 
 import struct
 
 class OvenPIC:
     _INS_MAGIC_START = 0xA5
     _INS_MAGIC_END   = 0x5A
+
+    _INS_HEADER_LEN  = 5
 
     _CMD_ECHO                       = 0x00
 
@@ -29,8 +31,10 @@ class OvenPIC:
     def __init__(self, port='/dev/ttyO5', baudrate=250000, timeout=1):
         self.s = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
         
+        self.rx_buffer = []
+
         # Wake up the device
-        self.s.write('x')
+        self.s.write(b'x')
         
     def _send_command(self, command, data):
         packet = [self._INS_MAGIC_START]
@@ -41,12 +45,80 @@ class OvenPIC:
         packet += data
         
         self.s.write(packet)
-        
+
+    def _read(self, timeout=5):
+        """Block until a packet is found"""
+
+        start_time = time.time()
+        now = 0
+        while(now < timeout):
+            response = self._read_packet()
+            if response is not None:
+                return response
+            time.sleep(0.1)
+            now = start_time - time.time()
+
+        raise Exception('Read timed out')
+
+
+    def _read_packet(self):
+        """Read the next message from the PIC"""
+
+        # Read in any new data
+        if (self.s.inWaiting() > 0 ): 
+            new_data = self.s.read(self.s.inWaiting())
+            self.rx_buffer += new_data
+
+
+        if len(self.rx_buffer) == 0:
+            return None
+
+
+        # Find first magic byte
+        i_start = 0
+        while self.rx_buffer[i_start] != self._INS_MAGIC_START:
+            i_start += 1
+            if i_start >= len(self.rx_buffer):
+                # If no start packet was found, invalidate the buffer and return
+                self.rx_buffer = []
+                return None
+
+        # Now check that there is enough data in the buffer for this packet
+        if i_start + self._INS_HEADER_LEN > len(self.rx_buffer):
+            # If the packet is not fully there, discard the start of the buffer and return
+            self.rx_buffer = self.rx_buffer[i_start:]
+            return None
+
+        # Now we have a valid start symbol and enough length to see the header
+        magic_start, command, length, crc, magic_end = \
+            struct.unpack('>5B', bytes(self.rx_buffer[i_start:i_start+self._INS_HEADER_LEN]))
+
+
+        if magic_end != self._INS_MAGIC_END:
+            print('Bad magic end byte')
+            # Discard the packet and return
+            self.rx_buffer = self.rx_buffer[i_start+self._INS_HEADER_LEN:]
+            return None
+
+        if i_start + self._INS_HEADER_LEN + length > len(self.rx_buffer):
+            # If there is not enough data in the buffer yet, rebase and return
+            self.rx_buffer = self.rx_buffer[i_start:]
+            return None
+
+        data = bytes(self.rx_buffer[i_start+self._INS_HEADER_LEN:i_start+self._INS_HEADER_LEN + length])
+        self.rx_buffer = self.rx_buffer[i_start+self._INS_HEADER_LEN + length:]
+
+        return command, data
+
+
     def echo(self, data):
+        if type(data) is str:
+            data = data.encode('ascii')
+
         self._send_command(self._CMD_ECHO, data)
         
-        response = self.s.read(len(data))
-        return response
+        command, data = self._read()
+        return data
     
 ################################
 ################### PWM 
@@ -81,8 +153,18 @@ class OvenPIC:
     def adc_read_last_conversion(self):
  
         self._send_command(self._CMD_ADC_READ_LAST_CONVERSION, [])
-        response = self.s.read(1000)
-        return response
+
+        command, data = self._read()
+        if command != self._CMD_ADC_READ_LAST_CONVERSION:
+            print(command)
+            print(data)
+            raise Exception('Bad reply command from PIC')
+
+        samples = struct.unpack('<8i', data)
+
+        return samples
+            
+
 
 
 ################################
@@ -274,11 +356,12 @@ class OvenPIC:
 p = OvenPIC()
 
 response = p.echo('hi\n')
-print(len(response))
 print(response)
 
 response = p.adc_read_last_conversion()
-print(len(response))
+print(response)
+
+response = p.echo('hi\n')
 print(response)
 
 dd
