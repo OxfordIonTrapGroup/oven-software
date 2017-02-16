@@ -28,6 +28,8 @@ class OvenPIC:
     _CMD_FEEDBACK_SETPOINT          = 0x33
     _CMD_FEEDBACK_READ_STATUS       = 0x34
 
+    _CMD_ERROR                      = 0xFF
+
     def __init__(self, port='/dev/ttyO5', baudrate=250000, timeout=1):
         self.s = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
         
