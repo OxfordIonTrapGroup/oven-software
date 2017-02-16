@@ -9,7 +9,7 @@
 //#define OVEN_PWM_CLOCK_FREQ 500000
 
 #define OVEN_PWM_PERIOD 199
-#define OVEN_MAX_DUTY (int)(0.30*OVEN_PWM_PERIOD)
+#define OVEN_MAX_DUTY (int)(0.15*OVEN_PWM_PERIOD)
 
 uint16_t pwm_0_duty = 0;
 
@@ -26,6 +26,8 @@ void pwm_set_duty(uint16_t duty) {
 
 // Use Timer 3 and OC4 to generate oven pwm on RB2 (pin6)
 void pwm_config() {
+    
+    //TRISBbits.TRISB2 = 1;
     
     //PR3 = (SYSCLK/OVEN_PWM_CLOCK_FREQ) - 1;
     PR3 = OVEN_PWM_PERIOD;

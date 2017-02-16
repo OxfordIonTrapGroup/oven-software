@@ -19,14 +19,6 @@
 #define CMD_ERROR                       0xFF
 
 
-typedef struct ins_header_s {
-    uint8_t magic_start;
-    uint8_t command;
-    uint8_t len;
-    uint8_t crc;
-    uint8_t magic_end;
-}ins_header_t;
-
 
 
 // PWM commands
@@ -43,7 +35,7 @@ typedef struct {
 } __attribute__((packed)) cmd_adc_stream_args_t;
 
 typedef struct  {
-    int32_t decimation;
+    uint32_t decimation;
 } __attribute__((packed)) cmd_adc_decimate_args_t;
 
 typedef struct  {
@@ -67,6 +59,15 @@ typedef struct {
 typedef struct {
     int32_t setpoint;
 } __attribute__((packed)) cmd_feedback_setpoint_args_t;
+
+
+typedef struct {
+    int32_t setpoint;
+    int32_t last_sample;
+    int32_t last_error;
+    int64_t last_duty;
+    int64_t integrator;
+} __attribute__((packed)) cmd_feedback_read_status_reply_t;
 
 
 #endif

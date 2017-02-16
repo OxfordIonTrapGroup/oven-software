@@ -30,6 +30,9 @@ void main() {
     SYSTEMConfig( SYSCLK, SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
     
     // Wait until the U1RX pin receives a signal
+    //TRISBbits.TRISB2 = 0;
+    //LATBbits.LATB2 = 0;
+    
     while(PORTAbits.RA4 == 0);
     //while(1);
     //TRISBbits.TRISB9 = 0;

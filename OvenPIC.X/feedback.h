@@ -3,6 +3,13 @@
 #define _FEEDBACK_H
 
 
+extern int32_t FB_target;
+extern uint8_t FB_adc_index;
+extern int32_t FB_last_error; 
+extern int64_t FB_last_duty; 
+extern int64_t FB_integrator;
+extern uint8_t FB_enabled;
+
 extern void fb_config(int32_t new_gain_p, int32_t new_gain_i, int32_t new_gain_d);
 extern void fb_start();
 extern void fb_stop();

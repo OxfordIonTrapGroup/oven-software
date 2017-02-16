@@ -9,6 +9,7 @@
 #include "AD7770.h"
 #include "feedback.h"
 #include "commands.h"
+#include "interface.h"
 
 #define INS_BUFFER_LEN 256
 uint8_t instruction_buffer[INS_BUFFER_LEN];
@@ -17,9 +18,22 @@ int instruction_buffer_end = 0;
 #define INS_MAGIC_START (uint8_t)0xA5
 #define INS_MAGIC_END   (uint8_t)0x5A
 
+uint8_t streaming = 0; // Non-zero if interface is in streaming mode
+                        // where normal command responses are hidden
 
+void ins_enable_streaming() {
+    streaming = 1;
+}
+
+void ins_disable_streaming() {
+    streaming = 0;
+}
 
 void ins_send_reply(ins_header_t* header, void* reply, uint8_t length) {
+    
+    // If we are streaming, don't send a reply
+    if(streaming != 0)
+        return;
     
     uint8_t message[INS_BUFFER_LEN];
     
@@ -38,7 +52,29 @@ void ins_send_reply(ins_header_t* header, void* reply, uint8_t length) {
     uart_write(message, sizeof(ins_header_t) + length);
 }
 
+void ins_send_text_message(uint8_t command, uint8_t* format, ...) {
+    // If we are streaming, don't send anything
+    if(streaming != 0)
+        return;
+
+    // Send a text message as a function reply       
+    va_list arg_list;
+    uint8_t message[INS_BUFFER_LEN];
+    ins_header_t header;
+
+    va_start(arg_list, format);             // Prep arguments list
+    vsprintf(message, format, arg_list);    // "Print" to buffer
+    va_end(arg_list);                       // End handling of arguments list
+
+    header.command = command;
+    ins_send_reply(&header, message, strlen(message));
+}
+
 void ins_report_error(uint8_t* format, ...) {
+    // If we are streaming, don't send anything
+    if(streaming != 0)
+        return;
+
     // Report an error to the uart with a message       
     va_list arg_list;
     uint8_t message[INS_BUFFER_LEN];
@@ -52,7 +88,6 @@ void ins_report_error(uint8_t* format, ...) {
     
     ins_send_reply(&header, message, strlen(message));
 }
-
 
 
 void ins_process_packet(ins_header_t* header, char* data) {
@@ -94,7 +129,7 @@ void ins_process_packet(ins_header_t* header, char* data) {
             cmd_feedback_setpoint(header, data); 
             break;
         case CMD_FEEDBACK_READ_STATUS: 
-            fb_read_status();
+            cmd_feedback_read_status(header, data);
             break;
 
         default:
@@ -120,7 +155,8 @@ void ins_rebase_buffer(int index) {
 }
 
 void ins_invalidate_buffer() {
-   
+    
+    ins_report_error("Buffer invalidated");
     instruction_buffer_end = 0;
 }
 

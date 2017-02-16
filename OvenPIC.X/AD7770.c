@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "AD7770.h"
 #include "feedback.h"
+#include "interface.h"
 
 #define ADC_CLOCK_FREQ 8000000
 #define ADC_RESET LATBbits.LATB5
@@ -36,15 +37,23 @@ uint32_t streaming_decimation = 0; // How many samples to skip before sending th
                                     // sample whilst streaming
 uint32_t streaming_decimation_counter = 0; // Counter for decimation
 
-char streaming_channels = 0;
+uint8_t streaming_channels = 0;
 
-void adc_streaming_start(char channels) {
+void adc_streaming_start(uint8_t channels) {
     // Start streaming to uart
-    streaming_channels = channels;
+    if( channels == 0 ) {
+        adc_streaming_stop();
+    } else {
+        ins_enable_streaming();
+        streaming_decimation_counter = 0;
+        streaming_channels = channels;
+    }
 }
 
 void adc_streaming_stop() {
     streaming_channels = 0;
+    
+    ins_disable_streaming();
 }
 
 void adc_set_streaming_decimation(uint32_t decimation) {
