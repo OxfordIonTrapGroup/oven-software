@@ -3,12 +3,14 @@
 
 #include <plib.h>
 #include <stdint.h>
+#include <stdarg.h>
+
 #include "uart.h"
 #include "AD7770.h"
 #include "feedback.h"
 #include "commands.h"
 
-#define INS_BUFFER_LEN 100
+#define INS_BUFFER_LEN 256
 uint8_t instruction_buffer[INS_BUFFER_LEN];
 int instruction_buffer_end = 0;
 
@@ -16,10 +18,6 @@ int instruction_buffer_end = 0;
 #define INS_MAGIC_END   (uint8_t)0x5A
 
 
-void ins_report_error(uint8_t* message) {
-    // Report an error to the uart 
-    uart_write(message, strlen(message));
-}
 
 void ins_send_reply(ins_header_t* header, void* reply, uint8_t length) {
     
@@ -39,6 +37,23 @@ void ins_send_reply(ins_header_t* header, void* reply, uint8_t length) {
     memcpy(&message[sizeof(ins_header_t)], reply, length);
     uart_write(message, sizeof(ins_header_t) + length);
 }
+
+void ins_report_error(uint8_t* format, ...) {
+    // Report an error to the uart with a message       
+    va_list arg_list;
+    uint8_t message[INS_BUFFER_LEN];
+    ins_header_t header;
+       
+    va_start(arg_list, format);             // Prep arguments list
+    vsprintf(message, format, arg_list);    // "Print" to buffer
+    va_end(arg_list);                       // End handling of arguments list
+   
+    header.command = CMD_ERROR;
+    
+    ins_send_reply(&header, message, strlen(message));
+}
+
+
 
 void ins_process_packet(ins_header_t* header, char* data) {
     

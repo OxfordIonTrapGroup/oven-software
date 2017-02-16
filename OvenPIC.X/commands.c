@@ -69,15 +69,8 @@ void cmd_adc_read_last_conversion(ins_header_t* header, uint8_t* data) {
     for(i=0;i<8;i++)
         reply.samples[i] = last_samples_signed[i];
     
-    ins_send_reply(header, &reply, sizeof(reply));
-
     
-//    float floatData[8];
-//    char buffer[120];
-//    //adc_convert_samples(last_samples, floatData);
-//
-//    //sprintf(&buffer[0],"%f %f %f %f \n", floatData[4], floatData[5], floatData[6], floatData[7]);
-//    uart_write(buffer,strlen(buffer));
+    ins_send_reply(header, &reply, sizeof(reply));
 }
 
 void cmd_adc_stream(ins_header_t* header, uint8_t* data) {

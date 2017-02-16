@@ -16,6 +16,7 @@
 #define CMD_FEEDBACK_SETPOINT           0x33
 #define CMD_FEEDBACK_READ_STATUS        0x34
 
+#define CMD_ERROR                       0xFF
 
 
 typedef struct ins_header_s {
@@ -25,6 +26,7 @@ typedef struct ins_header_s {
     uint8_t crc;
     uint8_t magic_end;
 }ins_header_t;
+
 
 
 // PWM commands
