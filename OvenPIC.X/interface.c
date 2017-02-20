@@ -132,6 +132,10 @@ void ins_process_packet(ins_header_t* header, char* data) {
             cmd_feedback_read_status(header, data);
             break;
 
+        case CMD_FEEDBACK_SET_LIMITS:
+            cmd_feedback_set_limits(header, data);
+            break;
+            
         default:
             ins_report_error("bad command code");
             break;
@@ -156,7 +160,7 @@ void ins_rebase_buffer(int index) {
 
 void ins_invalidate_buffer() {
     
-    ins_report_error("Buffer invalidated");
+    //ins_report_error("Buffer invalidated");
     instruction_buffer_end = 0;
 }
 

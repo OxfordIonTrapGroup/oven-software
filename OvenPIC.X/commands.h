@@ -15,6 +15,7 @@
 #define CMD_FEEDBACK_STOP               0x32
 #define CMD_FEEDBACK_SETPOINT           0x33
 #define CMD_FEEDBACK_READ_STATUS        0x34
+#define CMD_FEEDBACK_SET_LIMITS         0x35
 
 #define CMD_ERROR                       0xFF
 
@@ -69,5 +70,9 @@ typedef struct {
     int64_t integrator;
 } __attribute__((packed)) cmd_feedback_read_status_reply_t;
 
+typedef struct {
+    int32_t limit_i;
+    int32_t limit_t;
+} __attribute__((packed)) cmd_feedback_set_limits_args_t;
 
 #endif

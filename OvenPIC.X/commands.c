@@ -41,6 +41,10 @@ int _parse_args(ins_header_t* header, uint8_t* data, void* args) {
             length = sizeof(cmd_feedback_setpoint_args_t);
             break;
             
+        case CMD_FEEDBACK_SET_LIMITS:
+            length = sizeof(cmd_feedback_set_limits_args_t);
+            break;
+            
         default:
             length = 0;
             break;
@@ -155,4 +159,13 @@ void cmd_feedback_read_status(ins_header_t* header, uint8_t* data) {
 }
 
 
+void cmd_feedback_set_limits(ins_header_t* header, uint8_t* data) {
+    cmd_feedback_set_limits_args_t args;
+    
+    // Parse the arguments
+    if(_parse_args(header, data, &args) == ERROR)
+        return;
+  
+    fb_set_limits(args.limit_i, args.limit_t);
+}
 
