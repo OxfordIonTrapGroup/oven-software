@@ -51,10 +51,10 @@ typedef struct  {
 #define CMD_FEEDBACK_CONFIG_MODE_CONSTANTVOLTAGE       0x03
 
 typedef struct {
-    //uint8_t mode; // Feedback mode
     int32_t gain_p;
     int32_t gain_i;
     int32_t gain_d;
+    //uint8_t mode; // Feedback mode
 } __attribute__((packed)) cmd_feedback_config_args_t;
 
 typedef struct {

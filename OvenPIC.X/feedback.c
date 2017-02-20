@@ -12,12 +12,12 @@
 #define FIXED_POINT 16
 #define I_SHIFT 8
    
-int32_t FB_gain_p = 10;
-int32_t FB_gain_i = -(2);
+int32_t FB_gain_p = 0;
+int32_t FB_gain_i = 0;
 int32_t FB_gain_d = 0;
 
 int32_t FB_target = 0;
-uint8_t FB_adc_index = 6;
+uint8_t FB_adc_index = 5;
 int32_t FB_last_error = 0; 
 int64_t FB_last_duty = 0; 
 int64_t FB_integrator = 0;
