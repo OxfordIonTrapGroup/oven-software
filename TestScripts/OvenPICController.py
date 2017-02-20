@@ -27,6 +27,7 @@ class OvenPIC:
     _CMD_FEEDBACK_STOP              = 0x32
     _CMD_FEEDBACK_SETPOINT          = 0x33
     _CMD_FEEDBACK_READ_STATUS       = 0x34
+    _CMD_FEEDBACK_SET_LIMITS        = 0x35
 
     _CMD_ERROR                      = 0xFF
 
@@ -325,6 +326,10 @@ class OvenPIC:
         #print(response)
         #print([hex(ord(c)) for c in response])
 
+    def fb_set_limits(self, limit_i, limit_t):
+        data = struct.pack('<ii', int(limit_i), int(limit_t))
+        self._send_command(self._CMD_FEEDBACK_SET_LIMITS, data) 
+
     def fb_read_status(self):
 
         # self._send_command(self._CMD_FEEDBACK_READ_STATUS, [])
@@ -361,6 +366,8 @@ class OvenPIC:
 def TC(T):
     return -(T - 20)*(51./1000.)*(40.0/1000.)*0x800000/2.5
 
+def IC(I):
+    return (I/10.0)*0x800000/2.5
 
 p = OvenPIC()
 p.fb_stop()
@@ -384,18 +391,19 @@ def test_streaming_fixed():
     dd
 
 def test_fb():
-    p.fb_config( -10, -1, 0 )
+    p.fb_config( -10, -2, 0 )
     p.fb_set_setpoint( TC(20) )
+    p.fb_set_limits(IC(10), TC(200))
     p.fb_start()
 
     p.adc_decimate(0)
     p.adc_start_streaming([4,5,6,7])
     p.adc_poll_stream(2)
 
-    p.fb_set_setpoint( TC(150) )
-    p.adc_poll_stream(10)
+    p.fb_set_setpoint( TC(300) )
+    p.adc_poll_stream(20)
     p.fb_set_setpoint( TC(20) )
-    p.adc_poll_stream(2)
+    p.adc_poll_stream(10)
 
     p.fb_stop()
     data = p.adc_stop_streaming()
@@ -405,135 +413,7 @@ def test_fb():
 
     dd
 
-
-def test_streaming( duration = 10):
-    
-    channel_values = p.stream_channels([4,5,6,7], duration)    
-    #channel_values = p.stream_channels([6], duration)
-    #TC = ((-channel_values[0]*(1000.0/40.0)*(1000.0/51.)) + 20)
-    
-    VOut = 3*channel_values[0]
-    IOven = 10.0*channel_values[1]
-    TC = ((-channel_values[2]*(1000.0/40.0)*(1000.0/51.)) + 20)    
-    VOven = -3*channel_values[3]
-    
-    #print(channel_values[0]*0x800000/2.5)
-    
-    t = np.linspace(0,duration,len(channel_values[0]))
-
-    #plt.clf()
-    #plt.plot(t, TC, '.')
-    #plt.savefig('pp.pdf')
-    #return
-    plt.clf()
-    fig, ax = plt.subplots(nrows=3, sharex=True)
-    
-    ax[0].plot(t, TC, '.')
-    tAx = ax[0].twinx()
-    tAx.plot(t,VOven/IOven, '.r')
-    ax[0].set_ylabel('Temperature (C)')
-    tAx.set_ylabel('Resistance (R)')
-    
-    ax[1].plot(t, IOven, '.')
-    ax[1].set_ylabel('Current (A)')
-
-    ax[2].plot(t, VOven, '.')
-    #ax[2].plot(t, VOut, '.')
-    ax[2].set_ylabel('Voltage (V)')
-    
-    ax[2].set_xlabel('Time (s)')
-    #plt.tight_layout()
-    plt.savefig('pp.pdf')
-
-def test_streaming_sequence(mode='duty'):
-
-    channel_values = p.stream_channels_sequence([4,5,6,7], [(0,20),(1,150),(10,20),(20,20)], mode=mode )       
-    #channel_values = p.stream_channels_sequence([4,5,6,7], [(0,20),(1,150),(2,150)], mode=mode )    
-    #channel_values = p.stream_channels_sequence([4,5,6,7], [(0,0),(2,0.08),(7,0.01),(10,0)] )
-    
-    VOut = 3*channel_values[0]
-    IOven = 10.0*channel_values[1]
-    TC = ((-channel_values[2]*(1000.0/40.0)*(1000.0/51.)) + 20)
-    VOven = -3*channel_values[3]
-    
-    
-    t = np.linspace(0,10,len(channel_values[0]))
-
-    plt.clf()
-    fig, ax = plt.subplots(nrows=3, sharex=True)
-    
-    ax[0].plot(t, TC, '.')
-    tAx = ax[0].twinx()
-    tAx.plot(t,VOven/IOven, '.r')
-    tAx.set_ylim(0.2,0.3)
-    ax[0].set_ylabel('Temperature (C)')
-    tAx.set_ylabel('Resistance (R)')
-    
-    ax[1].plot(t, IOven, '.')
-    ax[1].set_ylabel('Current (A)')
-
-    ax[2].plot(t, VOven, '.')
-    #ax[2].plot(t, VOut, '.')
-    ax[2].set_ylabel('Voltage (V)')
-    
-    ax[2].set_xlabel('Time (s)')
-    #plt.tight_layout()
-    plt.savefig('pp.pdf')
-
-
-#test_streaming_sequence()
-#response = p.set_duty(0.0)
-#print(len(response))
-
-#######################################################
-######### Feedback testing
-#############################
-
-
-def test_fb():
-    T = 20
-    setpoint = -(T - 20)*(51./1000.)*(40.0/1000.)*0x800000/2.5
-    print(setpoint)
-    p.fb_read_status()
-    time.sleep(1)
-    p.fb_config( -10, -1, 0 )
-    time.sleep(1)
-    p.fb_set_setpoint( setpoint )
-    time.sleep(1)
-    p.fb_start()
-
-    #time.sleep(1)
-
-    #for i in range(10):
-    #    p.fb_read_status()
-    #    time.sleep(0.1)
-
-
-    response = p.s.read(1000)
-    print(response)
-
-    test_streaming_sequence(mode='temp')
-    response = p.s.read(100000)
-    p.fb_read_status()
-
-    #time.sleep(0.5)
-    p.fb_read_status()
-    p.fb_stop()
-
 test_fb()
-#########
 
-def timing_test():
-    print('Start')
-    p.fb_start()
-    print('Stop')
-    p.fb_stop()
-    p.fb_start()
-    time.sleep(1)
-    print('Read 1')
-    p.fb_read_status()
-    time.sleep(1)
-    print('Read 2')
-    p.fb_read_status()
 
 
