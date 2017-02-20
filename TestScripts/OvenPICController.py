@@ -358,37 +358,52 @@ class OvenPIC:
         
         return float_values
 
-        
+def TC(T):
+    return -(T - 20)*(51./1000.)*(40.0/1000.)*0x800000/2.5
+
+
 p = OvenPIC()
 p.fb_stop()
 
-response = p.echo('hi\n')
-print(response)
-response = p.adc_read_last_conversion()
-print(response)
+def test_streaming_fixed():
 
-p.adc_decimate(0)
-#p.adc_start_streaming([4,5,6,7])
-#p.adc_poll_stream(5)
-print(p.adc_read_last_conversion())
-print('set duty')
-p.pwm_set_duty(0.1)
-time.sleep(1)
-print(p.adc_read_last_conversion())
+    p.adc_decimate(0)
+    p.adc_start_streaming([4,5,6,7])
+    p.adc_poll_stream(5)
 
-#p.adc_poll_stream(10)
-#data = p.adc_stop_streaming()
-#p.pwm_set_duty(0)
+    p.pwm_set_duty(0.1)
 
-#print(len(data[6]))
+    p.adc_poll_stream(10)
+    p.pwm_set_duty(0)
+    data = p.adc_stop_streaming()
 
-#np.savetxt('data.txt', np.transpose(data[4:8])) 
+    print(len(data[6]))
 
-dd
+    np.savetxt('data.txt', np.transpose(data[4:8])) 
 
-#response = p.set_duty(0.08)
-#print(len(response))
-#print(response)
+    dd
+
+def test_fb():
+    p.fb_config( -10, -1, 0 )
+    p.fb_set_setpoint( TC(20) )
+    p.fb_start()
+
+    p.adc_decimate(0)
+    p.adc_start_streaming([4,5,6,7])
+    p.adc_poll_stream(2)
+
+    p.fb_set_setpoint( TC(150) )
+    p.adc_poll_stream(10)
+    p.fb_set_setpoint( TC(20) )
+    p.adc_poll_stream(2)
+
+    p.fb_stop()
+    data = p.adc_stop_streaming()
+
+    print(len(data[6]))
+    np.savetxt('data.txt', np.transpose(data[4:8])) 
+
+    dd
 
 
 def test_streaming( duration = 10):
