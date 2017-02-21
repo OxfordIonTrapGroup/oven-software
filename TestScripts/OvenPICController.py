@@ -2,10 +2,6 @@
 import serial
 import time
 import numpy as np
-#import matplotlib 
-#matplotlib.use('Agg')
-#import matplotlib.pyplot as plt
-
 import struct
 
 class OvenPIC:
@@ -162,7 +158,6 @@ class OvenPIC:
 
         period = round(period)
         duty_int = round(duty*period)
-
         print(duty_int)
 
         data = struct.pack('<H',duty_int)
@@ -363,57 +358,57 @@ class OvenPIC:
         
         return float_values
 
-def TC(T):
-    return -(T - 20)*(51./1000.)*(40.0/1000.)*0x800000/2.5
+# def TC(T):
+#     return -(T - 20)*(51./1000.)*(40.0/1000.)*0x800000/2.5
 
-def IC(I):
-    return (I/10.0)*0x800000/2.5
+# def IC(I):
+#     return (I/10.0)*0x800000/2.5
 
-p = OvenPIC()
-p.fb_stop()
+# p = OvenPIC()
+# p.fb_stop()
 
-def test_streaming_fixed():
+# def test_streaming_fixed():
 
-    p.adc_decimate(0)
-    p.adc_start_streaming([4,5,6,7])
-    p.adc_poll_stream(5)
+#     p.adc_decimate(0)
+#     p.adc_start_streaming([4,5,6,7])
+#     p.adc_poll_stream(5)
 
-    p.pwm_set_duty(0.1)
+#     p.pwm_set_duty(0.1)
 
-    p.adc_poll_stream(10)
-    p.pwm_set_duty(0)
-    data = p.adc_stop_streaming()
+#     p.adc_poll_stream(10)
+#     p.pwm_set_duty(0)
+#     data = p.adc_stop_streaming()
 
-    print(len(data[6]))
+#     print(len(data[6]))
 
-    np.savetxt('data.txt', np.transpose(data[4:8])) 
+#     np.savetxt('data.txt', np.transpose(data[4:8])) 
 
-    dd
+#     dd
 
-def test_fb():
-    p.fb_config( -10, -2, 0 )
-    p.fb_set_setpoint( TC(20) )
-    p.fb_set_limits(IC(10), TC(200))
-    p.fb_start()
+# def test_fb():
+#     p.fb_config( -10, -2, 0 )
+#     p.fb_set_setpoint( TC(20) )
+#     p.fb_set_limits(IC(10), TC(200))
+#     p.fb_start()
 
-    p.adc_decimate(0)
-    p.adc_start_streaming([4,5,6,7])
-    p.adc_poll_stream(2)
+#     p.adc_decimate(0)
+#     p.adc_start_streaming([4,5,6,7])
+#     p.adc_poll_stream(2)
 
-    p.fb_set_setpoint( TC(300) )
-    p.adc_poll_stream(20)
-    p.fb_set_setpoint( TC(20) )
-    p.adc_poll_stream(10)
+#     p.fb_set_setpoint( TC(300) )
+#     p.adc_poll_stream(20)
+#     p.fb_set_setpoint( TC(20) )
+#     p.adc_poll_stream(10)
 
-    p.fb_stop()
-    data = p.adc_stop_streaming()
+#     p.fb_stop()
+#     data = p.adc_stop_streaming()
 
-    print(len(data[6]))
-    np.savetxt('data.txt', np.transpose(data[4:8])) 
+#     print(len(data[6]))
+#     np.savetxt('data.txt', np.transpose(data[4:8])) 
 
-    dd
+#     dd
 
-test_fb()
+# test_fb()
 
 
 
