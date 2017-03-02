@@ -9,9 +9,48 @@
 #include "feedback.h"
 #include "pwm.h"
 
+// Feedback scheme:
+// PI Current controller
+
 #define FIXED_POINT 16
 #define I_SHIFT 8
-   
+
+// Decimal point and integral gain pre-divisor for 
+// the current feedback module
+#define FB_C_FIXED_POINT 16
+#define FB_C_I_SHIFT 8
+
+// Which ADC channel is the current sensor on
+#define FB_C_ADC_INDEX 5
+
+// P and I gains for the current feedback module
+int32_t FB_C_gain_p = 0;
+int32_t FB_C_gain_i = 0;
+
+// Setpoint for the current feedback module
+int32_t FB_C_setpoint = 0;
+
+int32_t FB_C_last_error = 0;
+int64_t FB_C_last_control = 0; 
+int64_t FB_C_integrator = 0;
+uint8_t FB_C_enabled = 0;
+
+
+void fb_current_start() {
+    if(FB_C_enabled) 
+        return;
+    
+    FB_C_last_error = 0;
+    FB_C_integrator = 0; 
+    
+    FB_C_enabled = 1;
+}
+
+void fb_current_stop() {
+    FB_C_enabled = 0;
+    pwm_set_duty(0);
+}
+
 int32_t FB_gain_p = 0;
 int32_t FB_gain_i = 0;
 int32_t FB_gain_d = 0;
