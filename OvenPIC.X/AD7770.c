@@ -1,7 +1,6 @@
 
 #include "HardwareProfile.h"
 
-#include <plib.h>
 #include <stdint.h>
 #include "AD7770.h"
 #include "feedback.h"
@@ -32,6 +31,7 @@
 
 uint32_t last_samples[8]; // Storage of samples
 int32_t last_samples_signed[8]; // Storage of samples
+float last_samples_float[8];
 
 uint32_t streaming_decimation = 0; // How many samples to skip before sending the next
                                     // sample whilst streaming
@@ -126,7 +126,7 @@ void adc_config() {
     
     ADC_RESET = 1; // Take ADC out of reset
     
-    int i;
+    uint32_t i;
     for(i=0;i<1000;i++); // Wait for a while
     
     adc_set_high_power();
@@ -135,18 +135,19 @@ void adc_config() {
     adc_set_decimation( 2000 );
     adc_enable_readout(1);
     
-    // Configure interrupt on ADC sample read pin (RB7)
-    INTCONbits.INT0EP = 0; // Set polarity to falling edge   
-    IFS0bits.INT0IF = 0; // Clear the flag
-    IEC0bits.INT0IE = 1; // Enable the interrupt
-    IPC0bits.INT0IP = 3; // Set the priority to 1
+    // Configure interrupt on ADC sample read pin (RB10)
+    INT3R = 0b0110;
+    INTCONbits.INT3EP = 0; // Set polarity to falling edge   
+    IFS0bits.INT3IF = 0; // Clear the flag
+    IEC0bits.INT3IE = 1; // Enable the interrupt
+    IPC0bits.INT3IP = 3; // Set the priority to 1
 
 }
 
-void __ISR( _EXTERNAL_0_VECTOR, IPL3AUTO) adc_ext_interrupt() {
+void __ISR( _EXTERNAL_3_VECTOR, IPL3AUTO) adc_ext_interrupt() {
 
     // Read the samples
-    adc_read_samples(last_samples, last_samples_signed);
+    adc_read_samples(last_samples, last_samples_signed, last_samples_float);
     LED_GREEN = !LED_GREEN;
     
     // Update the feedback loop
@@ -155,7 +156,7 @@ void __ISR( _EXTERNAL_0_VECTOR, IPL3AUTO) adc_ext_interrupt() {
     if(streaming_channels != 0)
         adc_streaming_interrupt();
     
-    IFS0bits.INT0IF = 0; // Clear the flag
+    IFS0bits.INT3IF = 0; // Clear the flag
 }
 
 char adc_read(char address) {
@@ -205,7 +206,7 @@ void adc_enable_readout(char enable) {
     LATBbits.LATB10 = 1;
 }
 
-void adc_read_samples(uint32_t* data, int32_t* data_signed) {
+void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
     
     //SPI2CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
@@ -229,6 +230,8 @@ void adc_read_samples(uint32_t* data, int32_t* data_signed) {
         data_signed[i] = (data[i] & 0x7FFFFF);
         if(data[i] & (1<<23))
             data_signed[i] = data_signed[i] - 0x800000;
+
+        data_float[i] = data_signed[i]/(0x800000*1.0);
     }
     
     //SPI2CONbits.FRMEN = 0; // Disable framed mode

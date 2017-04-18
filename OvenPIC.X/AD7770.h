@@ -19,6 +19,7 @@ extern void adc_streaming_stop();
 
 extern uint32_t last_samples[8];
 extern int32_t last_samples_signed[8];
+extern float last_samples_float[8];
 
 
 #endif

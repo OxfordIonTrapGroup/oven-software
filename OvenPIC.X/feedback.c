@@ -1,7 +1,6 @@
 
 #include "HardwareProfile.h"
 
-#include <plib.h>
 #include <stdint.h>
 #include "uart.h"
 #include "AD7770.h"

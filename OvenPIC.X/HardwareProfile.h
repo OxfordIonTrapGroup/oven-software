@@ -9,7 +9,8 @@
 #define LED_GREEN LATBbits.LATB14
 #define LED_RED LATBbits.LATB9
 
-
+#include <xc.h>
+#include <sys/attribs.h>
 
 
 #endif

@@ -1,7 +1,6 @@
 
 #include "HardwareProfile.h"
 
-#include <plib.h>
 #include <stdint.h>
 #include "uart.h"
 #include "pwm.h"
@@ -24,12 +23,12 @@ void __ISR(_TIMER_3_VECTOR, IPL1AUTO) t3_interrupt() {
 }
 
 
-void pwm_set_duty(uint16_t duty) {
+void pwm_set_duty(float duty) {
     
     if(duty > OVEN_MAX_DUTY)
         duty = OVEN_MAX_DUTY;
     
-    pwm_0_duty = duty;
+    pwm_0_duty = (uint16_t)(duty*OVEN_PWM_PERIOD);
     OC4RS = duty >> PWM_DECIMATION_BITS;
 }
 
