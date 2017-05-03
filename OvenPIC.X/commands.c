@@ -66,6 +66,7 @@ void cmd_echo(ins_header_t* header, uint8_t* data) {
     ins_send_reply(header, data, header->len);
 }
 
+/*
 // ADC commands
 
 void cmd_adc_read_last_conversion(ins_header_t* header, uint8_t* data) {
@@ -168,3 +169,4 @@ void cmd_feedback_set_limits(ins_header_t* header, uint8_t* data) {
     fb_set_limits(args.limit_i, args.limit_t);
 }
 
+*/

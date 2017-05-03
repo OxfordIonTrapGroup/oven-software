@@ -20,6 +20,13 @@
 #pragma config ICESEL = ICS_PGx1 // ICE comm via pin-set 1 (needed for pin 24)
 */
 
+#pragma config FPLLICLK = 1 // PLL source is FRC (8MHz)
+#pragma config FPLLRNG = RANGE_8_16_MHZ
+#pragma config FPLLIDIV = DIV_1 // 8/1 = 8 MHz
+#pragma config FPLLMULT = MUL_45 // 8*45 = 360 MHz
+#pragma config FPLLODIV = DIV_2  // 360/2 = 180 MHz
+
+#pragma config FNOSC = SPLL
 
 void ins_read_next();
 
@@ -79,18 +86,11 @@ void update_controllers() {
 
 void main() {
     
-    //ANSELA = 0;
-    //ANSELB = 0;
-    //SYSTEMConfig( SYSCLK, SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
+    // Configure the status light
+    ANSELEbits.ANSE5 = 0;
+    TRISEbits.TRISE5 = 0;
+    LATEbits.LATE5 = 0;    
     
-    // Wait until the U1RX pin receives a signal
-    TRISBbits.TRISB2 = 0;
-    LATBbits.LATB2 = 0;
-    
-    while(PORTAbits.RA4 == 0);
-    TRISBbits.TRISB2 = 1;
-    TRISBbits.TRISB14 = 0;
-
     uart_config();
 
     adc_config();
@@ -100,10 +100,18 @@ void main() {
 
     configure_current_controller();
 
-    //INTEnableSystemMultiVectoredInt();
+    // Enable interrupts
+    INTCONbits.MVEC = 1;
+    asm volatile("ei");
 
+    long i;
     while(1) {
         ins_read_next();
+        //uart_write_blocking("hhhaa\n",6);
+        for(i=0;i<1000000;i++);
+        //if(U1STAbits.URXDA)
+        //    LATEbits.LATE5 = ~LATEbits.LATE5;     
+
     }
 }
 

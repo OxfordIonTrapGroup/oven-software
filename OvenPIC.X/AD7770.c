@@ -85,7 +85,7 @@ void adc_streaming_interrupt() {
 }
 
 void adc_config() {
-
+/*
     // Use Timer 2 and OC1 to generate ADC clock on RB3
     PR2 = (SYSCLK/ADC_CLOCK_FREQ) - 1;
     OC1RS = (PR2 + 1)*0.5;
@@ -97,8 +97,6 @@ void adc_config() {
     // Configure ADC reset pin
     TRISBbits.TRISB5 = 0;
     ADC_RESET = 0;
-    
-
     
     // Use SPI2
     // SCK2 - RB15 (26)
@@ -141,7 +139,7 @@ void adc_config() {
     IFS0bits.INT3IF = 0; // Clear the flag
     IEC0bits.INT3IE = 1; // Enable the interrupt
     IPC0bits.INT3IP = 3; // Set the priority to 1
-
+*/
 }
 
 void __ISR( _EXTERNAL_3_VECTOR, IPL3AUTO) adc_ext_interrupt() {
@@ -151,7 +149,7 @@ void __ISR( _EXTERNAL_3_VECTOR, IPL3AUTO) adc_ext_interrupt() {
     LED_GREEN = !LED_GREEN;
     
     // Update the feedback loop
-    fb_update();
+//    fb_update();
 
     if(streaming_channels != 0)
         adc_streaming_interrupt();

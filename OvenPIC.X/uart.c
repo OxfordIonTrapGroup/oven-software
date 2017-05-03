@@ -3,6 +3,15 @@
 
 #include <stdint.h>
 
+/*
+Controller has two UART channels to BB host:
+-> UART1 is the 'command' channel. This is used for text based
+    communication between host.
+-> UART5 is the 'data' channel. This is used only for transmitting
+    binary data from the PIC to the BB.
+
+*/
+
 #define UART_TX_BUFFER_LEN 256
 char uart_tx_buffer[UART_TX_BUFFER_LEN];
 int uart_tx_buffer_start = 0;
@@ -12,6 +21,11 @@ int uart_tx_buffer_end = 0;
 char uart_rx_buffer[UART_RX_BUFFER_LEN];
 int uart_rx_buffer_start = 0;
 int uart_rx_buffer_end = 0;
+
+#define UART_DATA_TX_BUFFER_LEN 256
+char uart_data_tx_buffer[UART_DATA_TX_BUFFER_LEN];
+int uart_data_tx_buffer_start = 0;
+int uart_data_tx_buffer_end = 0;
 
 void __ISR(_UART1_TX_VECTOR, IPL2AUTO) uart_tx_interrupt() {
     // Process TX interrupt
@@ -34,6 +48,8 @@ void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
     if(IFS3bits.U1RXIF) {
         // Copy the data into the RX buffer
         uart_rx_buffer[uart_rx_buffer_end] = U1RXREG;
+        //LATEbits.LATE5 = ~LATEbits.LATE5;
+        //uart_write(&uart_rx_buffer[uart_rx_buffer_end], 1);
         uart_rx_buffer_end++; 
         if(uart_rx_buffer_end >= UART_RX_BUFFER_LEN)
             uart_rx_buffer_end = 0;    
@@ -42,11 +58,31 @@ void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
     }
 }
 
+void __ISR(_UART5_TX_VECTOR, IPL2AUTO) uart_data_tx_interrupt() {
+    // Process TX interrupt
+    if(IFS5bits.U5TXIF) {
+        // If there is more data to transmit, then send it
+        if(uart_data_tx_buffer_start != uart_data_tx_buffer_end) {
+            U5TXREG = uart_data_tx_buffer[uart_data_tx_buffer_start];
+            uart_data_tx_buffer_start++;
+            if(uart_data_tx_buffer_start >= UART_DATA_TX_BUFFER_LEN)
+                uart_data_tx_buffer_start = 0;
+        } else
+            IEC5bits.U5TXIE = 0;
+           
+        IFS5bits.U5TXIF = 0;
+    }
+}
 
-// UART5-TX on BB -> U1RX (RB9) (p22)
-// UART5-RX on BB -> U1TX (RD11) (p45)
+
+// UART1-TX on BB -> U1RX (RB9) (p22)
+// UART1-RX on BB -> U1TX (RD11) (p45)
+// UART4-TX on BB -> U5RX (RC14) (p48)
+// UART4-RX on BB -> U5TX (RC13) (p47)
 void uart_config() {
     
+    // Configure UART1 - command channel
+    ANSELBbits.ANSB9 = 0; // Disable analog input on RB9
     U1RXR = 0b0101; // RB9 = U1RX
     RPD11R = 0b0001; // RD11 = U1TX
     
@@ -58,9 +94,7 @@ void uart_config() {
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX
-    // Don't enable the transmitter until first receiving data
     U1STAbits.UTXISEL = 0b00; // Enable TX interrupt when buffer has space
-    //U1STAbits.UTXINV = 1; // Set TX idle state to off
     IFS3bits.U1TXIF = 0;
     IEC3bits.U1TXIE = 1; // Enable TX interrupt
     
@@ -71,8 +105,24 @@ void uart_config() {
     IEC3bits.U1RXIE = 1; // Enable RX interrupt
     
     IPC28bits.U1RXIP = 2; // Set interrupt priority level
-    IPC28bits.U1TXIP = 2; // Set interrupt priority level    
+    IPC28bits.U1TXIP = 2; // Set interrupt priority level
     U1MODEbits.ON = 1;     // enable UART1
+
+    // Configure UART5 - data channel
+    U5RXR = 0b0111; // RC14 = U5RX
+    RPC13R = 0b0011; // RC13 = U5TX
+
+    U5MODE = 0;
+    U5MODEbits.BRGH = 1; // 4x divisor
+    U5BRG = 24;
+
+    // Set up transmission
+    U5STAbits.UTXEN = 1; // Enable TX
+    U5STAbits.UTXISEL = 0b00; // Enable TX interrupt when buffer has space
+    IFS5bits.U5TXIF = 0;
+    IEC5bits.U5TXIE = 1; // Enable TX interrupt
+    IPC45bits.U5TXIP = 2; // Set interrupt priority level
+
 }
 
 void uart_write(uint8_t* buffer, uint32_t len) {
@@ -86,8 +136,8 @@ void uart_write(uint8_t* buffer, uint32_t len) {
             uart_tx_buffer_end = 0;
     }
     // If no transmission is currently happening, initiate it
-    if(IEC1bits.U1TXIE == 0) {
-        IEC1bits.U1TXIE = 1;
+    if(IEC3bits.U1TXIE == 0) {
+        IEC3bits.U1TXIE = 1;
     }
 }
 
@@ -116,3 +166,18 @@ uint32_t uart_read(uint8_t* buffer, uint32_t max_len) {
     return len;
 }
 
+void uart_write_data(uint8_t* buffer, uint32_t len) {
+    
+    uint32_t i;
+    // Copy the data into the send buffer
+    for(i=0; i<len; i++) {
+        uart_data_tx_buffer[uart_data_tx_buffer_end] = buffer[i];
+        uart_data_tx_buffer_end++;
+        if(uart_data_tx_buffer_end >= UART_DATA_TX_BUFFER_LEN)
+            uart_data_tx_buffer_end = 0;
+    }
+    // If no transmission is currently happening, initiate it
+    if(IEC5bits.U5TXIE == 0) {
+        IEC5bits.U5TXIE = 1;
+    }
+}

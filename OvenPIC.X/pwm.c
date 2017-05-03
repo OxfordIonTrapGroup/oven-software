@@ -29,7 +29,7 @@ void pwm_set_duty(float duty) {
         duty = OVEN_MAX_DUTY;
     
     pwm_0_duty = (uint16_t)(duty*OVEN_PWM_PERIOD);
-    OC4RS = duty >> PWM_DECIMATION_BITS;
+    OC4RS = pwm_0_duty >> PWM_DECIMATION_BITS;
 }
 
 

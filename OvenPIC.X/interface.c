@@ -95,7 +95,7 @@ void ins_process_packet(ins_header_t* header, char* data) {
         case CMD_ECHO: 
             cmd_echo(header, data); 
             break;
-            
+            /*
         // PWM commands
         case CMD_PWM_SET_DUTY: 
             cmd_pwm_set_duty(header, data); 
@@ -134,7 +134,7 @@ void ins_process_packet(ins_header_t* header, char* data) {
         case CMD_FEEDBACK_SET_LIMITS:
             cmd_feedback_set_limits(header, data);
             break;
-            
+            */
         default:
             ins_report_error("bad command code");
             break;
