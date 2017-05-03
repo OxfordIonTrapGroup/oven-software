@@ -27,6 +27,8 @@
 #pragma config FPLLODIV = DIV_2  // 360/2 = 180 MHz
 
 #pragma config FNOSC = SPLL
+#pragma config FSOSCEN = OFF // Disable secondary oscillator
+#pragma config OSCIOFNC = OFF // CLKO Output Signal Active on the OSCO Pin (Disabled)
 
 void ins_read_next();
 
@@ -76,7 +78,7 @@ void configure_temperature_controller() {
     current_controller->value_getter = temperature_controller_getter;
 }
 
-////
+
 
 void update_controllers() {
 
@@ -89,7 +91,7 @@ void main() {
     // Configure the status light
     ANSELEbits.ANSE5 = 0;
     TRISEbits.TRISE5 = 0;
-    LATEbits.LATE5 = 0;    
+    LATEbits.LATE5 = 1;
     
     uart_config();
 
