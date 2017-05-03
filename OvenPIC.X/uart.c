@@ -48,6 +48,7 @@ void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
     if(IFS3bits.U1RXIF) {
         // Copy the data into the RX buffer
         uart_rx_buffer[uart_rx_buffer_end] = U1RXREG;
+        uart_write_data(&uart_rx_buffer[uart_rx_buffer_end], 1);
         uart_rx_buffer_end++; 
         if(uart_rx_buffer_end >= UART_RX_BUFFER_LEN)
             uart_rx_buffer_end = 0;    
@@ -86,9 +87,9 @@ void uart_config() {
     
     U1MODE = 0;
     U1MODEbits.BRGH = 1; // 4x divisor
-    // PBCLK2 is 0.5*SYS_CLK = 90 MHz
-    // for 0.9 MHz, brg = 24
-    U1BRG = 24; // 0.9 MHz
+    // PBCLK2 is 0.5*SYS_CLK = 100 MHz
+    // for 0.9 MHz, brg = 27
+    U1BRG = 27; // 0.9 MHz
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX
@@ -112,7 +113,7 @@ void uart_config() {
 
     U5MODE = 0;
     U5MODEbits.BRGH = 1; // 4x divisor
-    U5BRG = 24;
+    U5BRG = 27;
 
     // Set up transmission
     U5STAbits.UTXEN = 1; // Enable TX

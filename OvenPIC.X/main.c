@@ -20,11 +20,11 @@
 #pragma config ICESEL = ICS_PGx1 // ICE comm via pin-set 1 (needed for pin 24)
 */
 
-#pragma config FPLLICLK = 1 // PLL source is FRC (8MHz)
-#pragma config FPLLRNG = RANGE_8_16_MHZ
+#pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
+#pragma config FPLLRNG = RANGE_5_10_MHZ
 #pragma config FPLLIDIV = DIV_1 // 8/1 = 8 MHz
-#pragma config FPLLMULT = MUL_45 // 8*45 = 360 MHz
-#pragma config FPLLODIV = DIV_2  // 360/2 = 180 MHz
+#pragma config FPLLMULT = MUL_50 // 8*50 = 400 MHz
+#pragma config FPLLODIV = DIV_2  // 400/2 = 200 MHz
 
 #pragma config FNOSC = SPLL
 #pragma config FSOSCEN = OFF // Disable secondary oscillator
@@ -112,7 +112,7 @@ void main() {
         //uart_write_blocking("hhhaa\n",6);
         for(i=0;i<1000000;i++);
         //if(U1STAbits.URXDA)
-        //    LATEbits.LATE5 = ~LATEbits.LATE5;     
+            LATEbits.LATE5 = ~LATEbits.LATE5;     
 
     }
 }
