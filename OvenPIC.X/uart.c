@@ -2,6 +2,7 @@
 #include "HardwareProfile.h"
 
 #include <stdint.h>
+#include <stdarg.h>
 
 /*
 Controller has two UART channels to BB host:
@@ -48,7 +49,7 @@ void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
     if(IFS3bits.U1RXIF) {
         // Copy the data into the RX buffer
         uart_rx_buffer[uart_rx_buffer_end] = U1RXREG;
-        uart_write_data(&uart_rx_buffer[uart_rx_buffer_end], 1);
+        //uart_write_data(&uart_rx_buffer[uart_rx_buffer_end], 1);
         uart_rx_buffer_end++; 
         if(uart_rx_buffer_end >= UART_RX_BUFFER_LEN)
             uart_rx_buffer_end = 0;    
@@ -90,6 +91,8 @@ void uart_config() {
     // PBCLK2 is 0.5*SYS_CLK = 100 MHz
     // for 0.9 MHz, brg = 27
     U1BRG = 27; // 0.9 MHz
+    // for 115.2 kHz, brg = 216 + 1
+    U1BRG = 216; // 115.2 kHz
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX
@@ -180,4 +183,16 @@ void uart_write_data(uint8_t* buffer, uint32_t len) {
     if(IEC5bits.U5TXIE == 0) {
         IEC5bits.U5TXIE = 1;
     }
+}
+
+void uart_printf(uint8_t* format, ...) {
+
+    va_list arg_list;
+    uint8_t message[UART_TX_BUFFER_LEN];
+
+    va_start(arg_list, format);             // Prep arguments list
+    vsprintf(message, format, arg_list);    // "Print" to buffer
+    va_end(arg_list);                       // End handling of arguments list
+
+    uart_write(message, strlen(message));
 }

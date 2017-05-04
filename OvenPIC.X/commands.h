@@ -2,7 +2,7 @@
 #ifndef _COMMANDS_H    
 #define _COMMANDS_H
 
-#define CMD_ECHO                        0x00
+#define CMD_ECHO                        "echo"
 
 #define CMD_PWM_SET_DUTY                0x10
 

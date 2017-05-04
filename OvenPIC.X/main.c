@@ -115,21 +115,21 @@ void main() {
     
     long i,j=0;
     while(1) {
-        //ins_read_next();
+        ins_read_next();
         
-        if(j==0) {
-            pwm_set_duty(0.05);
-            j=1;
-        } else {
-            pwm_set_duty(0.1);
-            j=0;
-        }
+        // if(j==0) {
+        //     pwm_set_duty(0.05);
+        //     j=1;
+        // } else {
+        //     pwm_set_duty(0.1);
+        //     j=0;
+        // }
         bb[0] = 0;
         for(i=0;i<8;i++) {
             sprintf(bb, "%s %f", bb, last_samples_float[i]);
         }
         sprintf(bb, "%s\n", bb);
-        uart_write(bb, strlen(bb));
+        uart_write_data(bb, strlen(bb));
         for(i=0;i<10000000;i++);
         //if(U1STAbits.URXDA)
         //LATEbits.LATE5 = 0;
