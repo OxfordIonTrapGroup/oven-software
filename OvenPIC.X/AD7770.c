@@ -6,8 +6,7 @@
 #include "feedback.h"
 #include "interface.h"
 
-#define ADC_CLOCK_FREQ 8000000
-#define ADC_RESET LATBbits.LATB5
+#define ADC_RESET LATBbits.LATB14
 
 #define _GENERAL_USER_CONFIG_1  0x11
 #define _GENERAL_USER_CONFIG_2  0x12
@@ -85,68 +84,92 @@ void adc_streaming_interrupt() {
 }
 
 void adc_config() {
-/*
-    // Use Timer 2 and OC1 to generate ADC clock on RB3
-    PR2 = (SYSCLK/ADC_CLOCK_FREQ) - 1;
+    // ADC_MCLK is on RD5
+    // SPI_CLK is on RD1 (SCK1)
+    // SPI_MOSI is on RD2
+    // SPI_MISO is on RD10
+    // SPI_CS is on RD4
+    // ADC_RESET is on RB14
+    // ADC_DRDY is on RB15
+
+    // ADC_MCLK:
+    // Use Timer 2 and OC1 to generate ADC clock on RD5
+    // PBCLK3 is 100 MHz, ADC_MCLK needs to be ~5 MHz
+    PR2 = (100/5) - 1;
     OC1RS = (PR2 + 1)*0.5;
     T2CONbits.ON = 1;
     OC1CONbits.OCM = 6;
     OC1CONbits.ON = 1;
-    RPB3R = 0b101; // OC1 on RB3 (pin 7)
+    RPB3R = 0b1100; // OC1 on RD5
    
-    // Configure ADC reset pin
-    TRISBbits.TRISB5 = 0;
+    // ADC_RESET:
+    // On RB14
+    ANSELBbits.ANSB14 = 0;
+    TRISBbits.TRISB14 = 0;
     ADC_RESET = 0;
     
-    // Use SPI2
-    // SCK2 - RB15 (26)
-    // SDI2 - RB13 (24)
-    // SDO2 - RB11 (22)
-    // SS2 -  RB10 (21)
-    // RESET - RB5(14)
-    RPB11R = 0b0100; // SDO2
-    RPB10R = 0b0100; // SS2
-    SDI2R = 0b0011; // SDI2
+    // SPI_1:
+    // SCK1 - RD1
+    // SDI1 - RD10
+    // SDO1 - RD2
+    // SS1 -  RD4
+    SDI1R = 0b0011; // SDI1 -> RD10
+    RPD2R = 0b0101; // SDO1 -> RD2
+    RPD4R = 0b0101; // SS1 -> RD4
     
-    SPI2STATbits.SPIROV = 0; // Clear overflow flag
-    SPI2BRG = 2; // SPI clkc is PBCLK / 4 (5MHz)
+    SPI1STATbits.SPIROV = 0; // Clear overflow flag
+    // SPI clock is 25 MHz 
+    SPI1BRG = 100; // PBCLK2 / 4 (100/4 = 25MHz)
     
-    SPI2CONbits.DISSDO = 0; // SDO enabled
-    SPI2CONbits.CKP = 1; // Clock idles high
-    SPI2CONbits.CKE = 0; // SPI mode 3
-    SPI2CONbits.SMP = 1;
-    SPI2CONbits.MSTEN = 1; // SPI master mode
-    SPI2CONbits.MSSEN = 1; // SPI master SS enable
-    SPI2CONbits.MODE32 = 0;
-    SPI2CONbits.MODE16 = 1; // 16bit mode
+    SPI1CONbits.DISSDO = 0; // SDO enabled
+    SPI1CONbits.CKP = 1; // Clock idles high
+    SPI1CONbits.CKE = 0; // SPI mode 3
+    SPI1CONbits.SMP = 1;
+    SPI1CONbits.MSTEN = 1; // SPI master mode
+    SPI1CONbits.MSSEN = 1; // SPI master SS enable
+    SPI1CONbits.MODE32 = 0;
+    SPI1CONbits.MODE16 = 1; // 16bit mode
     
-    SPI2CONbits.ON = 1; // Enable SPI
+    SPI1CONbits.ON = 1; // Enable SPI
     
     ADC_RESET = 1; // Take ADC out of reset
     
     uint32_t i;
     for(i=0;i<1000;i++); // Wait for a while
     
+    char bb[256];
+    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_1));
+    uart_write(bb, strlen(bb));
+    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_2));
+    uart_write(bb, strlen(bb));
+
+    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_3));
+    uart_write(bb, strlen(bb));
+
+    return;
+
     adc_set_high_power();
     adc_set_reference_internal();
     //adc_set_decimation( 2048 );
     adc_set_decimation( 2000 );
     adc_enable_readout(1);
     
-    // Configure interrupt on ADC sample read pin (RB10)
-    INT3R = 0b0110;
-    INTCONbits.INT3EP = 0; // Set polarity to falling edge   
-    IFS0bits.INT3IF = 0; // Clear the flag
-    IEC0bits.INT3IE = 1; // Enable the interrupt
-    IPC0bits.INT3IP = 3; // Set the priority to 1
-*/
+    // Configure interrupt on ADC sample read pin (RB15)
+    ANSELBbits.ANSB15 = 0;
+    INT2R = 0b0011;
+    INTCONbits.INT2EP = 0; // Set polarity to falling edge   
+    IFS0bits.INT2IF = 0; // Clear the flag
+    IEC0bits.INT2IE = 1; // Enable the interrupt
+    IPC3bits.INT2IP = 3; // Set the priority to 1
+
 }
 
-void __ISR( _EXTERNAL_3_VECTOR, IPL3AUTO) adc_ext_interrupt() {
+void __ISR( _EXTERNAL_2_VECTOR, IPL3AUTO) adc_ext_interrupt() {
 
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
-    LED_GREEN = !LED_GREEN;
+    //LATEbits.LATE5 = ~LATEbits.LATE5; 
+    //LATEbits.LATE5 = 0; 
     
     // Update the feedback loop
 //    fb_update();
@@ -154,22 +177,22 @@ void __ISR( _EXTERNAL_3_VECTOR, IPL3AUTO) adc_ext_interrupt() {
     if(streaming_channels != 0)
         adc_streaming_interrupt();
     
-    IFS0bits.INT3IF = 0; // Clear the flag
+    IFS0bits.INT2IF = 0; // Clear the flag
 }
 
 char adc_read(char address) {
-    while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-    SPI2BUF = (0x80 | address) << 8;
-    while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-    return SPI2BUF & 0xFF;
+    while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+    SPI1BUF = (0x80 | address) << 8;
+    while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+    return SPI1BUF & 0xFF;
 }
 
 char adc_write(char address, char value) {
-    while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-    SPI2BUF = ((address) << 8) | (value & 0xFF);
+    while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+    SPI1BUF = ((address) << 8) | (value & 0xFF);
   
-    while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-    return SPI2BUF & 0xFF;
+    while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+    return SPI1BUF & 0xFF;
 }
 
 void adc_set_high_power() {
@@ -198,31 +221,31 @@ void adc_enable_readout(char enable) {
         value = 0x80;
     adc_write(_GENERAL_USER_CONFIG_3, value);
     
-    SPI2CONbits.MSSEN = 0; // SPI master SS disable
-    RPB10R = 0b0000; // Take manual control of SS2 
-    TRISBbits.TRISB10 = 0;
-    LATBbits.LATB10 = 1;
+    SPI1CONbits.MSSEN = 0; // SPI master SS disable
+    RPD4R = 0b0000; // Take manual control of SS2 
+    TRISDbits.TRISD4 = 0;
+    LATDbits.LATD4 = 1;
 }
 
 void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
     
-    //SPI2CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
-    //SPI2CONbits.FRMSYPW = 1; 
-    //SPI2CONbits.FRMEN = 1; // Enable framed mode
-    LATBbits.LATB10 = 0;
+    //SPI1CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
+    //SPI1CONbits.FRMSYPW = 1; 
+    //SPI1CONbits.FRMEN = 1; // Enable framed mode
+    LATDbits.LATD4 = 0;
 
     for(i=0; i<8; i++) {
-        while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-        SPI2BUF = 0x8000;
-        while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] = (SPI2BUF & 0xFFFF) << 16;
-        while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-        SPI2BUF = 0x8000;
-        while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] |= (SPI2BUF & 0xFFFF);
+        while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+        SPI1BUF = 0x8000;
+        while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+        data[i] = (SPI1BUF & 0xFFFF) << 16;
+        while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+        SPI1BUF = 0x8000;
+        while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+        data[i] |= (SPI1BUF & 0xFFFF);
     }
-    LATBbits.LATB10 = 1;
+    LATDbits.LATD4 = 1;
         
     for(i=0; i<8; i++) {
         data_signed[i] = (data[i] & 0x7FFFFF);
@@ -232,8 +255,8 @@ void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
         data_float[i] = data_signed[i]/(0x800000*1.0);
     }
     
-    //SPI2CONbits.FRMEN = 0; // Disable framed mode
-    //SPI2CONbits.FRMCNT = 0b000; // Return SS to normal behaviour
+    //SPI1CONbits.FRMEN = 0; // Disable framed mode
+    //SPI1CONbits.FRMCNT = 0b000; // Return SS to normal behaviour
     
     //return data;
 }

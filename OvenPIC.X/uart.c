@@ -90,6 +90,7 @@ void uart_config() {
     // PBCLK2 is 0.5*SYS_CLK = 100 MHz
     // for 0.9 MHz, brg = 27
     U1BRG = 27; // 0.9 MHz
+    U1BRG = 24; // 0.9 MHz
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX

@@ -23,12 +23,13 @@
 #pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
 #pragma config FPLLRNG = RANGE_5_10_MHZ
 #pragma config FPLLIDIV = DIV_1 // 8/1 = 8 MHz
-#pragma config FPLLMULT = MUL_50 // 8*50 = 400 MHz
+#pragma config FPLLMULT = MUL_45 // 8*50 = 400 MHz
 #pragma config FPLLODIV = DIV_2  // 400/2 = 200 MHz
 
 #pragma config FNOSC = SPLL
 #pragma config FSOSCEN = OFF // Disable secondary oscillator
 #pragma config OSCIOFNC = OFF // CLKO Output Signal Active on the OSCO Pin (Disabled)
+#pragma config FDMTEN = OFF // Disable deadman timer
 
 void ins_read_next();
 
@@ -95,24 +96,31 @@ void main() {
     
     uart_config();
 
-    adc_config();
-    pwm_config();
+    //adc_config();
+    //pwm_config();
 
 
 
-    configure_current_controller();
+    //configure_current_controller();
 
     // Enable interrupts
-    INTCONbits.MVEC = 1;
-    asm volatile("ei");
+    //INTCONbits.MVEC = 1;
+    //asm volatile("ei");
+
+    char bb[200];
+
+    sprintf(bb, "gg\n");
+    uart_write_blocking(bb, strlen(bb));
 
     long i;
     while(1) {
-        ins_read_next();
-        //uart_write_blocking("hhhaa\n",6);
+        //ins_read_next();
+
+        //sprintf(bb, "%x %x\n", last_samples_signed[0], last_samples_signed[7]);
+        //uart_write(bb, strlen(bb));
         for(i=0;i<1000000;i++);
         //if(U1STAbits.URXDA)
-            LATEbits.LATE5 = ~LATEbits.LATE5;     
+        LATEbits.LATE5 = 0;
 
     }
 }
