@@ -97,7 +97,7 @@ void main() {
     uart_config();
 
     adc_config();
-    //pwm_config();
+    pwm_config();
 
 
 
@@ -112,9 +112,18 @@ void main() {
     sprintf(bb, "gg\n");
     uart_write_blocking(bb, strlen(bb));
 
-    long i;
+    
+    long i,j=0;
     while(1) {
         //ins_read_next();
+        
+        if(j==0) {
+            pwm_set_duty(0.05);
+            j=1;
+        } else {
+            pwm_set_duty(0.1);
+            j=0;
+        }
         bb[0] = 0;
         for(i=0;i<8;i++) {
             sprintf(bb, "%s %f", bb, last_samples_float[i]);
