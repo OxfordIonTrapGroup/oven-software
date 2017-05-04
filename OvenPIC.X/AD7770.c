@@ -86,8 +86,8 @@ void adc_streaming_interrupt() {
 void adc_config() {
     // ADC_MCLK is on RD5
     // SPI_CLK is on RD1 (SCK1)
-    // SPI_MOSI is on RD2
-    // SPI_MISO is on RD10
+    // SPI_MOSI is on RD10
+    // SPI_MISO is on RD2
     // SPI_CS is on RD4
     // ADC_RESET is on RB14
     // ADC_DRDY is on RB15
@@ -100,7 +100,8 @@ void adc_config() {
     T2CONbits.ON = 1;
     OC1CONbits.OCM = 6;
     OC1CONbits.ON = 1;
-    RPB3R = 0b1100; // OC1 on RD5
+    TRISDbits.TRISD5 = 0;
+    RPD5R = 0b1100; // OC1 on RD5
    
     // ADC_RESET:
     // On RB14
@@ -110,11 +111,11 @@ void adc_config() {
     
     // SPI_1:
     // SCK1 - RD1
-    // SDI1 - RD10
-    // SDO1 - RD2
+    // SDI1 - RD2
+    // SDO1 - RD10
     // SS1 -  RD4
-    SDI1R = 0b0011; // SDI1 -> RD10
-    RPD2R = 0b0101; // SDO1 -> RD2
+    SDI1R = 0b0000; // SDI1 -> RD2
+    RPD10R = 0b0101; // SDO1 -> RD10
     RPD4R = 0b0101; // SS1 -> RD4
     
     SPI1STATbits.SPIROV = 0; // Clear overflow flag
@@ -136,17 +137,6 @@ void adc_config() {
     
     uint32_t i;
     for(i=0;i<1000;i++); // Wait for a while
-    
-    char bb[256];
-    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_1));
-    uart_write(bb, strlen(bb));
-    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_2));
-    uart_write(bb, strlen(bb));
-
-    sprintf(bb, "%i\n", adc_read(_GENERAL_USER_CONFIG_3));
-    uart_write(bb, strlen(bb));
-
-    return;
 
     adc_set_high_power();
     adc_set_reference_internal();
@@ -165,11 +155,8 @@ void adc_config() {
 }
 
 void __ISR( _EXTERNAL_2_VECTOR, IPL3AUTO) adc_ext_interrupt() {
-
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
-    //LATEbits.LATE5 = ~LATEbits.LATE5; 
-    //LATEbits.LATE5 = 0; 
     
     // Update the feedback loop
 //    fb_update();
@@ -229,10 +216,7 @@ void adc_enable_readout(char enable) {
 
 void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
-    
-    //SPI1CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
-    //SPI1CONbits.FRMSYPW = 1; 
-    //SPI1CONbits.FRMEN = 1; // Enable framed mode
+
     LATDbits.LATD4 = 0;
 
     for(i=0; i<8; i++) {

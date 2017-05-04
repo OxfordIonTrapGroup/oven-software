@@ -23,7 +23,7 @@
 #pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
 #pragma config FPLLRNG = RANGE_5_10_MHZ
 #pragma config FPLLIDIV = DIV_1 // 8/1 = 8 MHz
-#pragma config FPLLMULT = MUL_45 // 8*50 = 400 MHz
+#pragma config FPLLMULT = MUL_50 // 8*50 = 400 MHz
 #pragma config FPLLODIV = DIV_2  // 400/2 = 200 MHz
 
 #pragma config FNOSC = SPLL
@@ -96,7 +96,7 @@ void main() {
     
     uart_config();
 
-    //adc_config();
+    adc_config();
     //pwm_config();
 
 
@@ -104,8 +104,8 @@ void main() {
     //configure_current_controller();
 
     // Enable interrupts
-    //INTCONbits.MVEC = 1;
-    //asm volatile("ei");
+    INTCONbits.MVEC = 1;
+    asm volatile("ei");
 
     char bb[200];
 
@@ -115,12 +115,15 @@ void main() {
     long i;
     while(1) {
         //ins_read_next();
-
-        //sprintf(bb, "%x %x\n", last_samples_signed[0], last_samples_signed[7]);
-        //uart_write(bb, strlen(bb));
-        for(i=0;i<1000000;i++);
+        bb[0] = 0;
+        for(i=0;i<8;i++) {
+            sprintf(bb, "%s %f", bb, last_samples_float[i]);
+        }
+        sprintf(bb, "%s\n", bb);
+        uart_write(bb, strlen(bb));
+        for(i=0;i<10000000;i++);
         //if(U1STAbits.URXDA)
-        LATEbits.LATE5 = 0;
+        //LATEbits.LATE5 = 0;
 
     }
 }
