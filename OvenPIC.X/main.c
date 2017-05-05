@@ -38,8 +38,12 @@ void ins_read_next();
 
 controller_t* current_controller = NULL;
 
+void current_controller_setter(float new_cv) {
+    pwm_set_duty(1, new_cv);
+}
+
 float current_controller_getter() {
-    return last_samples_float[5];
+    return last_samples_float[5]*2.5*5;
 }
 
 void configure_current_controller() {
@@ -48,12 +52,14 @@ void configure_current_controller() {
     current_controller = fbc_init();
 
     // Setter is the PWM duty cycle
-    current_controller->cv_setter = pwm_set_duty;
+    current_controller->cv_setter = current_controller_setter;
 
     current_controller->value_getter = current_controller_getter;
 
-    current_controller->cv_limit_max = OVEN_MAX_DUTY;
+    current_controller->cv_limit_max = 0.15;
     current_controller->cv_limit_min = 0;
+
+    current_controller->value_limit_max = 2;
 
 }
 
@@ -84,7 +90,7 @@ void configure_temperature_controller() {
 void update_controllers() {
 
     fbc_update(current_controller);
-    fbc_update(temperature_controller);
+    //fbc_update(temperature_controller);
 }
 
 void main() {
@@ -101,7 +107,7 @@ void main() {
 
 
 
-    //configure_current_controller();
+    configure_current_controller();
 
     // Enable interrupts
     INTCONbits.MVEC = 1;

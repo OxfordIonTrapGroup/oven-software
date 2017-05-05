@@ -167,7 +167,7 @@ void __ISR( _EXTERNAL_2_VECTOR, IPL3AUTO) adc_ext_interrupt() {
     // Update the sample counter
     adc_sample_index += 1;
     // Update the feedback loop
-//    fb_update();
+    update_controllers();
 
     if(streaming_channels != 0)
         adc_streaming_interrupt();

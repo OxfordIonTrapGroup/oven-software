@@ -20,6 +20,9 @@ controller_t* fbc_init() {
     c->error = 0;
     c->integrator = 0;
 
+    c->value_limit_max = 0; // Upper value limit
+
+
     c->enabled = 0;
 
     return c;
@@ -45,6 +48,9 @@ uint32_t fbc_check_limits(controller_t* c) {
 
 // Update the feedback control loop
 void fbc_update(controller_t* c) {
+
+    if(c->enabled == 0)
+        return;
 
     // The value in c->value has been updated externally 'somehow'
     c->value = c->value_getter();
@@ -87,5 +93,7 @@ void fbc_update(controller_t* c) {
 
     // Set the new control variable
     c->cv = new_cv;
-    c->cv_setter(c->cv);
+
+    if(c->enabled)
+        c->cv_setter(c->cv);
 }

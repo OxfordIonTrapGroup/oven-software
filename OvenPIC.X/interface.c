@@ -75,12 +75,26 @@ void ins_process_line(char* data, uint32_t length) {
     } else if(strcmp(command, CMD_ADC_READ_LAST_CONVERSION) == 0) {
         cmd_adc_read_last_conversion(residual_line, residual_line_length);
 
+    } else if(strcmp(command, CMD_FEEDBACK_CONFIG) == 0) {
+        cmd_feedback_config(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_FEEDBACK_START) == 0) {
+        cmd_feedback_start(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_FEEDBACK_STOP) == 0) {
+        cmd_feedback_stop(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_FEEDBACK_SETPOINT) == 0) {
+        cmd_feedback_setpoint(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
+        cmd_feedback_read_status(residual_line, residual_line_length);
+
     } else {
         ins_unknown_command(data_buffer, length);
     }
 
 }
-
 
 void ins_rebase_buffer(uint32_t index) {
     // Copy the contents of the buffer starting at 'index'

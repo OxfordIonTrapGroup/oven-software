@@ -5,7 +5,7 @@
 #include <string.h>
 #include "uart.h"
 #include "AD7770.h"
-#include "feedback.h"
+#include "feedback_controller.h"
 #include "interface.h"
 
 #include "commands.h"
@@ -132,62 +132,55 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     uart_printf(" %i\n", adc_crc_failure_count);
 }
 
-/*
-// PWM commands
-
-void cmd_pwm_set_duty(ins_header_t* header, char* data) {
-    cmd_pwm_set_duty_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
-        return;
-    
-    pwm_set_duty(args.new_duty);
-}
 
 // Feedback commands
+extern controller_t* current_controller;
 
-void cmd_feedback_config(ins_header_t* header, char* data) {
-    cmd_feedback_config_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
-        return;
 
-    fb_config(args.gain_p, args.gain_i, args.gain_d);
+void cmd_feedback_config(char* line, uint32_t length) {
+
+    float p, i, d;
+
+    sscanf(line, "%f %f %f", &p, &i, &d);
+
+    current_controller->p_gain = p;
+    current_controller->i_gain = i;
+    current_controller->d_gain = d;
+
+    uart_printf(">%f %f %f\n", p, i, d);
 }
 
-void cmd_feedback_start(ins_header_t* header, char* data) {
-    fb_start();
+void cmd_feedback_start(char* line, uint32_t length) {
+    current_controller->enabled = 1;
+    uart_printf(">1\n");
 }
 
-void cmd_feedback_stop(ins_header_t* header, char* data) {
-    fb_stop();
+void cmd_feedback_stop(char* line, uint32_t length) {
+    current_controller->enabled = 0;
+    uart_printf(">0\n");
 }
 
-void cmd_feedback_setpoint(ins_header_t* header, char* data) {
-    cmd_feedback_setpoint_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
-        return;
-  
-    fb_set_setpoint(args.setpoint);
+void cmd_feedback_setpoint(char* line, uint32_t length) {
+    float setpoint;
+    sscanf(line, "%f", &setpoint);
+
+    current_controller->setpoint = setpoint;
+
+    uart_printf(">%f\n", setpoint);
 }
 
-void cmd_feedback_read_status(ins_header_t* header, char* data) {
-    cmd_feedback_read_status_reply_t reply;
+void cmd_feedback_read_status(char* line, uint32_t length) {
 
-    reply.setpoint = FB_target;
-    reply.last_sample = last_samples_signed[FB_adc_index];
-    reply.last_error = FB_last_error;
-    reply.last_duty = FB_last_duty;
-    reply.integrator = FB_integrator;
-    
-    ins_send_reply(header, &reply, sizeof(reply));
+    uart_printf(">%f %f %f %f %f %i\n", 
+        current_controller->setpoint,
+        current_controller->value,
+        current_controller->error,
+        current_controller->integrator,
+        current_controller->cv,
+        current_controller->enabled);
 }
 
-
+/*
 void cmd_feedback_set_limits(ins_header_t* header, char* data) {
     cmd_feedback_set_limits_args_t args;
     
