@@ -72,6 +72,9 @@ void ins_process_line(char* data, uint32_t length) {
     } else if(strcmp(command, CMD_ADC_DECIMATE) == 0) {
         cmd_adc_decimate(residual_line, residual_line_length);
 
+    } else if(strcmp(command, CMD_ADC_READ_LAST_CONVERSION) == 0) {
+        cmd_adc_read_last_conversion(residual_line, residual_line_length);
+
     } else {
         ins_unknown_command(data_buffer, length);
     }

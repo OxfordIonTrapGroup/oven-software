@@ -120,23 +120,17 @@ void cmd_adc_decimate(char* line, uint32_t length) {
     uart_printf(">%i\n", decimation);
 }
 
-
-/*
-
-
-
-void cmd_adc_read_last_conversion(ins_header_t* header, char* data) {
+void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     
-    cmd_adc_read_last_conversion_reply_t reply;
-    int i;
+    uint32_t i;
     
+    uart_printf(">");
     for(i=0;i<8;i++)
-        reply.samples[i] = last_samples_signed[i];
-    
-    
-    ins_send_reply(header, &reply, sizeof(reply));
+        uart_printf(" %f", last_samples_float[i]*2.5);
+    uart_printf("\n");
 }
 
+/*
 // PWM commands
 
 void cmd_pwm_set_duty(ins_header_t* header, char* data) {
