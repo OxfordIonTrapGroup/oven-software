@@ -16,5 +16,5 @@ while(1):
 
     V = TCCal(V)
 
-    print(V)
+    print(V, data[-1])
     

@@ -12,7 +12,7 @@ def reset_pic():
     GPIO.output("P9_23", GPIO.LOW)
     time.sleep(0.01)
     GPIO.output("P9_23", GPIO.HIGH)
-    time.sleep(0.01)
+    time.sleep(0.2)
 
 
 CMD_ECHO = "echo"
@@ -23,6 +23,12 @@ CMD_ADC_STREAM = "adc_stream_channels"
 CMD_ADC_DECIMATE = "adc_set_decimation"
 CMD_ADC_READ_LAST_CONVERSION = "adc_read_sample"
 
+CMD_FEEDBACK_CONFIG = "fb_config"
+CMD_FEEDBACK_START = "fb_start"
+CMD_FEEDBACK_STOP = "fb_stop"
+CMD_FEEDBACK_SETPOINT = "fb_set_setpoint"
+CMD_FEEDBACK_READ_STATUS = "fb_read_status"
+
 # Lookup table for adc channel meanings
 ADC_CHANNELS = {
     "T": [3, 6], # Thermocouple on oven
@@ -30,6 +36,38 @@ ADC_CHANNELS = {
     "V_out": [1, 4], # Voltage at output
     "V": [2, 7], # Voltage at oven
     }
+
+ADC_CONVERSION_FACTORS = {
+    "T": (-1*(1000.0/40.0)*(1000.0/51.)),
+    "I": 5,
+    "V_out": 3,
+    "V": -3,
+}
+
+ADC_CONVERSION_OFFSETS = {
+    "T": 20,
+    "I": 0,
+    "V_out": 0,
+    "V": 0,
+}
+
+def convert_samples(channel, samples):
+    """Convert adc samples into calibrated data"""
+
+    results = {}
+
+    for name in ADC_CHANNELS:
+        # Get the data array
+        data = samples[ADC_CHANNELS[name][channel]]
+
+        if len(data) != 0:
+
+            data *= ADC_CONVERSION_FACTORS[name]
+            data += ADC_CONVERSION_OFFSETS[name]
+
+            results[name] = data
+    return results
+
 
 class PICError(Exception):
     pass
@@ -76,8 +114,11 @@ class OvenPICInterface:
         self._data_buffers = []
 
         self._streaming_thread = threading.Thread(
-            target=self._streaming_thread_exec
+            target=self._streaming_thread_exec,
+            daemon=True,
             )
+
+        self._streaming_thread.start()
 
     def _send_command(self, line):
         """Send a command line and read the response"""
@@ -136,6 +177,8 @@ class OvenPICInterface:
 
         return float_values
 
+    def close(self):
+        self._quit = True
 
     def echo(self, data):
         line = CMD_ECHO + " {}".format(data)
@@ -181,7 +224,7 @@ class OvenPICInterface:
         channel_byte = 0
         safe_channels = []
         for i, channel in enumerate(channels):
-            if not 0 < channel < 8:
+            if not 0 <= channel <= 7:
                 raise Exception(
                     'Requested channel out of range: {0}'.format(channel))
             if channel not in safe_channels:
@@ -202,7 +245,7 @@ class OvenPICInterface:
         line = CMD_ADC_STREAM + " {}".format(channel_byte)
         self._send_command(line)
 
-    def adc_stop_streaming(self, read_delay=0.5):
+    def adc_stop_streaming(self, read_delay=0.1):
 
         if self._streaming_mode != "adc":
             raise PICError(
@@ -273,6 +316,26 @@ class OvenPICInterface:
 
         return all_channel_values 
 
+    def fb_config(self, p, i, d):
+        line = CMD_FEEDBACK_CONFIG + " {:f} {:f} {:f}".format(p, i, d)
+        self._send_command(line)
+
+    def fb_start(self):
+        self._send_command(CMD_FEEDBACK_START)
+
+    def fb_stop(self):
+        self._send_command(CMD_FEEDBACK_STOP)
+
+    def fb_set_setpoint(self, new_setpoint):
+        line = CMD_FEEDBACK_SETPOINT + " {:f}".format(new_setpoint)
+        self._send_command(line)
+
+    def fb_read_status(self):
+        response = self._send_command(CMD_FEEDBACK_READ_STATUS)
+
+        return response.decode()
+
+
 
 def TCCal(data):
     TC = ((-data*(1000.0/40.0)*(1000.0/51.)) + 20) 
@@ -302,9 +365,9 @@ if __name__ == "__main__":
     p.adc_start_streaming(channels)
     time.sleep(0.5)
     p.set_pwm_duty(1, 0.1)
-    time.sleep(1)
+    time.sleep(0.5)
     p.set_pwm_duty(1, 0)
-    time.sleep(1)
+    time.sleep(0.5)
 
     data = p.adc_stop_streaming()
 
@@ -324,3 +387,5 @@ if __name__ == "__main__":
     print(T)
     print(V)
     print(V_out)
+
+    print(p.adc_read_sample())
