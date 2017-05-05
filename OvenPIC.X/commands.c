@@ -127,7 +127,9 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     uart_printf(">");
     for(i=0;i<8;i++)
         uart_printf(" %f", last_samples_float[i]*2.5);
-    uart_printf("\n");
+
+    // Also print the crc failure count
+    uart_printf(" %i\n", adc_crc_failure_count);
 }
 
 /*

@@ -39,7 +39,7 @@ uint32_t streaming_decimation_counter = 0; // Counter for decimation
 uint8_t streaming_channels = 0;
 
 uint32_t adc_sample_index = 0; // Counter incremented every sample
-
+uint32_t adc_crc_failure_count = 0; // Counter for CRC failures
 
 void adc_streaming_start(uint8_t channels) {
     // Start streaming to uart
@@ -224,33 +224,41 @@ void adc_enable_readout(char enable) {
 
 void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
-
+    uint32_t data_buffer[8];
+    
+    // Read in the raw data
     LATDbits.LATD4 = 0;
-
     for(i=0; i<8; i++) {
         while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
         SPI1BUF = 0x8000;
         while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] = (SPI1BUF & 0xFFFF) << 16;
+        data_buffer[i] = (SPI1BUF & 0xFFFF) << 16;
         while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
         SPI1BUF = 0x8000;
         while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] |= (SPI1BUF & 0xFFFF);
+        data_buffer[i] |= (SPI1BUF & 0xFFFF);
     }
     LATDbits.LATD4 = 1;
         
-    for(i=0; i<8; i++) {
-        data_signed[i] = (data[i] & 0x7FFFFF);
-        if(data[i] & (1<<23))
-            data_signed[i] = data_signed[i] - 0x800000;
+    // Check for crc failure
+    uint8_t crc_fails;
+    crc_fails = adc_check_samples(data_buffer);
 
-        data_float[i] = data_signed[i]/(0x800000*1.0);
+    if(crc_fails > 0) {
+        // If the samples do no pass the CRC, then increment the failure count
+        // and do not update the samples
+        adc_crc_failure_count += 1;
+    } else {
+        // Otherwise, we are free to update the samples
+        for(i=0; i<8; i++) {
+            data[i] = data_buffer[i];
+            data_signed[i] = (data_buffer[i] & 0x7FFFFF);
+            if(data_buffer[i] & (1<<23))
+                data_signed[i] = data_signed[i] - 0x800000;
+
+            data_float[i] = data_signed[i]/(0x800000*1.0);
+        }
     }
-    
-    //SPI1CONbits.FRMEN = 0; // Disable framed mode
-    //SPI1CONbits.FRMCNT = 0b000; // Return SS to normal behaviour
-    
-    //return data;
 }
 
 uint8_t calculate_crc(uint32_t* data) {

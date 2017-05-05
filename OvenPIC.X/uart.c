@@ -23,7 +23,7 @@ char uart_rx_buffer[UART_RX_BUFFER_LEN];
 int uart_rx_buffer_start = 0;
 int uart_rx_buffer_end = 0;
 
-#define UART_DATA_TX_BUFFER_LEN 256
+#define UART_DATA_TX_BUFFER_LEN 256*2
 char uart_data_tx_buffer[UART_DATA_TX_BUFFER_LEN];
 int uart_data_tx_buffer_start = 0;
 int uart_data_tx_buffer_end = 0;
