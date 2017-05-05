@@ -21,13 +21,14 @@ CMD_SET_PWM_DUTY = "set_pwm_duty"
 
 CMD_ADC_STREAM = "adc_stream_channels"
 CMD_ADC_DECIMATE = "adc_set_decimation"
+CMD_ADC_READ_LAST_CONVERSION = "adc_read_sample"
 
 # Lookup table for adc channel meanings
 ADC_CHANNELS = {
     "T": [3, 6], # Thermocouple on oven
     "I": [0, 5], # Current
     "V_out": [1, 4], # Voltage at output
-    "V": [3, 6], # Voltage at oven
+    "V": [2, 7], # Voltage at oven
     }
 
 class PICError(Exception):
@@ -42,7 +43,7 @@ class OvenPICInterface:
     # How long to wait between polling the data port
     _streaming_poll_time = 0.1
 
-    _DEBUG = True
+    _DEBUG = False
 
     def __init__(self, command_port="/dev/ttyO1", data_port="/dev/ttyO4",
         timeout=1):
@@ -157,6 +158,15 @@ class OvenPICInterface:
         line = CMD_SET_PWM_DUTY + " {:d} {:f}".format(channel, duty)
         print(line)
         response = self._send_command(line)
+
+    def adc_read_sample(self):
+        """Read the last set of adc samples"""
+
+        response = self._send_command(CMD_ADC_READ_LAST_CONVERSION)
+
+        values_str = response.decode().strip().split(" ")
+        values = [float(s.strip()) for s in values_str]
+        return values
 
     def adc_decimate(self, decimation):
 
@@ -284,16 +294,17 @@ if __name__ == "__main__":
     p.echo("Hi!")
     #p.set_pwm_duty(0, 0.01)
 
+
     channels = [a["T"][1], a["I"][1], a["V_out"][1], a["V"][1]]
 
     p.adc_decimate(10)
 
     p.adc_start_streaming(channels)
     time.sleep(0.5)
-    p.set_pwm_duty(1, 0.2)
-    time.sleep(0.5)
+    p.set_pwm_duty(1, 0.1)
+    time.sleep(1)
     p.set_pwm_duty(1, 0)
-    time.sleep(0.5)
+    time.sleep(1)
 
     data = p.adc_stop_streaming()
 
