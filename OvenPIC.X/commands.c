@@ -135,6 +135,7 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
 
 // Feedback commands
 extern controller_t* current_controller;
+extern controller_t* temperature_controller;
 
 
 void cmd_feedback_config(char* line, uint32_t length) {
@@ -143,20 +144,22 @@ void cmd_feedback_config(char* line, uint32_t length) {
 
     sscanf(line, "%f %f %f", &p, &i, &d);
 
-    current_controller->p_gain = p;
-    current_controller->i_gain = i;
-    current_controller->d_gain = d;
+    temperature_controller->p_gain = p;
+    temperature_controller->i_gain = i;
+    temperature_controller->d_gain = d;
 
     uart_printf(">%f %f %f\n", p, i, d);
 }
 
 void cmd_feedback_start(char* line, uint32_t length) {
     current_controller->enabled = 1;
+    temperature_controller->enabled = 1;
     uart_printf(">1\n");
 }
 
 void cmd_feedback_stop(char* line, uint32_t length) {
     current_controller->enabled = 0;
+    temperature_controller->enabled = 0;
     uart_printf(">0\n");
 }
 
@@ -164,7 +167,7 @@ void cmd_feedback_setpoint(char* line, uint32_t length) {
     float setpoint;
     sscanf(line, "%f", &setpoint);
 
-    current_controller->setpoint = setpoint;
+    temperature_controller->setpoint = setpoint;
 
     uart_printf(">%f\n", setpoint);
 }
@@ -172,12 +175,12 @@ void cmd_feedback_setpoint(char* line, uint32_t length) {
 void cmd_feedback_read_status(char* line, uint32_t length) {
 
     uart_printf(">%f %f %f %f %f %i\n", 
-        current_controller->setpoint,
-        current_controller->value,
-        current_controller->error,
-        current_controller->integrator,
-        current_controller->cv,
-        current_controller->enabled);
+        temperature_controller->setpoint,
+        temperature_controller->value,
+        temperature_controller->error,
+        temperature_controller->integrator,
+        temperature_controller->cv,
+        temperature_controller->enabled);
 }
 
 /*

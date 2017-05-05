@@ -56,6 +56,9 @@ void configure_current_controller() {
 
     current_controller->value_getter = current_controller_getter;
 
+    current_controller->p_gain = 0.01;
+    current_controller->i_gain = 0.01;
+
     current_controller->cv_limit_max = 0.15;
     current_controller->cv_limit_min = 0;
 
@@ -74,7 +77,7 @@ void temperature_controller_setter(float new_cv) {
 }
 
 float temperature_controller_getter() {
-    return last_samples_float[6];
+    return last_samples_float[6]*(-1*(1000.0/40.0)*(1000.0/51.)) + 20;
 }
 
 
@@ -82,7 +85,14 @@ void configure_temperature_controller() {
     temperature_controller = fbc_init();
 
     temperature_controller->cv_setter = temperature_controller_setter;
-    current_controller->value_getter = temperature_controller_getter;
+    temperature_controller->value_getter = temperature_controller_getter;
+
+
+
+    temperature_controller->cv_limit_max = 2;
+    temperature_controller->cv_limit_min = 0;
+
+    temperature_controller->value_limit_max = 200;
 }
 
 
@@ -90,7 +100,7 @@ void configure_temperature_controller() {
 void update_controllers() {
 
     fbc_update(current_controller);
-    //fbc_update(temperature_controller);
+    fbc_update(temperature_controller);
 }
 
 void main() {
@@ -108,7 +118,8 @@ void main() {
 
 
     configure_current_controller();
-
+    configure_temperature_controller();
+    
     // Enable interrupts
     INTCONbits.MVEC = 1;
     asm volatile("ei");
