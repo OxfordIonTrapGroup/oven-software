@@ -69,8 +69,61 @@ void cmd_echo(char* line, uint32_t length) {
     }
 }
 
-/*
+// PWM commands
+
+void cmd_pwm_set_duty(char* line, uint32_t length) {
+
+    uint32_t channel;
+    float new_duty;
+
+    // Read in the values
+    sscanf(line, "%i %f", &channel, &new_duty);
+
+    if(channel > 1) {
+        uart_printf("! Bad channel: %i\n", channel);
+        return;
+    }
+
+    if(new_duty < 0 || new_duty > 1) {
+        uart_printf("! Bad duty cycle: %f\n", new_duty);
+        return;
+    }
+
+    pwm_set_duty(channel, new_duty);
+    uart_printf(">%i %f\n", channel, new_duty);
+}
+
+
+
+
 // ADC commands
+
+void cmd_adc_stream(char* line, uint32_t length) {
+
+    uint8_t channels;
+
+    // Read in the values
+    sscanf(line, "%i", &channels);
+
+    adc_streaming_start(channels);
+    uart_printf(">%i\n", channels);
+}
+
+void cmd_adc_decimate(char* line, uint32_t length) {
+
+    uint32_t decimation;
+
+    // Read in the decimation
+    sscanf(line, "%i", &decimation);
+
+    adc_set_streaming_decimation(decimation);
+    uart_printf(">%i\n", decimation);
+}
+
+
+/*
+
+
 
 void cmd_adc_read_last_conversion(ins_header_t* header, char* data) {
     
@@ -83,29 +136,6 @@ void cmd_adc_read_last_conversion(ins_header_t* header, char* data) {
     
     ins_send_reply(header, &reply, sizeof(reply));
 }
-
-void cmd_adc_stream(ins_header_t* header, char* data) {
-    
-    cmd_adc_stream_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
-        return;
-    
-    adc_streaming_start(args.channels);
-}
-
-
-void cmd_adc_decimate(ins_header_t* header, char* data) {
-    cmd_adc_decimate_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
-        return;
-        
-    adc_set_streaming_decimation(args.decimation);
-}
-
 
 // PWM commands
 

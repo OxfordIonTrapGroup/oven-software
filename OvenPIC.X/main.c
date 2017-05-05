@@ -109,10 +109,14 @@ void main() {
 
     char bb[200];
 
-    sprintf(bb, "gg\n");
-    uart_write_blocking(bb, strlen(bb));
+    //sprintf(bb, "gg\n");
+    //uart_write_blocking(bb, strlen(bb));
 
-    
+    adc_set_streaming_decimation(200);
+    //adc_streaming_start(0xFF);
+
+
+
     long i,j=0;
     while(1) {
         ins_read_next();
@@ -124,13 +128,13 @@ void main() {
         //     pwm_set_duty(0.1);
         //     j=0;
         // }
-        bb[0] = 0;
-        for(i=0;i<8;i++) {
-            sprintf(bb, "%s %f", bb, last_samples_float[i]);
-        }
-        sprintf(bb, "%s\n", bb);
-        uart_write_data(bb, strlen(bb));
-        for(i=0;i<10000000;i++);
+        // bb[0] = 0;
+        // for(i=0;i<8;i++) {
+        //     sprintf(bb, "%s %f", bb, last_samples_float[i]);
+        // }
+        // sprintf(bb, "%s\n", bb);
+        // uart_write_data(bb, strlen(bb));
+        //for(i=0;i<1000000;i++);
         //if(U1STAbits.URXDA)
         //LATEbits.LATE5 = 0;
 

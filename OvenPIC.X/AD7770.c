@@ -38,12 +38,15 @@ uint32_t streaming_decimation_counter = 0; // Counter for decimation
 
 uint8_t streaming_channels = 0;
 
+uint32_t adc_sample_index = 0; // Counter incremented every sample
+
+
 void adc_streaming_start(uint8_t channels) {
     // Start streaming to uart
     if( channels == 0 ) {
         adc_streaming_stop();
     } else {
-        ins_enable_streaming();
+        //ins_enable_streaming();
         streaming_decimation_counter = 0;
         streaming_channels = channels;
     }
@@ -52,7 +55,7 @@ void adc_streaming_start(uint8_t channels) {
 void adc_streaming_stop() {
     streaming_channels = 0;
     
-    ins_disable_streaming();
+    //ins_disable_streaming();
 }
 
 void adc_set_streaming_decimation(uint32_t decimation) {
@@ -73,12 +76,15 @@ void adc_streaming_interrupt() {
         }
     }
     // Cat the streaming_channels byte
-    uart_write(&streaming_channels, 1);
-    
+    uart_write_data(&streaming_channels, 1);
+
+    // Cat the sample index
+    //uart_write_data(&adc_sample_index, 4);
+
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
             // Cat the data to the uart if the channel is enabled
-            uart_write(&last_samples[i], 4);
+            uart_write_data(&last_samples[i], 4);
         }
     }
 }
@@ -158,6 +164,8 @@ void __ISR( _EXTERNAL_2_VECTOR, IPL3AUTO) adc_ext_interrupt() {
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
     
+    // Update the sample counter
+    adc_sample_index += 1;
     // Update the feedback loop
 //    fb_update();
 

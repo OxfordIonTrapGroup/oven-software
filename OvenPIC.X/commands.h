@@ -4,10 +4,10 @@
 
 #define CMD_ECHO                        "echo"
 
-#define CMD_PWM_SET_DUTY                0x10
+#define CMD_SET_PWM_DUTY                "set_pwm_duty"
 
-#define CMD_ADC_STREAM                  0x20
-#define CMD_ADC_DECIMATE                0x21
+#define CMD_ADC_STREAM                  "adc_stream_channels"
+#define CMD_ADC_DECIMATE                "adc_set_decimation"
 #define CMD_ADC_READ_LAST_CONVERSION    0x22
 
 #define CMD_FEEDBACK_CONFIG             0x30
