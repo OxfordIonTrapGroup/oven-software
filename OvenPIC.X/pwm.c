@@ -12,7 +12,7 @@ uint16_t pwm_duty[2] = {0,0};
 #define PWM_0_REG OC5RS
 #define PWM_1_REG OC4RS
 
-void __ISR(_TIMER_3_VECTOR, IPL1AUTO) t3_interrupt() {
+void __ISR(_TIMER_3_VECTOR, IPL4AUTO) t3_interrupt() {
     pwm_decimation_counter--;
 
     // Service pwm channel 0
@@ -74,7 +74,7 @@ void pwm_config() {
     PR3 = OVEN_PWM_PERIOD;
     IEC0bits.T3IE = 1; // Enable timer 3 interrupt
     IFS0bits.T3IF = 0;
-    IPC3bits.T3IP = 1;    
+    IPC3bits.T3IP = 4;    
     T3CONbits.ON = 1;
     
     OC5CONbits.OCTSEL = 1; // Select timer 3

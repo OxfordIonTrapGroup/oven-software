@@ -1,6 +1,7 @@
 
 #include "HardwareProfile.h"
 
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 #include "AD7770.h"
@@ -33,6 +34,7 @@
 
 void ins_read_next();
 
+#define CURRENT_LIMIT 10
 
 ///////
 
@@ -62,7 +64,7 @@ void configure_current_controller() {
     current_controller->cv_limit_max = 0.4;
     current_controller->cv_limit_min = 0;
 
-    current_controller->value_limit_max = 8;
+    current_controller->value_limit_max = CURRENT_LIMIT;
 
 }
 
@@ -89,7 +91,7 @@ void configure_temperature_controller() {
 
 
 
-    temperature_controller->cv_limit_max = 8;
+    temperature_controller->cv_limit_max = sqrt(CURRENT_LIMIT);
     temperature_controller->cv_limit_min = 0;
 
     temperature_controller->value_limit_max = 500;
@@ -115,8 +117,6 @@ void main() {
     adc_config();
     pwm_config();
 
-
-
     configure_current_controller();
     configure_temperature_controller();
 
@@ -124,37 +124,10 @@ void main() {
     INTCONbits.MVEC = 1;
     asm volatile("ei");
 
-    char bb[200];
+    adc_set_streaming_decimation(100);
 
-    //sprintf(bb, "gg\n");
-    //uart_write_blocking(bb, strlen(bb));
-
-    adc_set_streaming_decimation(200);
-    //adc_streaming_start(0xFF);
-
-
-
-    long i,j=0;
     while(1) {
         ins_read_next();
-        
-        // if(j==0) {
-        //     pwm_set_duty(0.05);
-        //     j=1;
-        // } else {
-        //     pwm_set_duty(0.1);
-        //     j=0;
-        // }
-        // bb[0] = 0;
-        // for(i=0;i<8;i++) {
-        //     sprintf(bb, "%s %f", bb, last_samples_float[i]);
-        // }
-        // sprintf(bb, "%s\n", bb);
-        // uart_write_data(bb, strlen(bb));
-        //for(i=0;i<1000000;i++);
-        //if(U1STAbits.URXDA)
-        //LATEbits.LATE5 = 0;
-
     }
 }
 

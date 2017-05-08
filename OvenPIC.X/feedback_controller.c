@@ -110,14 +110,6 @@ void fbc_update(controller_t* c) {
 
     // Calculate the new control variable
     new_cv = c->error*c->p_gain + c->integrator;
-    // } else {
-    //     // If we are limiting, don't integrate, disable output
-
-    //     float error = c->setpoint - c->value_limit_max;
-    //     new_cv = error*c->p_gain + c->integrator;
-    //     c->integrator = 0;
-    //     new_cv = c->cv_limit_min;
-    // }
 
 
     // Clip the new control variable to be in range

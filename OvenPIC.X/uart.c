@@ -126,6 +126,16 @@ void uart_config() {
     IPC45bits.U5TXIP = 2; // Set interrupt priority level
     U5MODEbits.ON = 1;     // enable UART5
 
+    // Initialise the positions to 0
+    uart_tx_buffer_start = 0;
+    uart_tx_buffer_end = 0;
+
+    uart_rx_buffer_start = 0;
+    uart_rx_buffer_end = 0;
+
+    uart_data_tx_buffer_start = 0;
+    uart_data_tx_buffer_end = 0;
+
 }
 
 void uart_write(uint8_t* buffer, uint32_t len) {
