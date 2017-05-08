@@ -1,14 +1,19 @@
 
-
+#include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 
 #include "feedback_controller.h"
 
+#define N_MAX_CONTROLLERS 10
+
+// Array of pointers to controllers
+controller_t* fbc_controllers[N_MAX_CONTROLLERS] = {NULL};
+uint32_t n_fbc_controllers = 0; // Number of valid controller pointsers
 
 
 // Initialise feedback controller
-controller_t* fbc_init() {
+controller_t* fbc_init(char* name) {
     controller_t* c = malloc(sizeof(controller_t));
 
     c->p_gain = 0;
@@ -22,8 +27,15 @@ controller_t* fbc_init() {
 
     c->value_limit_max = 0; // Upper value limit
 
-
     c->enabled = 0;
+
+    c->name = name;
+
+    // Add the controller to the list
+    if(n_fbc_controllers < N_MAX_CONTROLLERS) {
+        fbc_controllers[n_fbc_controllers] = c;
+        n_fbc_controllers += 1;
+    }
 
     return c;
 }
@@ -37,6 +49,23 @@ void fbc_enable(controller_t* c) {
 void fbc_disable(controller_t* c) {
     c->enabled = 0;
 }
+
+controller_t* fbc_get_by_name(char* name) {
+    // Get a feedback controller by name
+    uint32_t i;
+
+    for(i=0; i < n_fbc_controllers; i++) {
+
+        if(strcmp(name, fbc_controllers[i]->name) == 0) {
+            // If the name matches the controller, return
+            return fbc_controllers[i];
+        }
+    }
+
+    // If no match was found, return NULL
+    return NULL;
+}
+
 
 // Returns 1 if value is above max limit
 // 0 otherwise

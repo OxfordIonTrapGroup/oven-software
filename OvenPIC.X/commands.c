@@ -12,55 +12,6 @@
 
 #define ERROR -1
 
-// int _parse_args(ins_header_t* header, char* data, void* args) {
-    
-//     uint8_t length = 0;
-    
-//     switch(header->command) {
-        
-//         // PWM commands
-//         case CMD_PWM_SET_DUTY:
-//             length = sizeof(cmd_pwm_set_duty_args_t);
-//             break;
-            
-//         // ADC commands
-//         case CMD_ADC_STREAM:
-//             length = sizeof(cmd_adc_stream_args_t);
-//             break;
-//         case CMD_ADC_DECIMATE:
-//             length = sizeof(cmd_adc_decimate_args_t);
-//             break;
-            
-//         // Feedback commands
-//         case CMD_FEEDBACK_CONFIG:
-//             length = sizeof(cmd_feedback_config_args_t);
-//             break;    
-            
-//         case CMD_FEEDBACK_SETPOINT:
-//             length = sizeof(cmd_feedback_setpoint_args_t);
-//             break;
-            
-//         case CMD_FEEDBACK_SET_LIMITS:
-//             length = sizeof(cmd_feedback_set_limits_args_t);
-//             break;
-            
-//         default:
-//             length = 0;
-//             break;
-//     }
-    
-//     if(header->len != length) {
-//         ins_report_error("Bad args length in command %x", header->command);
-//         return ERROR;
-//     }
-    
-//     // Copy the data across into the args pointer
-//     memcpy(args, (void*)data, header->len);
-    
-//     return 0;
-// }
-
-
 void cmd_echo(char* line, uint32_t length) {
     if(length > 0) {
         uart_printf(">echo %s\n", line);
@@ -141,46 +92,104 @@ extern controller_t* temperature_controller;
 void cmd_feedback_config(char* line, uint32_t length) {
 
     float p, i, d;
+    char name[FBC_NAME_LEN];
 
-    sscanf(line, "%f %f %f", &p, &i, &d);
+    sscanf(line, "%s %f %f %f", &name, &p, &i, &d);
 
-    temperature_controller->p_gain = p;
-    temperature_controller->i_gain = i;
-    temperature_controller->d_gain = d;
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    c->p_gain = p;
+    c->i_gain = i;
+    c->d_gain = d;
 
     uart_printf(">%f %f %f\n", p, i, d);
 }
 
 void cmd_feedback_start(char* line, uint32_t length) {
-    current_controller->enabled = 1;
-    temperature_controller->enabled = 1;
-    uart_printf(">1\n");
+
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s", &name);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    c->enabled = 1;
+    uart_printf(">%s enabled\n", name);
 }
 
 void cmd_feedback_stop(char* line, uint32_t length) {
-    current_controller->enabled = 0;
-    temperature_controller->enabled = 0;
-    uart_printf(">0\n");
+
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s", &name);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    c->enabled = 0;
+
+    uart_printf(">%s disabled\n", name);
 }
 
 void cmd_feedback_setpoint(char* line, uint32_t length) {
     float setpoint;
-    sscanf(line, "%f", &setpoint);
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s %f", &name, &setpoint);
 
-    temperature_controller->setpoint = setpoint;
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
 
-    uart_printf(">%f\n", setpoint);
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    c->setpoint = setpoint;
+
+    uart_printf(">%s %f\n", name, setpoint);
 }
 
 void cmd_feedback_read_status(char* line, uint32_t length) {
 
-    uart_printf(">%f %f %f %f %f %i\n", 
-        temperature_controller->setpoint,
-        temperature_controller->value,
-        temperature_controller->error,
-        temperature_controller->integrator,
-        temperature_controller->cv,
-        temperature_controller->enabled);
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s", &name);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    uart_printf(">%s %f %f %f %f %f %i\n", 
+        name,
+        c->setpoint,
+        c->value,
+        c->error,
+        c->integrator,
+        c->cv,
+        c->enabled);
 }
 
 /*

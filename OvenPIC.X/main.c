@@ -49,7 +49,7 @@ float current_controller_getter() {
 void configure_current_controller() {
 
     // Configure the current feedback controller
-    current_controller = fbc_init();
+    current_controller = fbc_init("current");
 
     // Setter is the PWM duty cycle
     current_controller->cv_setter = current_controller_setter;
@@ -59,10 +59,10 @@ void configure_current_controller() {
     current_controller->p_gain = 0.01;
     current_controller->i_gain = 0.01;
 
-    current_controller->cv_limit_max = 0.15;
+    current_controller->cv_limit_max = 0.2;
     current_controller->cv_limit_min = 0;
 
-    current_controller->value_limit_max = 2;
+    current_controller->value_limit_max = 4;
 
 }
 
@@ -82,14 +82,14 @@ float temperature_controller_getter() {
 
 
 void configure_temperature_controller() {
-    temperature_controller = fbc_init();
+    temperature_controller = fbc_init("temperature");
 
     temperature_controller->cv_setter = temperature_controller_setter;
     temperature_controller->value_getter = temperature_controller_getter;
 
 
 
-    temperature_controller->cv_limit_max = 2;
+    temperature_controller->cv_limit_max = 4;
     temperature_controller->cv_limit_min = 0;
 
     temperature_controller->value_limit_max = 200;
@@ -119,7 +119,7 @@ void main() {
 
     configure_current_controller();
     configure_temperature_controller();
-    
+
     // Enable interrupts
     INTCONbits.MVEC = 1;
     asm volatile("ei");
