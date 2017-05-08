@@ -100,7 +100,7 @@ void adc_config() {
 
     // ADC_MCLK:
     // Use Timer 2 and OC1 to generate ADC clock on RD5
-    // PBCLK3 is 100 MHz, ADC_MCLK needs to be ~5 MHz
+    // PBCLK3 is 100 MHz, ADC_MCLK is 5 MHz
     PR2 = (100/5) - 1;
     OC1RS = (PR2 + 1)*0.5;
     T2CONbits.ON = 1;
@@ -147,7 +147,8 @@ void adc_config() {
     adc_set_high_power();
     adc_set_reference_internal();
     //adc_set_decimation( 2048 );
-    adc_set_decimation( 2000 );
+    adc_set_decimation(1250); // MCLK/(4*decimation) = 1 kHz 
+    //adc_set_decimation(2000); // MCLK/(4*decimation) = 625 Hz 
     adc_enable_readout(1);
     
     // Configure interrupt on ADC sample read pin (RB15)
@@ -156,11 +157,11 @@ void adc_config() {
     INTCONbits.INT2EP = 0; // Set polarity to falling edge   
     IFS0bits.INT2IF = 0; // Clear the flag
     IEC0bits.INT2IE = 1; // Enable the interrupt
-    IPC3bits.INT2IP = 3; // Set the priority to 1
+    IPC3bits.INT2IP = 1; // Set the priority to 1
 
 }
 
-void __ISR( _EXTERNAL_2_VECTOR, IPL3AUTO) adc_ext_interrupt() {
+void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
     
@@ -203,7 +204,7 @@ void adc_set_decimation(int decimation) {
         return; // bad decimation
     
     adc_write(_SRC_N_MSB, (decimation & 0xFF00) >> 8);
-    adc_write(_SRC_N_LSB, (decimation & 0x00FF) >> 8);
+    adc_write(_SRC_N_LSB, (decimation & 0x00FF));
     
     adc_write(_SRC_UPDATE, 0x01);
 }

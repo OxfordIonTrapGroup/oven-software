@@ -87,31 +87,37 @@ void fbc_update(controller_t* c) {
     // Check if we should limit the output
     uint32_t limiting = fbc_check_limits(c);
 
-    // Calculate the error value
-    c->error = c->setpoint - c->value;
+    if(limiting == 0) {
+        // Calculate the error value
+        c->error = c->setpoint - c->value;
+    } else {
+        c->error = c->value_limit_max - c->value;
+    }
 
     float new_cv = 0;
 
-    if(limiting == 0) {
 
-        // If the control variable is saturated, don't add the 
-        // integrator if the error is in the saturated direction
-        if(c->cv >= c->cv_limit_max && c->error*c->i_gain > 0) {
-            // Do nothing
-        } else if(c->cv <= c->cv_limit_min && c->error*c->i_gain < 0) {
-            // Do nothing
-        } else {
-            // Calculate the new integrator value
-            c->integrator += c->error*c->i_gain;
-        }
-
-        // Calculate the new control variable
-        new_cv = c->error*c->p_gain + c->integrator;
+    // If the control variable is saturated, don't add the 
+    // integrator if the error is in the saturated direction
+    if(c->cv >= c->cv_limit_max && c->error*c->i_gain > 0) {
+        // Do nothing
+    } else if(c->cv <= c->cv_limit_min && c->error*c->i_gain < 0) {
+        // Do nothing
     } else {
-        // If we are limiting, don't integrate, disable output
-        c->integrator = 0;
-        new_cv = c->cv_limit_min;
+        // Calculate the new integrator value
+        c->integrator += c->error*c->i_gain;
     }
+
+    // Calculate the new control variable
+    new_cv = c->error*c->p_gain + c->integrator;
+    // } else {
+    //     // If we are limiting, don't integrate, disable output
+
+    //     float error = c->setpoint - c->value_limit_max;
+    //     new_cv = error*c->p_gain + c->integrator;
+    //     c->integrator = 0;
+    //     new_cv = c->cv_limit_min;
+    // }
 
 
     // Clip the new control variable to be in range
