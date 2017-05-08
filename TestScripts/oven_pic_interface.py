@@ -134,6 +134,9 @@ class OvenPICInterface:
         # Send the command
         self.sc.write(line.encode())
 
+        if self._DEBUG:
+            print("SEND: " + str(line.encode()))
+
         # Read a response
         response = self.sc.readline()
 
@@ -316,22 +319,23 @@ class OvenPICInterface:
 
         return all_channel_values 
 
-    def fb_config(self, p, i, d):
-        line = CMD_FEEDBACK_CONFIG + " {:f} {:f} {:f}".format(p, i, d)
+    def fb_config(self, name, p, i, d):
+        line = CMD_FEEDBACK_CONFIG \
+            + " {:s} {:f} {:f} {:f}".format(name, p, i, d)
         self._send_command(line)
 
-    def fb_start(self):
-        self._send_command(CMD_FEEDBACK_START)
+    def fb_start(self, name):
+        self._send_command(CMD_FEEDBACK_START + " " + name)
 
-    def fb_stop(self):
-        self._send_command(CMD_FEEDBACK_STOP)
+    def fb_stop(self, name):
+        self._send_command(CMD_FEEDBACK_STOP + " " + name)
 
-    def fb_set_setpoint(self, new_setpoint):
-        line = CMD_FEEDBACK_SETPOINT + " {:f}".format(new_setpoint)
+    def fb_set_setpoint(self, name, new_setpoint):
+        line = CMD_FEEDBACK_SETPOINT + " {:s} {:f}".format(name, new_setpoint)
         self._send_command(line)
 
-    def fb_read_status(self):
-        response = self._send_command(CMD_FEEDBACK_READ_STATUS)
+    def fb_read_status(self, name):
+        response = self._send_command(CMD_FEEDBACK_READ_STATUS + " " + name)
 
         return response.decode()
 
