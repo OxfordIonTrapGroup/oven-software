@@ -294,6 +294,7 @@ class OvenPICInterface:
         # Check that the channel_bytes are all the same
         if np.sum(channel_bytes != self._streaming_channel_byte) != 0:
             # If there are any samples which have the wrong byte
+            print(channel_bytes)
             raise Exception(
                 'Bad channel_bytes in adc_streamed data, sync error')
 
