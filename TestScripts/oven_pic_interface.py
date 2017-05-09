@@ -16,6 +16,7 @@ def reset_pic():
 
 
 CMD_ECHO = "echo"
+CMD_VERSION = "version"
 
 CMD_SET_PWM_DUTY = "set_pwm_duty"
 
@@ -120,6 +121,9 @@ class OvenPICInterface:
 
         self._streaming_thread.start()
 
+        version = self.get_version()
+        print("Connected to PIC, firmware version: " + version)
+
     def _send_command(self, line):
         """Send a command line and read the response"""
 
@@ -188,6 +192,12 @@ class OvenPICInterface:
 
         response = self._send_command(line)
         print("ECHO: " + str(response))
+
+    def get_version(self):
+        response = self._send_command(CMD_VERSION)
+
+        version_str = response.decode().strip().split(" ")[1].strip()
+        return version_str
 
     def set_pwm_duty(self, channel, duty):
         """Set the pwm duty cycle on the given channel.
