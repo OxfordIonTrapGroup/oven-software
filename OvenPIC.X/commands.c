@@ -20,6 +20,10 @@ void cmd_echo(char* line, uint32_t length) {
     }
 }
 
+void cmd_version(char* line, uint32_t length) {
+    uart_printf(">version %s\n", VERSION_STRING);
+}
+
 // PWM commands
 
 void cmd_pwm_set_duty(char* line, uint32_t length) {

@@ -3,6 +3,7 @@
 #define _COMMANDS_H
 
 #define CMD_ECHO                        "echo"
+#define CMD_VERSION                     "version"
 
 #define CMD_SET_PWM_DUTY                "set_pwm_duty"
 
@@ -16,8 +17,6 @@
 #define CMD_FEEDBACK_SETPOINT           "fb_set_setpoint"
 #define CMD_FEEDBACK_READ_STATUS        "fb_read_status"
 #define CMD_FEEDBACK_SET_LIMITS         0x35
-
-#define CMD_ERROR                       0xFF
 
 
 

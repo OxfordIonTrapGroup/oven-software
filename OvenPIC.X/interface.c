@@ -63,6 +63,9 @@ void ins_process_line(char* data, uint32_t length) {
     if(strcmp(command, CMD_ECHO) == 0) {
         cmd_echo(residual_line, residual_line_length);
 
+    } else if(strcmp(command, CMD_VERSION) == 0) {
+        cmd_version(residual_line, residual_line_length);
+
     } else if(strcmp(command, CMD_SET_PWM_DUTY) == 0) {
         cmd_pwm_set_duty(residual_line, residual_line_length);
 
