@@ -9,18 +9,6 @@
 #include "feedback_controller.h"
 #include "pwm.h"
 
-/*#pragma config FNOSC = PRIPLL // Primary oscillator
-#pragma config POSCMOD = XT // 'XT' mode for xtals, ours is 8MHz
-#pragma config FPLLIDIV = DIV_2 // Divide input clock by 2
-#pragma config FPLLMUL = MUL_20 // Multiply input clock by 20
-#pragma config FPLLODIV = DIV_2 // Divide by 2, giving 40 MHz sys clock
-#pragma config FPBDIV = DIV_1 // Peripheral clock = sys clock
-#pragma config FSOSCEN = OFF // Secondary oscillator diabled, for dig IO on SOCS pins
-
-#pragma config JTAGEN = OFF // Disable jtag  (needed for pin 24 (RED LED))
-#pragma config ICESEL = ICS_PGx1 // ICE comm via pin-set 1 (needed for pin 24)
-*/
-
 #pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
 #pragma config FPLLRNG = RANGE_5_10_MHZ
 #pragma config FPLLIDIV = DIV_1 // 8/1 = 8 MHz
@@ -36,7 +24,6 @@ void ins_read_next();
 
 #define CURRENT_LIMIT 10
 
-///////
 
 controller_t* current_controller = NULL;
 
