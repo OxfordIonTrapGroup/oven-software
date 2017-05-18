@@ -208,3 +208,20 @@ void cmd_feedback_set_limits(ins_header_t* header, char* data) {
 }
 
 */
+
+void cmd_settings_load(char* line, uint32_t length) {
+
+    settings_read();
+    uart_printf(">loaded\n");
+}
+
+void cmd_settings_save(char* line, uint32_t length) {
+
+    settings_write();
+    uart_printf(">saved\n");
+}
+
+void cmd_settings_print(char* line, uint32_t length) {
+
+    settings_printout();
+}

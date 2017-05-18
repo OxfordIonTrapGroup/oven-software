@@ -18,6 +18,9 @@
 #define CMD_FEEDBACK_READ_STATUS        "fb_read_status"
 #define CMD_FEEDBACK_SET_LIMITS         0x35
 
+#define CMD_SETTINGS_LOAD "settings_load"
+#define CMD_SETTINGS_SAVE "settings_save"
+#define CMD_SETTINGS_PRINT "settings_print"
 
 
 

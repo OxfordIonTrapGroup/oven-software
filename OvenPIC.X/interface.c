@@ -66,7 +66,9 @@ void ins_process_line(char* data, uint32_t length) {
     } else if(strcmp(command, CMD_VERSION) == 0) {
         cmd_version(residual_line, residual_line_length);
 
-    } else if(strcmp(command, CMD_SET_PWM_DUTY) == 0) {
+    } 
+    // PWM commands
+    else if(strcmp(command, CMD_SET_PWM_DUTY) == 0) {
         cmd_pwm_set_duty(residual_line, residual_line_length);
 
     } else if(strcmp(command, CMD_ADC_STREAM) == 0) {
@@ -92,6 +94,15 @@ void ins_process_line(char* data, uint32_t length) {
 
     } else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
         cmd_feedback_read_status(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_SETTINGS_LOAD) == 0) {
+        cmd_settings_load(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_SETTINGS_SAVE) == 0) {
+        cmd_settings_save(residual_line, residual_line_length);
+
+    } else if(strcmp(command, CMD_SETTINGS_PRINT) == 0) {
+        cmd_settings_print(residual_line, residual_line_length);
 
     } else {
         ins_unknown_command(data_buffer, length);

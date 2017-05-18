@@ -113,6 +113,15 @@ void main() {
 
     adc_set_streaming_decimation(100);
 
+//    settings_read();
+//    
+//    uint32_t i;
+//    while(1){
+//        debug_settings();
+//        for(i=0;i<1000000; i++);
+//        
+//    }
+
     while(1) {
         ins_read_next();
     }
