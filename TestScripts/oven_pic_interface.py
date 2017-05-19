@@ -23,12 +23,18 @@ CMD_SET_PWM_DUTY = "set_pwm_duty"
 CMD_ADC_STREAM = "adc_stream_channels"
 CMD_ADC_DECIMATE = "adc_set_decimation"
 CMD_ADC_READ_LAST_CONVERSION = "adc_read_sample"
+CMD_ADC_READ_LAST_CALIBRATED_DATA = "adc_read_calibrated_sample"
 
 CMD_FEEDBACK_CONFIG = "fb_config"
 CMD_FEEDBACK_START = "fb_start"
 CMD_FEEDBACK_STOP = "fb_stop"
 CMD_FEEDBACK_SETPOINT = "fb_set_setpoint"
 CMD_FEEDBACK_READ_STATUS = "fb_read_status"
+
+CMD_SETTINGS_LOAD = "settings_load"
+CMD_SETTINGS_SET_TO_FACTORY = "settings_set_to_factory"
+CMD_SETTINGS_SAVE = "settings_save"
+CMD_SETTINGS_PRINT = "settings_print"
 
 # Lookup table for adc channel meanings
 ADC_CHANNELS = {
@@ -39,7 +45,7 @@ ADC_CHANNELS = {
     }
 
 ADC_CONVERSION_FACTORS = {
-    "T": (-1*(1000.0/40.0)*(1000.0/51.)),
+    "T": (1*(1000.0/40.0)*(1000.0/51.)),
     "I": 5,
     "V_out": 3,
     "V": -3,
@@ -82,7 +88,7 @@ class OvenPICInterface:
     # How long to wait between polling the data port
     _streaming_poll_time = 0.1
 
-    _DEBUG = False
+    _DEBUG = True
 
     def __init__(self, command_port="/dev/ttyO1", data_port="/dev/ttyO4",
         timeout=1):
@@ -224,6 +230,27 @@ class OvenPICInterface:
         values = [float(s.strip()) for s in values_str]
         return values
 
+    def adc_read_calibrated_sample(self):
+        """Read the last set of adc samples after calibration"""
+
+        response = self._send_command(CMD_ADC_READ_LAST_CALIBRATED_DATA)
+
+        channels = response.decode().strip().split(";")[:2]
+        values = []
+        for channel in channels:
+            index, temperature, current, output_voltage, oven_voltage = \
+                channel.strip().split()
+            channel_values = {
+                "temperature": float(temperature.strip()),
+                "current": float(current.strip()),
+                "output_voltage": float(output_voltage.strip()),
+                "oven_voltage": float(oven_voltage.strip()),
+                }
+            values.append(channel_values)
+
+        return values
+
+
     def adc_decimate(self, decimation):
 
         line = CMD_ADC_DECIMATE + " {:d}".format(decimation)
@@ -351,6 +378,15 @@ class OvenPICInterface:
         return response.decode()
 
 
+    def settings_load(self):
+        self._send_command(CMD_SETTINGS_LOAD)
+
+    def settings_save(self):
+        self._send_command(CMD_SETTINGS_SAVE)
+
+    def settings_print(self):
+        response = self._send_command(CMD_SETTINGS_PRINT)
+        print(response)
 
 def TCCal(data):
     TC = ((-data*(1000.0/40.0)*(1000.0/51.)) + 20) 

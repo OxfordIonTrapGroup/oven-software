@@ -4,10 +4,11 @@ import time
 import pickle
 
 p = oven_pic_interface.OvenPICInterface()
+p._DEBUG = True
 
 t_start = 1
-t_on = 2
-t_off = 2
+t_on = 5
+t_off = 1
 
 channel = 1
 p.set_pwm_duty(channel, 0)
@@ -17,8 +18,8 @@ p.fb_set_setpoint("current", 0)
 p.fb_start("current")
 
 
-p.fb_config("temperature", 0.04, 0.00006, 0)
-p.fb_set_setpoint("temperature", 400)
+p.fb_config("temperature", 0.04, 0.00008, 0)
+p.fb_set_setpoint("temperature", 200)
 p.adc_decimate(9)
 
 print(p.fb_read_status("temperature"))

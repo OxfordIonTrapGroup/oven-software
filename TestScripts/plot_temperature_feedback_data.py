@@ -11,13 +11,17 @@ t = (np.arange(len(results["T"]))/100)-1
 
 ax[0].plot(t, results["T"], '.')
 ax[1].plot(t, results["I"], '.')
+
+#ax[2].plot(t, results["V"]/results["I"], '.')
+#ax[2].set_ylim(0.14,0.2)
+
 ax[2].plot(t, results["V"], '.')
 ax[2].plot(t, results["V_out"], '.')
 
 #ax[2].set_xticks(np.arange(0,10))
 
-major_ticks = np.arange(-2, 4, 1)                                              
-minor_ticks = np.arange(-2, 4, 0.5) 
+major_ticks = np.arange(-2, np.max(t), 1)                                              
+minor_ticks = np.arange(-2, np.max(t), 0.5) 
 
 
 for i in range(3):
@@ -28,4 +32,5 @@ for i in range(3):
     ax[i].set_axisbelow(True)
 
 plt.tight_layout()
+plt.show()
 plt.savefig("measure_temperature_feedback_data.pdf")
