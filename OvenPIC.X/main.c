@@ -22,83 +22,15 @@
 
 void ins_read_next();
 
-#define CURRENT_LIMIT 10
-
-
-controller_t* current_controller = NULL;
-
-void current_controller_setter(float new_cv) {
-    pwm_set_duty(1, new_cv);
-}
-
-float current_controller_getter() {
-    return last_samples_float[5]*2.5*5;
-}
-
-void configure_current_controller() {
-
-    // Configure the current feedback controller
-    current_controller = fbc_init("current");
-
-    // Setter is the PWM duty cycle
-    current_controller->cv_setter = current_controller_setter;
-
-    current_controller->value_getter = current_controller_getter;
-
-    current_controller->p_gain = 0.01;
-    current_controller->i_gain = 0.01;
-
-    current_controller->cv_limit_max = 0.4;
-    current_controller->cv_limit_min = 0;
-
-    current_controller->value_limit_max = CURRENT_LIMIT;
-
-}
-
-//////
-
-controller_t* temperature_controller = NULL;
-
-// The temperature controller regulates the setpoint
-// of the current controller
-void temperature_controller_setter(float new_cv) {
-    current_controller->setpoint = new_cv*new_cv;
-}
-
-float temperature_controller_getter() {
-    return 2.5*last_samples_float[6]*(-1*(1000.0/40.0)*(1000.0/51.)) + 20;
-}
-
-
-void configure_temperature_controller() {
-    temperature_controller = fbc_init("temperature");
-
-    temperature_controller->cv_setter = temperature_controller_setter;
-    temperature_controller->value_getter = temperature_controller_getter;
-
-
-
-    temperature_controller->cv_limit_max = sqrt(CURRENT_LIMIT);
-    temperature_controller->cv_limit_min = 0;
-
-    temperature_controller->value_limit_max = 500;
-}
-
-
-
-void update_controllers() {
-
-    fbc_update(current_controller);
-    fbc_update(temperature_controller);
-}
-
 void main() {
     
     // Configure the status light
     ANSELEbits.ANSE5 = 0;
     TRISEbits.TRISE5 = 0;
     LATEbits.LATE5 = 1;
-    
+
+    settings_set_to_factory();
+
     uart_config();
 
     adc_config();
@@ -112,15 +44,6 @@ void main() {
     asm volatile("ei");
 
     adc_set_streaming_decimation(100);
-
-//    settings_read();
-//    
-//    uint32_t i;
-//    while(1){
-//        debug_settings();
-//        for(i=0;i<1000000; i++);
-//        
-//    }
 
     while(1) {
         ins_read_next();

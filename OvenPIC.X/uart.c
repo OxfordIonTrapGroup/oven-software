@@ -206,3 +206,15 @@ void uart_printf(uint8_t* format, ...) {
 
     uart_write(message, strlen(message));
 }
+
+void uart_printf_blocking(uint8_t* format, ...) {
+
+    va_list arg_list;
+    uint8_t message[UART_TX_BUFFER_LEN];
+
+    va_start(arg_list, format);             // Prep arguments list
+    vsprintf(message, format, arg_list);    // "Print" to buffer
+    va_end(arg_list);                       // End handling of arguments list
+
+    uart_write_blocking(message, strlen(message));
+}

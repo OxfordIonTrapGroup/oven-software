@@ -65,46 +65,65 @@ void ins_process_line(char* data, uint32_t length) {
 
     } else if(strcmp(command, CMD_VERSION) == 0) {
         cmd_version(residual_line, residual_line_length);
+    }
 
-    } 
+    // --------------------------------------------------------------
     // PWM commands
+    // --------------------------------------------------------------
     else if(strcmp(command, CMD_SET_PWM_DUTY) == 0) {
         cmd_pwm_set_duty(residual_line, residual_line_length);
+    }
 
-    } else if(strcmp(command, CMD_ADC_STREAM) == 0) {
+
+    // --------------------------------------------------------------
+    // ADC commands
+    // --------------------------------------------------------------
+    else if(strcmp(command, CMD_ADC_STREAM) == 0) {
         cmd_adc_stream(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_ADC_DECIMATE) == 0) {
+    } 
+    else if(strcmp(command, CMD_ADC_DECIMATE) == 0) {
         cmd_adc_decimate(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_ADC_READ_LAST_CONVERSION) == 0) {
+    } 
+    else if(strcmp(command, CMD_ADC_READ_LAST_CONVERSION) == 0) {
         cmd_adc_read_last_conversion(residual_line, residual_line_length);
+    }
+    else if(strcmp(command, CMD_ADC_READ_LAST_CALIBRATED_DATA) == 0) {
+        cmd_adc_read_last_calibrated_data(residual_line, residual_line_length);
+    }
 
-    } else if(strcmp(command, CMD_FEEDBACK_CONFIG) == 0) {
+
+    // --------------------------------------------------------------
+    // Feedback commands
+    // --------------------------------------------------------------
+    else if(strcmp(command, CMD_FEEDBACK_CONFIG) == 0) {
         cmd_feedback_config(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_FEEDBACK_START) == 0) {
+    } 
+    else if(strcmp(command, CMD_FEEDBACK_START) == 0) {
         cmd_feedback_start(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_FEEDBACK_STOP) == 0) {
+    } 
+    else if(strcmp(command, CMD_FEEDBACK_STOP) == 0) {
         cmd_feedback_stop(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_FEEDBACK_SETPOINT) == 0) {
+    } 
+    else if(strcmp(command, CMD_FEEDBACK_SETPOINT) == 0) {
         cmd_feedback_setpoint(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
+    } 
+    else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
         cmd_feedback_read_status(residual_line, residual_line_length);
+    }
 
-    } else if(strcmp(command, CMD_SETTINGS_LOAD) == 0) {
+    // --------------------------------------------------------------
+    // Settings commands
+    // --------------------------------------------------------------
+    else if(strcmp(command, CMD_SETTINGS_LOAD) == 0) {
         cmd_settings_load(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_SETTINGS_SAVE) == 0) {
+    } 
+    else if(strcmp(command, CMD_SETTINGS_SAVE) == 0) {
         cmd_settings_save(residual_line, residual_line_length);
-
-    } else if(strcmp(command, CMD_SETTINGS_PRINT) == 0) {
+    } 
+    else if(strcmp(command, CMD_SETTINGS_PRINT) == 0) {
         cmd_settings_print(residual_line, residual_line_length);
-
-    } else {
+    } 
+    else {
         ins_unknown_command(data_buffer, length);
     }
 

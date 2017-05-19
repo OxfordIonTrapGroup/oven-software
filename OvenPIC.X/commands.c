@@ -7,6 +7,8 @@
 #include "AD7770.h"
 #include "feedback_controller.h"
 #include "interface.h"
+#include "settings.h"
+#include "calibration.h"
 
 #include "commands.h"
 
@@ -81,11 +83,28 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     
     uart_printf(">");
     for(i=0;i<8;i++)
-        uart_printf(" %f", last_samples_float[i]*2.5);
+        uart_printf(" %f", last_samples_float[i]);
 
     // Also print the crc failure count
     uart_printf(" %i\n", adc_crc_failure_count);
 }
+
+void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
+    
+    uint32_t i;
+    
+    uart_printf(">");
+    for(i=0;i<2;i++)
+        uart_printf("%i %f %f %f %f;", i,
+            calibrated_oven[i].temperature,
+            calibrated_oven[i].current,
+            calibrated_oven[i].output_voltage,
+            calibrated_oven[i].oven_voltage);
+
+    // Also print the crc failure count
+    uart_printf(" %i\n", adc_crc_failure_count);
+}
+
 
 
 // Feedback commands
@@ -109,9 +128,9 @@ void cmd_feedback_config(char* line, uint32_t length) {
         return;
     }
 
-    c->p_gain = p;
-    c->i_gain = i;
-    c->d_gain = d;
+    c->s->p_gain = p;
+    c->s->i_gain = i;
+    c->s->d_gain = d;
 
     uart_printf(">%f %f %f\n", p, i, d);
 }
@@ -214,6 +233,13 @@ void cmd_settings_load(char* line, uint32_t length) {
     settings_read();
     uart_printf(">loaded\n");
 }
+
+void cmd_settings_set_to_factory(char* line, uint32_t length) {
+
+    settings_set_to_factory();
+    uart_printf(">set to factory\n");
+}
+
 
 void cmd_settings_save(char* line, uint32_t length) {
 

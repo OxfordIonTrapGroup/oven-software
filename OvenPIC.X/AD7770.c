@@ -5,6 +5,7 @@
 #include "AD7770.h"
 #include "feedback.h"
 #include "interface.h"
+#include "calibration.h"
 
 #define ADC_RESET LATBbits.LATB14
 
@@ -259,6 +260,9 @@ void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
 
             data_float[i] = data_signed[i]/(0x800000*1.0);
         }
+
+        // Update the calibrated samples
+        calibration_update_samples();
     }
 }
 

@@ -4,36 +4,65 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "settings.h"
+#include "feedback_controller.h"
+
 // Flash page size for pic32mz is 16kb
 #define PAGE_SIZE 16*1024
-
-typedef struct {
-
-    float test_value;
-    uint32_t test_int;
-} settings_t;
-
-#define SETTINGS_SIZE 16*1024
 
 // PIC32mz1024 has 1024 kb of flash. Bank 2 starts at 0xBD080000
 volatile void* settings_in_flash = 0xBD080000; // Start of bank 2
 
-// volatile uint8_t settings_in_flash[SETTINGS_SIZE] \
-//     __attribute__((aligned(PAGE_SIZE))) = {0xFF, 0xDD};
-//     //__attribute__((aligned(PAGE_SIZE), section(".text,\"ax\", @progbits #"))) = {0xFF, 0xDD};
+settings_t settings;
 
-settings_t my_settings;
+// Set the settings to sane 'factory defaults'
+void settings_set_to_factory() {
+
+    uint32_t i;
+
+    for(i=0;i<2;i++) {
+        // Thermocouple has sensitivity of 40uV / C
+        // Instrumentation amp has gain 51
+        // Offset is the temperature of the cold junction ~20 C
+        settings.calibration_data[i].temperature_scale = (2.5*(1000.0/40.0)*(1000.0/51.));
+        settings.calibration_data[i].temperature_offset = 20;
+
+        // Current sensor has a gain of 5 A / V
+        settings.calibration_data[i].current_scale = 5*2.5;
+        settings.calibration_data[i].current_offset = 0;
+
+        // Output voltage sense has a gain of 3 V/V
+        settings.calibration_data[i].output_voltage_scale = 3*2.5;
+        settings.calibration_data[i].output_voltage_offset = 0;
+
+        // Oven voltage sense has a gain of 3 V/V
+        settings.calibration_data[i].oven_voltage_scale = 3*2.5;
+        settings.calibration_data[i].oven_voltage_offset = 0;
+    }
+
+    for(i=0;i<N_MAX_CONTROLLERS;i++) {
+        // PID gains
+        settings.controller_settings[i].p_gain = 0;
+        settings.controller_settings[i].i_gain = 0;
+        settings.controller_settings[i].d_gain = 0;
+
+        settings.controller_settings[i].value_limit_max = 0; // Upper value limit
+
+        settings.controller_settings[i].cv_limit_max = 0; // Max allowable value of control var
+        settings.controller_settings[i].cv_limit_min = 0; // Min allowable value of control var
+
+        settings.controller_settings[i].default_setpoint = 0; // Default setpoint for controller
+        // This is used only during initialisation
+    }
+}
 
 // Read the setting strcuture from flash
 void settings_read() {
-    memcpy((void*)&my_settings, settings_in_flash, sizeof(settings_t));
+    memcpy((void*)&settings, settings_in_flash, sizeof(settings_t));
 }
 
 // Write the setting structure to flash
 void settings_write() {
-
-    //my_settings.test_value = 2.34;
-    //my_settings.test_int = 501;
 
     // Erase the page
     nvm_erase_page((void*)settings_in_flash);
@@ -41,14 +70,46 @@ void settings_write() {
     // Program the new settings
     nvm_program(
         (void*)settings_in_flash,
-        &my_settings,
+        &settings,
         sizeof(settings_t));
 
 }
 
+// Print out all the the settings
 void settings_printout() {
+    uint32_t i;
 
-    uart_printf(">%f %i\n", my_settings.test_value, my_settings.test_int);
+    uart_printf_blocking(">settings: ");
+
+    for(i=0;i<2;i++) {
+        uart_printf_blocking("TC%i %f,%f; ", i,
+            settings.calibration_data[i].temperature_scale,
+            settings.calibration_data[i].temperature_offset);
+
+        uart_printf_blocking("I%i %f,%f; ", i,
+            settings.calibration_data[i].current_scale,
+            settings.calibration_data[i].current_offset);
+
+        uart_printf_blocking("V_OUT%i %f,%f; ", i,
+            settings.calibration_data[i].output_voltage_scale,
+            settings.calibration_data[i].output_voltage_offset);
+
+        uart_printf_blocking("V_OVEN%i %f,%f; ", i,
+            settings.calibration_data[i].oven_voltage_scale,
+            settings.calibration_data[i].oven_voltage_offset);
+    }
+
+    for(i=0;i<N_MAX_CONTROLLERS;i++) {
+        uart_printf_blocking("FBC%i %f,%f,%f,%f,%f,%f,%f; ", i,
+            settings.controller_settings[i].p_gain,
+            settings.controller_settings[i].i_gain,
+            settings.controller_settings[i].d_gain,
+            settings.controller_settings[i].value_limit_max,
+            settings.controller_settings[i].cv_limit_max,
+            settings.controller_settings[i].cv_limit_min,
+            settings.controller_settings[i].default_setpoint);
+    }
+
 }
 
 // Copied from reference manual (DS61193A)
