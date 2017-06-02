@@ -29,7 +29,6 @@ typedef struct {
     float oven_voltage;
 } calibrated_values_t;
 
-extern calibration_data_t calibration_data[2];
 extern calibrated_values_t calibrated_oven[2];
 
 extern void calibration_update_samples();

@@ -55,7 +55,7 @@ extern controller_t* fbc_get_by_name(char* name);
 #define FBC_NAME_LEN 32
 
 // Maximum possible number of feedback controllers
-#define N_MAX_CONTROLLERS 10
+#define N_MAX_CONTROLLERS 5
 
 
 #endif

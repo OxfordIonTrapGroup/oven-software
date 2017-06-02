@@ -83,7 +83,7 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     
     uart_printf(">");
     for(i=0;i<8;i++)
-        uart_printf(" %f", last_samples_float[i]);
+        uart_printf(" %g", last_samples_float[i]);
 
     // Also print the crc failure count
     uart_printf(" %i\n", adc_crc_failure_count);
@@ -95,7 +95,7 @@ void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
     
     uart_printf(">");
     for(i=0;i<2;i++)
-        uart_printf("%i %f %f %f %f;", i,
+        uart_printf("%i %g %g %g %g;", i,
             calibrated_oven[i].temperature,
             calibrated_oven[i].current,
             calibrated_oven[i].output_voltage,

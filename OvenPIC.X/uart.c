@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdarg.h>
+#include "timer.h"
 
 /*
 Controller has two UART channels to BB host:
@@ -13,7 +14,7 @@ Controller has two UART channels to BB host:
 
 */
 
-#define UART_TX_BUFFER_LEN 256
+#define UART_TX_BUFFER_LEN 1024
 char uart_tx_buffer[UART_TX_BUFFER_LEN];
 int uart_tx_buffer_start = 0;
 int uart_tx_buffer_end = 0;
@@ -91,8 +92,8 @@ void uart_config() {
     // PBCLK2 is 0.5*SYS_CLK = 100 MHz
     // for 0.9 MHz, brg = 27
     U1BRG = 27; // 0.9 MHz
-    // for 115.2 kHz, brg = 216 + 1
-    U1BRG = 216; // 115.2 kHz
+    //// for 115.2 kHz, brg = 216 + 1
+    //U1BRG = 216; // 115.2 kHz
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX
@@ -136,6 +137,7 @@ void uart_config() {
     uart_data_tx_buffer_start = 0;
     uart_data_tx_buffer_end = 0;
 
+    uart_printf_blocking("booted! %i %x\n", sys_time, RCON);
 }
 
 void uart_write(uint8_t* buffer, uint32_t len) {

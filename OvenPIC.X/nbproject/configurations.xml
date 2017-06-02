@@ -26,6 +26,10 @@
       <itemPath>pwm.c</itemPath>
       <itemPath>commands.c</itemPath>
       <itemPath>feedback_controller.c</itemPath>
+      <itemPath>calibration.c</itemPath>
+      <itemPath>safety.c</itemPath>
+      <itemPath>settings.c</itemPath>
+      <itemPath>timer.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -9,6 +9,7 @@
 #include "uart.h"
 #include "commands.h"
 #include "interface.h"
+#include "timer.h"
 
 #define INS_BUFFER_LEN 256
 char instruction_buffer[INS_BUFFER_LEN] = {0};
@@ -59,6 +60,9 @@ void ins_process_line(char* data, uint32_t length) {
 
     // Length of the rest of the line
     uint32_t residual_line_length = length - command_length;
+
+    //uart_printf(">t=%i", sys_time);
+
 
     if(strcmp(command, CMD_ECHO) == 0) {
         cmd_echo(residual_line, residual_line_length);
@@ -117,6 +121,9 @@ void ins_process_line(char* data, uint32_t length) {
     else if(strcmp(command, CMD_SETTINGS_LOAD) == 0) {
         cmd_settings_load(residual_line, residual_line_length);
     } 
+    else if(strcmp(command, CMD_SETTINGS_SET_TO_FACTORY) == 0) {
+        cmd_settings_set_to_factory(residual_line, residual_line_length);
+    } 
     else if(strcmp(command, CMD_SETTINGS_SAVE) == 0) {
         cmd_settings_save(residual_line, residual_line_length);
     } 
@@ -169,7 +176,6 @@ void ins_read_next() {
             // Wait for more data
             return;
         }
-
     }
 
     // Now we have found a new line,

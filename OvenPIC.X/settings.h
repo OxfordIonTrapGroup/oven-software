@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "feedback_controller.h"
 #include "calibration.h"
+#include "safety.h"
 
 typedef struct {
 
@@ -16,6 +17,9 @@ typedef struct {
 
     // Oven ADC calibration data structures
     calibration_data_t calibration_data[2];
+
+    // Safety measure settings
+    safety_settings_t safety_settings;
 
 } settings_t;
 

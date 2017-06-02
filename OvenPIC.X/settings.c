@@ -6,6 +6,7 @@
 
 #include "settings.h"
 #include "feedback_controller.h"
+#include "timer.h"
 
 // Flash page size for pic32mz is 16kb
 #define PAGE_SIZE 16*1024
@@ -79,28 +80,28 @@ void settings_write() {
 void settings_printout() {
     uint32_t i;
 
-    uart_printf_blocking(">settings: ");
+    uart_printf(">settings: ");
 
     for(i=0;i<2;i++) {
-        uart_printf_blocking("TC%i %f,%f; ", i,
+        uart_printf("TC%i %g,%g; ", i,
             settings.calibration_data[i].temperature_scale,
             settings.calibration_data[i].temperature_offset);
 
-        uart_printf_blocking("I%i %f,%f; ", i,
+        uart_printf("I%i %g,%g; ", i,
             settings.calibration_data[i].current_scale,
             settings.calibration_data[i].current_offset);
 
-        uart_printf_blocking("V_OUT%i %f,%f; ", i,
+        uart_printf("V_OUT%i %g,%g; ", i,
             settings.calibration_data[i].output_voltage_scale,
             settings.calibration_data[i].output_voltage_offset);
 
-        uart_printf_blocking("V_OVEN%i %f,%f; ", i,
+        uart_printf("V_OVEN%i %g,%g; ", i,
             settings.calibration_data[i].oven_voltage_scale,
             settings.calibration_data[i].oven_voltage_offset);
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {
-        uart_printf_blocking("FBC%i %f,%f,%f,%f,%f,%f,%f; ", i,
+        uart_printf("FBC%i %g,%g,%g,%g,%g,%g,%g; ", i,
             settings.controller_settings[i].p_gain,
             settings.controller_settings[i].i_gain,
             settings.controller_settings[i].d_gain,
@@ -108,8 +109,11 @@ void settings_printout() {
             settings.controller_settings[i].cv_limit_max,
             settings.controller_settings[i].cv_limit_min,
             settings.controller_settings[i].default_setpoint);
+        //uart_printf(">t=%d", sys_time);
     }
 
+        //uart_printf(">t=%d", sys_time);
+    uart_printf("\n");
 }
 
 // Copied from reference manual (DS61193A)

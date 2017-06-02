@@ -13,7 +13,6 @@
 #define CHANNEL_1_OUTPUT_VOLTAGE 4
 #define CHANNEL_1_OVEN_VOLTAGE 7
 
-calibration_data_t calibration_data[2];
 calibrated_values_t calibrated_oven[2];
 
 // Update the calibrated data values from last_samples_float
