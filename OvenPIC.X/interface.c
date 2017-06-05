@@ -133,6 +133,14 @@ void ins_process_line(char* data, uint32_t length) {
     else if(strcmp(command, CMD_SETTINGS_PRINT) == 0) {
         cmd_settings_print(residual_line, residual_line_length);
     } 
+
+    // --------------------------------------------------------------
+    // Safety commands
+    // --------------------------------------------------------------
+    else if(strcmp(command, CMD_SAFETY_STATUS) == 0) {
+        cmd_safety_status(residual_line, residual_line_length);
+    }
+
     else {
         ins_unknown_command(data_buffer, length);
     }

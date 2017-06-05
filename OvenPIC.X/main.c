@@ -56,16 +56,24 @@ void main() {
 
     adc_set_streaming_decimation(100);
 
+    uint32_t last_time = 0;
+
     while(1) {
 
         // Clear the watchdog timer
         safety_clear_watchdog();
-        //LATEbits.LATE5 = !LATEbits.LATE5;
 
-        if((sys_time % 1000) >= 500)
-            LATEbits.LATE5 = 1;
-        else
-            LATEbits.LATE5 = 0;
+        // if((sys_time % 1000) >= 500)
+        //     LATEbits.LATE5 = 1;
+        // else
+        //     LATEbits.LATE5 = 0;
+
+        if(sys_time != last_time) {
+            LATEbits.LATE5 = !LATEbits.LATE5;
+            last_time = sys_time;
+        }
+
+
         ins_read_next();
     }
 }

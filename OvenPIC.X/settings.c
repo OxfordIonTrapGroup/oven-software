@@ -39,6 +39,16 @@ void settings_set_to_factory() {
         // Oven voltage sense has a gain of 3 V/V
         settings.calibration_data[i].oven_voltage_scale = 3*2.5;
         settings.calibration_data[i].oven_voltage_offset = 0;
+
+        // Set default safety settings
+        settings.safety_settings.oven_temperature_max[i] = 200;
+        settings.safety_settings.oven_temperature_check_disabled[i] = 0;
+
+        settings.safety_settings.oven_current_max[i] = 8;
+        settings.safety_settings.oven_current_check_disabled[i] = 0;
+
+        settings.safety_settings.on_time_max[i] = 30;
+        settings.safety_settings.on_time_check_disabled[i] = 0;
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {

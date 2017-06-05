@@ -266,3 +266,13 @@ void cmd_settings_print(char* line, uint32_t length) {
 
     settings_printout();
 }
+
+
+void cmd_safety_status(char* line, uint32_t length) {
+
+    uart_printf(">");
+    safety_print_errors();
+    uart_printf("\n");
+}
+
+

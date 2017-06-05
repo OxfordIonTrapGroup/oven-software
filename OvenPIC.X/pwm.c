@@ -59,7 +59,7 @@ void pwm_set_duty(uint32_t channel, float duty) {
 
 
 // Use Timer 3 and OC5 to generate oven pwm on RG6 (PWM0) 
-// Use Timer 3 and OC4 to generate oven pwm on RG7 (PWM0) 
+// Use Timer 3 and OC4 to generate oven pwm on RG7 (PWM1) 
 void pwm_config() {
 
     ANSELGbits.ANSG6 = 0;
@@ -84,4 +84,20 @@ void pwm_config() {
     OC4CONbits.OCTSEL = 1; // Select timer 3
     OC4CONbits.OCM = 0b110; // PWM with fault disabled
     OC4CONbits.ON = 1;
+}
+
+void pwm_enable(uint32_t channel) {
+    if(channel == 0) {
+        OC5CONbits.ON = 1;
+    } else {
+        OC4CONbits.ON = 1;
+    }
+}
+
+void pwm_disable(uint32_t channel) {
+    if(channel == 0) {
+        OC5CONbits.ON = 0;
+    } else {
+        OC4CONbits.ON = 0;
+    }
 }

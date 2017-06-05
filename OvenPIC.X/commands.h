@@ -24,6 +24,6 @@
 #define CMD_SETTINGS_SAVE "settings_save"
 #define CMD_SETTINGS_PRINT "settings_print"
 
-
+#define CMD_SAFETY_STATUS "safety_status"
 
 #endif

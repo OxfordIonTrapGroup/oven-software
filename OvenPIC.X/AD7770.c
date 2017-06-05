@@ -173,6 +173,9 @@ void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
 
     if(streaming_channels != 0)
         adc_streaming_interrupt();
+
+    // Check the safety margins
+    safety_check();
     
     IFS0bits.INT2IF = 0; // Clear the flag
 }
