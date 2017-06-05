@@ -17,7 +17,7 @@
 #define CMD_FEEDBACK_STOP               "fb_stop"
 #define CMD_FEEDBACK_SETPOINT           "fb_set_setpoint"
 #define CMD_FEEDBACK_READ_STATUS        "fb_read_status"
-#define CMD_FEEDBACK_SET_LIMITS         0x35
+#define CMD_FEEDBACK_SET_LIMITS         "fb_set_limits"
 
 #define CMD_SETTINGS_LOAD "settings_load"
 #define CMD_SETTINGS_SET_TO_FACTORY "settings_set_to_factory"

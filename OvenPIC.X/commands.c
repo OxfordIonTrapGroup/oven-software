@@ -215,18 +215,33 @@ void cmd_feedback_read_status(char* line, uint32_t length) {
         c->enabled);
 }
 
-/*
-void cmd_feedback_set_limits(ins_header_t* header, char* data) {
-    cmd_feedback_set_limits_args_t args;
-    
-    // Parse the arguments
-    if(_parse_args(header, data, &args) == ERROR)
+
+void cmd_feedback_set_limits(char* line, uint32_t length) {
+    float cv_limit_min;
+    float cv_limit_max;
+    float value_limit_max;
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s %g %g %g", &name, &cv_limit_min, &cv_limit_max,\
+        &value_limit_max);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
         return;
-  
-    fb_set_limits(args.limit_i, args.limit_t);
+    }
+
+    c->s->cv_limit_min = cv_limit_min;
+    c->s->cv_limit_max = cv_limit_max;
+    c->s->value_limit_max = value_limit_max;
+
+    uart_printf(">%s %g %g %g\n", name, cv_limit_min, cv_limit_max,\
+        value_limit_max);
 }
 
-*/
+
 
 void cmd_settings_load(char* line, uint32_t length) {
 

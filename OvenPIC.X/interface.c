@@ -114,6 +114,9 @@ void ins_process_line(char* data, uint32_t length) {
     else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
         cmd_feedback_read_status(residual_line, residual_line_length);
     }
+    else if(strcmp(command, CMD_FEEDBACK_SET_LIMITS) == 0) {
+        cmd_feedback_set_limits(residual_line, residual_line_length);
+    }
 
     // --------------------------------------------------------------
     // Settings commands
