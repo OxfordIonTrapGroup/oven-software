@@ -18,19 +18,20 @@ import time
 
 import oven_pic_interface
 
-p = oven_pic_interface.OvenPICInterface()
-#p._DEBUG = False
+p = oven_pic_interface.OvenPICInterface(timeout=2)
+p._DEBUG = True
+print(p.adc_read_calibrated_sample())
 
 p.settings_print()
 
-# p.settings_load()
+#p.settings_set_to_factory()
 
 # p.settings_print()
 
-# #p.settings_save()
+# p.settings_save()
 
-# p.settings_print()
+# # p.settings_print()
 
-# p.settings_load()
-
+# # p.settings_load()
+time.sleep(2)
 print(p.adc_read_calibrated_sample())

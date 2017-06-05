@@ -12,7 +12,7 @@ def reset_pic():
     GPIO.output("P9_23", GPIO.LOW)
     time.sleep(0.01)
     GPIO.output("P9_23", GPIO.HIGH)
-    time.sleep(0.2)
+    time.sleep(0.01)
 
 
 CMD_ECHO = "echo"
@@ -82,7 +82,7 @@ class PICError(Exception):
 class OvenPICInterface:
 
     # Baud rate for the command and data ports
-    _command_baudrate = 115200
+    _command_baudrate = 900000
     _data_baudrate = 900000
 
     # How long to wait between polling the data port
@@ -113,8 +113,11 @@ class OvenPICInterface:
         reset_pic()
 
         # Clear the input buffers
-        self.sc.reset_input_buffer()
+        #self.sc.reset_input_buffer()
         self.sd.reset_input_buffer()
+
+        response = self.sc.readline()
+        print("DD: "+str(response))
 
         # When streaming, this is non-zero
         self._streaming_mode = None
@@ -158,7 +161,7 @@ class OvenPICInterface:
                 str(response))
 
         # Trim the ">" character and the newline
-        response = response[1:-1]
+        response = response[1:]
 
         if self._DEBUG:
             print("RECV: " + str(response))
@@ -380,6 +383,9 @@ class OvenPICInterface:
 
     def settings_load(self):
         self._send_command(CMD_SETTINGS_LOAD)
+
+    def settings_set_to_factory(self):
+        self._send_command(CMD_SETTINGS_SET_TO_FACTORY)
 
     def settings_save(self):
         self._send_command(CMD_SETTINGS_SAVE)
