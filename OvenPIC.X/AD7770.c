@@ -1,9 +1,8 @@
 
-#include "HardwareProfile.h"
+#include "hardware_profile.h"
 
 #include <stdint.h>
 #include "AD7770.h"
-#include "feedback.h"
 #include "interface.h"
 #include "calibration.h"
 

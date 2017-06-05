@@ -1,5 +1,5 @@
 
-#include "HardwareProfile.h"
+#include "hardware_profile.h"
 #include "calibration.h"
 #include "settings.h"
 #include "safety.h"

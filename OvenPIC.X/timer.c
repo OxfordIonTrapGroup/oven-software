@@ -1,6 +1,6 @@
 
 
-#include "HardwareProfile.h"
+#include "hardware_profile.h"
 #include <stdint.h>
 
 uint32_t sys_time;

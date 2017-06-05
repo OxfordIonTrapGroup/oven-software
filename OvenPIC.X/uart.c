@@ -1,5 +1,5 @@
 
-#include "HardwareProfile.h"
+#include "hardware_profile.h"
 
 #include <stdint.h>
 #include <stdarg.h>

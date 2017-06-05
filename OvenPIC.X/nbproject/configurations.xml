@@ -4,13 +4,12 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>HardwareProfile.h</itemPath>
       <itemPath>AD7770.h</itemPath>
       <itemPath>uart.h</itemPath>
       <itemPath>pwm.h</itemPath>
-      <itemPath>feedback.h</itemPath>
       <itemPath>commands.h</itemPath>
       <itemPath>interface.h</itemPath>
+      <itemPath>hardware_profile.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
