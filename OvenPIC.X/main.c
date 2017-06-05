@@ -20,8 +20,8 @@
 #pragma config FSOSCEN = OFF // Disable secondary oscillator
 #pragma config OSCIOFNC = OFF // CLKO Output Signal Active on the OSCO Pin (Disabled)
 #pragma config FDMTEN = OFF // Disable deadman timer
-//#pragma config WDTPS = 0x09// 512ms watchdog
-#pragma config WDTPS = 0x0a// 512ms watchdog
+#pragma config WDTPS = 0x09// 512ms watchdog
+//#pragma config WDTPS = 0x0B// 2s watchdog
 #pragma config WINDIS = NORMAL // Watchdog in non-windowed mode
 #pragma config FWDTEN = OFF
 #pragma config WDTSPGM = STOP // Watchdog timer stopped during flash programming
@@ -62,7 +62,7 @@ void main() {
         safety_clear_watchdog();
         //LATEbits.LATE5 = !LATEbits.LATE5;
 
-        if((sys_time % 2000) >= 500)
+        if((sys_time % 1000) >= 500)
             LATEbits.LATE5 = 1;
         else
             LATEbits.LATE5 = 0;

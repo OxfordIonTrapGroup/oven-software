@@ -24,7 +24,7 @@ uint16_t* wd_clear_pointer;
 // Initialise the safety routines
 void safety_config() {
 
-    wd_clear_pointer = (uint16_t*)WDTCON + 1;
+    wd_clear_pointer = (uint16_t*)0xBF800800 + 1;
 
     // Initialise the watchdog timer
     // WD timer driver by LPRC which runs at 32.768kHz
@@ -34,12 +34,14 @@ void safety_config() {
 
     // Clear reset status flags
     RCON = 0;
+
+    //*wd_clear_pointer = 0x5743;
 }
 
 // Update the watchdog timer
 void safety_clear_watchdog() {
     asm volatile("di");
-    wd_clear_pointer = 0x5743;
+    *wd_clear_pointer = 0x5743;
     asm volatile("ei");
 }
 
@@ -65,6 +67,4 @@ void safety_check() {
             }
         }
     }
-
-
 }

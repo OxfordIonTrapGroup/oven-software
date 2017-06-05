@@ -99,16 +99,16 @@ void uart_config() {
     U1STAbits.UTXEN = 1; // Enable TX
     U1STAbits.UTXISEL = 0b00; // Enable TX interrupt when buffer has space
     IFS3bits.U1TXIF = 0;
-    IEC3bits.U1TXIE = 1; // Enable TX interrupt
-    
+    IEC3bits.U1TXIE = 0; // TX interrupt is enabled in uart_write routine
+    IPC28bits.U1TXIP = 2; // Set interrupt priority level
+
     // Set up reception
     U1STAbits.URXEN = 1; // Enable RX
     U1STAbits.URXISEL = 0b00; // Interrupt happens when buffer is not empty
     IFS3bits.U1RXIF = 0;
     IEC3bits.U1RXIE = 1; // Enable RX interrupt
-    
     IPC28bits.U1RXIP = 2; // Set interrupt priority level
-    IPC28bits.U1TXIP = 2; // Set interrupt priority level
+
     U1MODEbits.ON = 1;     // enable UART1
 
     // Configure UART5 - data channel
@@ -123,7 +123,7 @@ void uart_config() {
     U5STAbits.UTXEN = 1; // Enable TX
     U5STAbits.UTXISEL = 0b00; // Enable TX interrupt when buffer has space
     IFS5bits.U5TXIF = 0;
-    IEC5bits.U5TXIE = 1; // Enable TX interrupt
+    IEC5bits.U5TXIE = 0; // TX interrupt is enabled in uart_write routine
     IPC45bits.U5TXIP = 2; // Set interrupt priority level
     U5MODEbits.ON = 1;     // enable UART5
 
@@ -161,7 +161,7 @@ void uart_write_blocking(uint8_t* buffer, uint32_t len ) {
     uint32_t i=0;
     
     while(i < len) {
-        while( !U1STAbits.TRMT ); // Wait for tx empty
+        while(!U1STAbits.TRMT); // Wait for tx empty
         
         U1TXREG = buffer[i];
         i++;
