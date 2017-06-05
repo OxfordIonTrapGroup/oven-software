@@ -25,7 +25,7 @@ p._DEBUG = False
 while(1):
     values = p.adc_read_calibrated_sample()
     print(values[1]["temperature"])
-
-    values = p.adc_read_sample()
-    temperature = values[6]*(2.5*(1000.0/40.0)*(1000.0/51.)) + 20
-    print(temperature)
+    time.sleep(0.1)
+    # values = p.adc_read_sample()
+    # temperature = values[6]*(2.5*(1000.0/40.0)*(1000.0/51.)) + 20
+    # print(temperature)

@@ -37,6 +37,8 @@ CMD_SETTINGS_SET_TO_FACTORY = "settings_set_to_factory"
 CMD_SETTINGS_SAVE = "settings_save"
 CMD_SETTINGS_PRINT = "settings_print"
 
+CMD_SAFETY_STATUS = "safety_status"
+
 # Lookup table for adc channel meanings
 ADC_CHANNELS = {
     "T": [3, 6], # Thermocouple on oven
@@ -397,6 +399,10 @@ class OvenPICInterface:
 
     def settings_print(self):
         response = self._send_command(CMD_SETTINGS_PRINT)
+        print(response)
+
+    def safety_status(self, print_output=True):
+        response = self._send_command(CMD_SAFETY_STATUS)
         print(response)
 
 def TCCal(data):
