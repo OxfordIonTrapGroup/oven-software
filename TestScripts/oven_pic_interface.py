@@ -30,6 +30,7 @@ CMD_FEEDBACK_START = "fb_start"
 CMD_FEEDBACK_STOP = "fb_stop"
 CMD_FEEDBACK_SETPOINT = "fb_set_setpoint"
 CMD_FEEDBACK_READ_STATUS = "fb_read_status"
+CMD_FEEDBACK_SET_LIMITS = "fb_set_limits"
 
 CMD_SETTINGS_LOAD = "settings_load"
 CMD_SETTINGS_SET_TO_FACTORY = "settings_set_to_factory"
@@ -380,6 +381,10 @@ class OvenPICInterface:
 
         return response.decode()
 
+    def fb_set_limits(self, name, cv_min, cv_max, value_max):
+        line = CMD_FEEDBACK_SET_LIMITS + " {:s}".format(name)
+        line += " {:f} {:f} {:f}".format(cv_min, cv_max, value_max)
+        self._send_command(line)
 
     def settings_load(self):
         self._send_command(CMD_SETTINGS_LOAD)
