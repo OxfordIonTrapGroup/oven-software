@@ -12,7 +12,7 @@
 #define PAGE_SIZE 16*1024
 
 // PIC32mz1024 has 1024 kb of flash. Bank 2 starts at 0xBD080000
-volatile void* settings_in_flash = 0xBD080000; // Start of bank 2
+volatile void* settings_in_flash = (void*)0xBD080000; // Start of bank 2
 
 settings_t settings;
 
@@ -69,7 +69,7 @@ void settings_set_to_factory() {
 
 // Read the setting strcuture from flash
 void settings_read() {
-    memcpy((void*)&settings, settings_in_flash, sizeof(settings_t));
+    memcpy((void*)&settings, (void*)settings_in_flash, sizeof(settings_t));
 }
 
 // Write the setting structure to flash

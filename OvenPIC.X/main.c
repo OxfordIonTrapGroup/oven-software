@@ -41,8 +41,8 @@ void main() {
     uart_config();
     safety_config();
 
-    //settings_read();
-    settings_set_to_factory();
+    settings_read();
+    //settings_set_to_factory();
 
     adc_config();
     pwm_config();
