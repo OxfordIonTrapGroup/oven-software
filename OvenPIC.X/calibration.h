@@ -19,6 +19,11 @@ typedef struct {
 
     float oven_voltage_scale;
     float oven_voltage_offset;
+
+    // This is the apparent temperature reading offset when
+    // current is applied to the oven.
+    // Units are degrees C / A
+    float temperature_current_coefficient;
 } calibration_data_t;
 
 // Structure containing samples which have been calibrated
