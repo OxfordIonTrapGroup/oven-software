@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include "settings.h"
 #include "calibration.h"
 #include "AD7770.h"
@@ -66,3 +67,33 @@ void calibration_update_samples() {
         * last_samples_float[CHANNEL_1_OVEN_VOLTAGE] \
         + settings.calibration_data[1].oven_voltage_offset;
 }
+
+void calibration_print_channel(uint32_t channel) {
+
+    if(channel != 0)
+        channel = 1;
+
+    uart_printf("%g %g %g %g %g %g %g %g %g",\
+        settings.calibration_data[channel].current_scale,\
+        settings.calibration_data[channel].current_offset,\
+        settings.calibration_data[channel].temperature_scale,\
+        settings.calibration_data[channel].temperature_offset,\
+        settings.calibration_data[channel].output_voltage_scale,\
+        settings.calibration_data[channel].output_voltage_offset,\
+        settings.calibration_data[channel].oven_voltage_scale,\
+        settings.calibration_data[channel].oven_voltage_offset,\
+        settings.calibration_data[channel].temperature_current_coefficient);
+}
+
+void calibration_set_channel(uint32_t channel,\
+    calibration_data_t* new_calibration) {
+
+    if(channel != 0)
+        channel = 1;
+
+    memcpy((void*)&settings.calibration_data[channel],\
+        (void*)new_calibration, sizeof(calibration_data_t));
+
+}
+
+

@@ -26,4 +26,7 @@
 
 #define CMD_SAFETY_STATUS "safety_status"
 
+#define CMD_CALIBRATION_READ_CHANNEL "calibration_read_channel"
+#define CMD_CALIBRATION_SET_CHANNEL "calibration_set_channel"
+
 #endif

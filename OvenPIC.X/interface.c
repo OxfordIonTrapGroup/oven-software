@@ -141,9 +141,23 @@ void ins_process_line(char* data, uint32_t length) {
         cmd_safety_status(residual_line, residual_line_length);
     }
 
+    // --------------------------------------------------------------
+    // Calibration commands
+    // --------------------------------------------------------------
+    else if(strcmp(command, CMD_CALIBRATION_READ_CHANNEL) == 0) {
+        cmd_calibration_read_channel(residual_line, residual_line_length);
+    }
+    else if(strcmp(command, CMD_CALIBRATION_SET_CHANNEL) == 0) {
+        cmd_calibration_set_channel(residual_line, residual_line_length);
+    }
+
+
+
     else {
         ins_unknown_command(data_buffer, length);
     }
+
+
 
 }
 

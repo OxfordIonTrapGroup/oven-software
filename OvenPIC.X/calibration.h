@@ -2,6 +2,7 @@
 #ifndef _CALIBRATION_H
 #define _CALIBRATION_H
 
+#include <stdint.h>
 
 // Structure containing calibration data for a set of oven channels (4 adcs)
 // Calibration is of the form T = scale*V + offset
@@ -37,5 +38,8 @@ typedef struct {
 extern calibrated_values_t calibrated_oven[2];
 
 extern void calibration_update_samples();
+extern void calibration_print_channel(uint32_t channel);
+extern void calibration_set_channel(uint32_t channel,\
+    calibration_data_t* new_calibration);
 
 #endif

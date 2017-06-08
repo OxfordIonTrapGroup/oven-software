@@ -106,12 +106,6 @@ void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
 }
 
 
-
-// Feedback commands
-extern controller_t* current_controller;
-extern controller_t* temperature_controller;
-
-
 void cmd_feedback_config(char* line, uint32_t length) {
 
     float p, i, d;
@@ -274,5 +268,38 @@ void cmd_safety_status(char* line, uint32_t length) {
     safety_print_errors();
     uart_printf("\n");
 }
+
+
+void cmd_calibration_read_channel(char* line, uint32_t length) {
+    uint32_t channel;
+
+    sscanf(line, "%i", &channel);
+
+    uart_printf(">%i ", channel);
+    calibration_print_channel(channel);
+    uart_printf("\n");
+}
+
+void cmd_calibration_set_channel(char* line, uint32_t length) {
+    uint32_t channel;
+    calibration_data_t new_calibration;
+
+    sscanf(line, "%i %g %g %g %g %g %g %g %g %g",\
+        &channel,\
+        &new_calibration.current_scale,\
+        &new_calibration.current_offset,\
+        &new_calibration.temperature_scale,\
+        &new_calibration.temperature_offset,\
+        &new_calibration.output_voltage_scale,\
+        &new_calibration.output_voltage_offset,\
+        &new_calibration.oven_voltage_scale,\
+        &new_calibration.oven_voltage_offset,\
+        &new_calibration.temperature_current_coefficient);
+
+    calibration_set_channel(channel, &new_calibration);
+
+    uart_printf(">ok\n");
+}
+
 
 
