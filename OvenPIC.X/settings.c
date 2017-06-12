@@ -138,7 +138,7 @@ void nvm_initiate_operation() {
     NVMKEY = 0x556699AA;
     NVMCONSET = (1<<15); // Set the write bit in one operation
 
-    uart_printf(">n %x ", NVMCON);
+    // uart_printf(">n %x ", NVMCON);
 
     // Restore interrupts
     if(int_status & 1)
@@ -156,7 +156,7 @@ void nvm_clear_errors() {
     while(NVMCONbits.WR);
 
     NVMCONbits.WREN = 0;
-    uart_printf(">c %x ", NVMCON);
+    // uart_printf(">c %x ", NVMCON);
 }
 
 // Erase a page of the NVM
@@ -182,7 +182,7 @@ void nvm_erase_page(void* page_address) {
     // Disable future write/erase operations
     NVMCONbits.WREN = 0;
 
-    uart_printf(">%x %x ", NVMADDR, NVMCON);
+    // uart_printf(">%x %x ", NVMADDR, NVMCON);
 }
 
 // Program a word into the NVM
@@ -207,8 +207,8 @@ void nvm_program_word(void* destination, uint32_t value) {
     // Disable future write/erase operations
     NVMCONbits.WREN = 0;
 
-    uart_printf(">v=%x %x %x %x", value, NVMADDR,
-        ((uint32_t*)destination)[0], NVMCON);
+    // uart_printf(">v=%x %x %x %x", value, NVMADDR,
+    //     ((uint32_t*)destination)[0], NVMCON);
 }
 
 // Program n_bytes of data from *data to the destination in the NVM

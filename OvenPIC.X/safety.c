@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include "hardware_profile.h"
 #include "calibration.h"
 #include "settings.h"
@@ -97,3 +98,73 @@ void safety_check() {
         }
     }
 }
+
+
+// Print out the safety parameters for a given channel
+void safety_print_channel(uint32_t channel) {
+
+    if(channel > 1) {
+        uart_printf("Bad channel");
+    }
+
+    uart_printf("%i", channel);
+    uart_printf(" %g %i", settings.safety_settings.oven_temperature_max[channel],\
+        settings.safety_settings.oven_temperature_check_disabled[channel]);
+    uart_printf(" %g %i", settings.safety_settings.oven_current_max[channel],\
+        settings.safety_settings.oven_current_check_disabled[channel]);
+    uart_printf(" %g %i", settings.safety_settings.on_time_max[channel],\
+        settings.safety_settings.on_time_check_disabled[channel]);
+    uart_printf(" %g", settings.safety_settings.duty_max[channel]);
+
+}
+
+// Set the given parameter
+void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
+
+    float value;
+    sscanf(key_value, "%g", &value);
+
+    uint32_t success = 1;
+
+    if(strcmp(key_name, "oven_temperature_max") == 0) {
+        settings.safety_settings.oven_temperature_max[channel] = value;
+    }
+    else if(strcmp(key_name, "oven_current_max") == 0) {
+        settings.safety_settings.oven_current_max[channel] = value;
+    }
+    else if(strcmp(key_name, "on_time_max") == 0) {
+        settings.safety_settings.on_time_max[channel] = value;
+    }
+    else if(strcmp(key_name, "duty_max") == 0) {
+        settings.safety_settings.duty_max[channel] = value;
+    }
+
+    else if(strcmp(key_name, "oven_temperature_check_disabled") == 0) {
+        if(value == 0)
+            settings.safety_settings.oven_temperature_check_disabled[channel] = 0;
+        else
+            settings.safety_settings.oven_temperature_check_disabled[channel] = 1;
+    }
+    else if(strcmp(key_name, "oven_current_check_disabled") == 0) {
+        if(value == 0)
+            settings.safety_settings.oven_current_check_disabled[channel] = 0;
+        else
+            settings.safety_settings.oven_current_check_disabled[channel] = 1;
+    }
+    else if(strcmp(key_name, "on_time_check_disabled") == 0) {
+        if(value == 0)
+            settings.safety_settings.on_time_check_disabled[channel] = 0;
+        else
+            settings.safety_settings.on_time_check_disabled[channel] = 1;
+    }
+
+    else {
+        uart_printf("!Bad key name: %s", key_name);
+        success = 0;
+    }
+
+    if(success == 1) {
+        uart_printf(">success");
+    }
+}
+

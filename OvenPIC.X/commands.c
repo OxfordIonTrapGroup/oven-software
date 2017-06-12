@@ -269,6 +269,26 @@ void cmd_safety_status(char* line, uint32_t length) {
     uart_printf("\n");
 }
 
+void cmd_safety_read_channel(char* line, uint32_t length) {
+
+    uint32_t channel;
+    sscanf(line, "%i", &channel);
+
+    uart_printf(">");
+    safety_print_channel(channel);
+    uart_printf("\n");
+}
+
+void cmd_safety_set_channel(char* line, uint32_t length) {
+
+    uint32_t channel;
+    char key_name[64];
+    char key_value[64];
+    sscanf(line, "%i %s %s", &channel, &key_name, &key_value);
+
+    safety_set_channel(channel, key_name, key_value);
+    uart_printf("\n");
+}
 
 void cmd_calibration_read_channel(char* line, uint32_t length) {
     uint32_t channel;

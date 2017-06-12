@@ -25,6 +25,8 @@
 #define CMD_SETTINGS_PRINT "settings_print"
 
 #define CMD_SAFETY_STATUS "safety_status"
+#define CMD_SAFETY_READ_CHANNEL "safety_read_channel"
+#define CMD_SAFETY_SET_CHANNEL "safety_set_channel"
 
 #define CMD_CALIBRATION_READ_CHANNEL "calibration_read_channel"
 #define CMD_CALIBRATION_SET_CHANNEL "calibration_set_channel"
