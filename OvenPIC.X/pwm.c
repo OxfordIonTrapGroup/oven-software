@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "uart.h"
 #include "pwm.h"
+#include "settings.h"
 
 
 uint8_t pwm_decimation_counter = 0;
@@ -42,8 +43,8 @@ void pwm_set_duty(uint32_t channel, float duty) {
         return;
     }
 
-    if(duty > OVEN_MAX_DUTY)
-        duty = OVEN_MAX_DUTY;
+    if(duty > settings.safety_settings.duty_max[channel])
+        duty = settings.safety_settings.duty_max[channel];
     else if(duty < 0) {
         duty = 0;
     }

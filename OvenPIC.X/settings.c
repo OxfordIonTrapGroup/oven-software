@@ -49,6 +49,8 @@ void settings_set_to_factory() {
 
         settings.safety_settings.on_time_max[i] = 30;
         settings.safety_settings.on_time_check_disabled[i] = 0;
+
+        settings.safety_settings.duty_max[i] = 0.2;
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {

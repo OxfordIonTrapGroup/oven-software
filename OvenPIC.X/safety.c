@@ -136,6 +136,12 @@ void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
         settings.safety_settings.on_time_max[channel] = value;
     }
     else if(strcmp(key_name, "duty_max") == 0) {
+
+        if(value > 1)
+            value = 1;
+        else if(value < 0)
+            value = 0;
+        
         settings.safety_settings.duty_max[channel] = value;
     }
 
