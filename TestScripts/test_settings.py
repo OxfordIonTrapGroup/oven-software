@@ -19,16 +19,25 @@ import time
 import oven_pic_interface
 
 p = oven_pic_interface.OvenPICInterface(timeout=2)
-p._DEBUG = True
+p._DEBUG = False
 print(p.adc_read_calibrated_sample())
 
-p.settings_print()
+#p.settings_print()
 
-#p.settings_set_to_factory()
+p.settings_set_to_factory()
+
+calib = p.calibration_read_channel(1)
+print(calib)
+
+calib["oven_voltage_scale"] = 10
+p.calibration_set_channel(1, calib)
+
+calib = p.calibration_read_channel(1)
+print(calib)
 
 # p.settings_print()
 
-# p.settings_save()
+#p.settings_save()
 
 # # p.settings_print()
 
