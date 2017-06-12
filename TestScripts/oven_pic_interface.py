@@ -38,6 +38,8 @@ CMD_SETTINGS_SAVE = "settings_save"
 CMD_SETTINGS_PRINT = "settings_print"
 
 CMD_SAFETY_STATUS = "safety_status"
+CMD_SAFETY_READ_CHANNEL = "safety_read_channel"
+CMD_SAFETY_SET_CHANNEL = "safety_set_channel"
 
 CMD_CALIBRATION_READ_CHANNEL = "calibration_read_channel"
 CMD_CALIBRATION_SET_CHANNEL = "calibration_set_channel"
@@ -448,6 +450,35 @@ class OvenPICInterface:
 
     def safety_status(self, print_output=True):
         response = self._send_command(CMD_SAFETY_STATUS)
+        print(response)
+
+    def safety_read_channel(self, channel):
+        line = CMD_SAFETY_READ_CHANNEL + " {:d}".format(channel)
+        response = self._send_command(line)
+
+        response_split = iter(response.decode().split(" "))
+
+        received_channel = int(next(response_split))
+        if received_channel != channel:
+            raise Exception("Wrong channel response! {} vs {}".format(
+                channel, received_channel))
+
+        safety_settings = {}
+        safety_settings["oven_temperature_max"] = float(next(response_split))
+        safety_settings["oven_temperature_check_disabled"] = float(next(response_split))
+        safety_settings["oven_current_max"] = float(next(response_split))
+        safety_settings["oven_current_check_disabled"] = float(next(response_split))
+        safety_settings["on_time_max"] = float(next(response_split))
+        safety_settings["on_time_check_disabled"] = float(next(response_split))
+        safety_settings["duty_max"] = float(next(response_split))
+
+        return safety_settings
+
+    def safety_set_channel(self, channel, key_name, key_value):
+
+        line = CMD_SAFETY_SET_CHANNEL + " {:d} ".format(channel)
+        line += key_name + " {:g}".format(key_value)
+        response = self._send_command(line)
         print(response)
 
     def calibration_read_channel(self, channel):
