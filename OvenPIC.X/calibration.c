@@ -32,18 +32,18 @@ void calibration_update_samples() {
 
 
     calibrated_oven[0].temperature = \
-        settings.calibration_data[0].temperature_scale \
-        * last_samples_float[CHANNEL_0_TEMPERATURE] \
+        (settings.calibration_data[0].temperature_scale \
+        * last_samples_float[CHANNEL_0_TEMPERATURE]) \
         + settings.calibration_data[0].temperature_offset \
-        - settings.calibration_data[0].temperature_current_coefficient \
-        * calibrated_oven[0].current;
+        + (settings.calibration_data[0].temperature_current_coefficient \
+        * calibrated_oven[0].current);
 
     calibrated_oven[1].temperature = \
-        settings.calibration_data[1].temperature_scale \
-        * last_samples_float[CHANNEL_1_TEMPERATURE] \
+        (settings.calibration_data[1].temperature_scale \
+        * last_samples_float[CHANNEL_1_TEMPERATURE]) \
         + settings.calibration_data[1].temperature_offset \
-        - settings.calibration_data[1].temperature_current_coefficient \
-        * calibrated_oven[1].current;
+        + (settings.calibration_data[1].temperature_current_coefficient \
+        * calibrated_oven[1].current);
 
 
     calibrated_oven[0].output_voltage = \

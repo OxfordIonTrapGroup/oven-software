@@ -40,6 +40,9 @@ void settings_set_to_factory() {
         settings.calibration_data[i].oven_voltage_scale = 3*2.5;
         settings.calibration_data[i].oven_voltage_offset = 0;
 
+        settings.calibration_data[i].temperature_current_coefficient = 0;
+
+
         // Set default safety settings
         settings.safety_settings.oven_temperature_max[i] = 200;
         settings.safety_settings.oven_temperature_check_disabled[i] = 0;
