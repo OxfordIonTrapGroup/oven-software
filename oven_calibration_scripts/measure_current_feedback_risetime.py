@@ -7,7 +7,7 @@ p = oven_pic_interface.OvenPICInterface()
 p._DEBUG = False
 p.settings_set_to_factory()
 calib = p.calibration_read_channel(1)
-calib["temperature_current_coefficient"] = 0.3
+calib["temperature_current_coefficient"] = 0
 p.calibration_set_channel(1, calib)
 
 p._read_calibrations()
@@ -23,7 +23,7 @@ p.fb_set_limits("current", 0, 0.2, 6)
 
 
 p.fb_config("current", 0.008, 0.007, 0)
-p.fb_set_setpoint("current", 2)
+p.fb_set_setpoint("current", 1)
 p.adc_decimate(0)
 
 print(p.fb_read_status("current"))

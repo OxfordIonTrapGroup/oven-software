@@ -14,7 +14,7 @@ while(1):
     data = p.adc_read_sample()
     V = data[a["T"][1]]
 
-    V = TCCal(V)
+    #V = TCCal(V)
 
     print(V, data[-1])
     

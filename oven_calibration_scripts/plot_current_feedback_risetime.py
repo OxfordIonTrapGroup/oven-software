@@ -24,7 +24,8 @@ next_min_index = np.argmax(results["I"][last_max_index::] > 0.1)
 
 dt = t[next_min_index] - t[last_max_index]
 dT = results["T"][next_min_index] - results["T"][last_max_index]
-dI = results["I"][next_min_index] - results["I"][last_max_index]
+#dI = results["I"][next_min_index] - results["I"][last_max_index]
+dI = - results["I"][last_max_index]
 
 dTdI = dT/dI
 

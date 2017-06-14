@@ -21,6 +21,8 @@ import oven_pic_interface
 p = oven_pic_interface.OvenPICInterface()
 p._DEBUG = False
 
+#p.settings_set_to_factory()
+
 
 while(1):
     values = p.adc_read_calibrated_sample()

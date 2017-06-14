@@ -21,7 +21,7 @@ import oven_pic_interface
 p = oven_pic_interface.OvenPICInterface(timeout=2)
 p._DEBUG = True
 
-#p.settings_set_to_factory()
+p.settings_set_to_factory()
 
 safety_settings = p.safety_read_channel(1)
 print(safety_settings)

@@ -395,7 +395,7 @@ class OvenPICInterface:
                 if len(data) == 0:
                     continue
 
-                data *= self._calibrations[channel][CALIBRATION_KEYS[name][0]]
+                data *= self._calibrations[channel][CALIBRATION_KEYS[name][0]]/2.5
                 data += self._calibrations[channel][CALIBRATION_KEYS[name][1]]
 
                 results[channel][name] = data
