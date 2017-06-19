@@ -17,7 +17,7 @@ ax[2].plot(t, results["V_out"], '.')
 
 I_max = np.max(results["I"])
 # Find the last sample which had the maximum current
-last_max_index = np.argmax(results["I"][::-1])
+last_max_index = -np.argmax(results["I"][::-1] > 0.95*I_max) - 1
 
 # Find the next sample which has a 'near zero' current
 next_min_index = np.argmax(results["I"][last_max_index::] > 0.1)
@@ -25,12 +25,15 @@ next_min_index = np.argmax(results["I"][last_max_index::] > 0.1)
 dt = t[next_min_index] - t[last_max_index]
 dT = results["T"][next_min_index] - results["T"][last_max_index]
 #dI = results["I"][next_min_index] - results["I"][last_max_index]
-dI = - results["I"][last_max_index]
+dI = I_max
+
+ax[0].plot([t[last_max_index], t[last_max_index]],
+    [np.min(results["T"]), np.max(results["T"])], '-')
 
 dTdI = dT/dI
 
 print("Fall time: {:f} s".format(dt))
-print("Temperature change: {:f} C".format(dT))
+print("Temperature change: {:f} C ({:f} - {:f})".format(dT, results["T"][next_min_index], results["T"][last_max_index]))
 print("Current change: {:f} A".format(dI))
 print("T-C coefficent: {:f} C/A".format(dTdI))
 

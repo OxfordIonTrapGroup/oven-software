@@ -21,14 +21,16 @@ import oven_pic_interface
 p = oven_pic_interface.OvenPICInterface(timeout=2)
 p._DEBUG = True
 
-p.settings_set_to_factory()
+#p.settings_set_to_factory()
 
 safety_settings = p.safety_read_channel(1)
 print(safety_settings)
 
-#p.safety_set_channel(1, "duty_max", 0.4)
+p.safety_set_channel(1, "duty_max", 0.4)
+p.safety_set_channel(1, "oven_temperature_max", 300)
+p.safety_set_channel(1, "oven_current_max", 10)
 
-#p.settings_save()
+# p.settings_save()
 
-safety_settings = p.safety_read_channel(1)
-print(safety_settings)
+# safety_settings = p.safety_read_channel(1)
+# print(safety_settings)

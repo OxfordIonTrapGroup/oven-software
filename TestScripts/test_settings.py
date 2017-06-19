@@ -24,20 +24,22 @@ p._DEBUG = True
 
 #p.settings_print()
 
-p.settings_set_to_factory()
+#p.settings_set_to_factory()
 
 calib = p.calibration_read_channel(1)
 print(calib)
 
 # calib["oven_voltage_scale"] = 10
-# p.calibration_set_channel(1, calib)
+
+calib["temperature_current_coefficient"] =-4.9+0.3
+p.calibration_set_channel(1, calib)
 
 calib = p.calibration_read_channel(1)
 print(calib)
 
 # p.settings_print()
 
-p.settings_save()
+#p.settings_save()
 
 # # p.settings_print()
 
