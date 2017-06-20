@@ -129,32 +129,9 @@ class OvenPICInterface:
             )
 
         # Reset the PIC
-        reset_pic()
-
-        # Clear the input buffers
-        #self.sc.reset_input_buffer()
-        self.sd.reset_input_buffer()
-
-        response = self.sc.readline()
-        print("DD: "+str(response))
-
-        # When streaming, this is non-zero
-        self._streaming_mode = None
-        self._data_buffers = []
-
-        self._streaming_thread = threading.Thread(
-            target=self._streaming_thread_exec,
-            daemon=True,
-            )
+        self.reset()
 
         self._streaming_thread.start()
-
-        version = self.get_version()
-        print("Connected to PIC, firmware version: " + version)
-
-        self._calibrations = [None, None]
-        if self._READ_CALIBRATION:
-            self._read_calibrations()
 
     def _read_calibrations(self):
         self._calibrations[0] = self.calibration_read_channel(0)
@@ -228,6 +205,33 @@ class OvenPICInterface:
 
         response = self._send_command(line)
         print("ECHO: " + str(response))
+
+    def reset(self):
+        # Reset the PIC
+        reset_pic()
+
+        # Clear the input buffers
+        self.sd.reset_input_buffer()
+
+        response = self.sc.readline()
+        print("DD: "+str(response))
+
+        # When streaming, this is non-zero
+        self._streaming_mode = None
+        self._data_buffers = []
+
+        self._streaming_thread = threading.Thread(
+            target=self._streaming_thread_exec,
+            daemon=True,
+            )
+
+
+        version = self.get_version()
+        print("Connected to PIC, firmware version: " + version)
+
+        self._calibrations = [None, None]
+        if self._READ_CALIBRATION:
+            self._read_calibrations()
 
     def get_version(self):
         response = self._send_command(CMD_VERSION)
