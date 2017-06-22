@@ -109,9 +109,10 @@ void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
 void cmd_feedback_config(char* line, uint32_t length) {
 
     float p, i, d;
+    uint32_t sample_decimation;
     char name[FBC_NAME_LEN];
 
-    sscanf(line, "%s %f %f %f", &name, &p, &i, &d);
+    sscanf(line, "%s %f %f %f %d", &name, &p, &i, &d, &sample_decimation);
 
     // Find the feedback controller with the given name
     controller_t* c = fbc_get_by_name(name);
@@ -125,8 +126,9 @@ void cmd_feedback_config(char* line, uint32_t length) {
     c->s->p_gain = p;
     c->s->i_gain = i;
     c->s->d_gain = d;
+    c->s->sample_decimation = sample_decimation;
 
-    uart_printf(">%f %f %f\n", p, i, d);
+    uart_printf(">%f %f %f %d\n", p, i, d, sample_decimation);
 }
 
 void cmd_feedback_start(char* line, uint32_t length) {

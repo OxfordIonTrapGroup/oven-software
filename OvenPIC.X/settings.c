@@ -67,6 +67,8 @@ void settings_set_to_factory() {
         settings.controller_settings[i].cv_limit_max = 0; // Max allowable value of control var
         settings.controller_settings[i].cv_limit_min = 0; // Min allowable value of control var
 
+        settings.controller_settings[i].sample_decimation = 0; // ADC sample decimation
+
         settings.controller_settings[i].default_setpoint = 0; // Default setpoint for controller
         // This is used only during initialisation
     }
@@ -116,13 +118,14 @@ void settings_printout() {
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {
-        uart_printf("FBC%i %g,%g,%g,%g,%g,%g,%g; ", i,
+        uart_printf("FBC%i %g,%g,%g,%g,%g,%g,%d,%g; ", i,
             settings.controller_settings[i].p_gain,
             settings.controller_settings[i].i_gain,
             settings.controller_settings[i].d_gain,
             settings.controller_settings[i].value_limit_max,
             settings.controller_settings[i].cv_limit_max,
             settings.controller_settings[i].cv_limit_min,
+            settings.controller_settings[i].sample_decimation,
             settings.controller_settings[i].default_setpoint);
         //uart_printf(">t=%d", sys_time);
     }

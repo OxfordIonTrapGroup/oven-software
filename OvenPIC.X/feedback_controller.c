@@ -29,6 +29,11 @@ controller_t* fbc_init(char* name, uint32_t index) {
     c->error = 0;
     c->integrator = 0;
 
+    c->sample_decimation_average = 0;
+    c->sample_decimation_counter = 0;
+
+    c->limiting = 0;
+
     c->enabled = 0;
 
     c->name = name;
@@ -87,12 +92,30 @@ void fbc_update(controller_t* c) {
         return;
 
     // The value in c->value has been updated externally 'somehow'
-    c->value = c->value_getter();
+    float new_value = c->value_getter();
+
+    // Decimate if we need to
+    if(c->s->sample_decimation > 0) {
+        // Calculate the rolling average
+        c->sample_decimation_average += \
+            (new_value - c->value) / (c->s->sample_decimation + 1);
+
+        // If we do not need to update the loop yet, return
+        if(c->sample_decimation_counter < c->s->sample_decimation) {
+            c->sample_decimation_counter++;
+            c->value = new_value;
+            return;
+        } else { // Otherwise continue with loop updation
+            c->sample_decimation_counter = 0;
+        }
+    }
+
+    c->value = new_value;
 
     // Check if we should limit the output
-    uint32_t limiting = fbc_check_limits(c);
+    c->limiting = fbc_check_limits(c);
 
-    if(limiting == 0) {
+    if(c->limiting == 0) {
         // Calculate the error value
         c->error = c->setpoint - c->value;
     } else {
@@ -117,10 +140,12 @@ void fbc_update(controller_t* c) {
 
 
     // Clip the new control variable to be in range
-    if(new_cv > c->s->cv_limit_max)
+    if(new_cv > c->s->cv_limit_max) {
         new_cv = c->s->cv_limit_max;
-    else if(new_cv < c->s->cv_limit_min)
+    }
+    else if(new_cv < c->s->cv_limit_min) {
         new_cv = c->s->cv_limit_min;
+    }
 
     // Set the new control variable
     c->cv = new_cv;
@@ -131,8 +156,6 @@ void fbc_update(controller_t* c) {
 
 
 // Controller instances
-
-#define CURRENT_LIMIT 10
 
 
 controller_t* current_controller = NULL;
@@ -153,14 +176,6 @@ void configure_current_controller() {
     // Setter is the PWM duty cycle
     current_controller->cv_setter = current_controller_setter;
     current_controller->value_getter = current_controller_getter;
-
-    // current_controller->p_gain = 0.01;
-    // current_controller->i_gain = 0.01;
-
-    // current_controller->cv_limit_max = 0.4;
-    // current_controller->cv_limit_min = 0;
-
-    // current_controller->value_limit_max = CURRENT_LIMIT;
 }
 
 //////
@@ -177,19 +192,12 @@ float temperature_controller_getter() {
     return calibrated_oven[1].temperature;
 }
 
-
 void configure_temperature_controller() {
     temperature_controller = fbc_init("temperature", 1);
 
     temperature_controller->cv_setter = temperature_controller_setter;
     temperature_controller->value_getter = temperature_controller_getter;
-
-    // temperature_controller->cv_limit_max = sqrt(CURRENT_LIMIT);
-    // temperature_controller->cv_limit_min = 0;
-
-    // temperature_controller->value_limit_max = 500;
 }
-
 
 
 void update_controllers() {

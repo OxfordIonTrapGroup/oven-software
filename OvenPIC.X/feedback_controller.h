@@ -17,6 +17,11 @@ typedef struct {
     float default_setpoint; // Default setpoint for controller
     // This is used only during initialisation
 
+    // Sample decimation allows the ADC value to be decimated before
+    // being fed into the feedback loop. 
+    // This is the number of samples to skip.
+    uint32_t sample_decimation; 
+
 } controller_settings_t;
 
 // Controller datastructure
@@ -31,9 +36,14 @@ typedef struct {
     float integrator; // Value of the integrator
     float cv; // Value of control variable
 
-
+    // Counter used for sample decimation
+    uint32_t sample_decimation_counter;
+    // Float used to store a rolling average of the decimated samples
+    float sample_decimation_average;
 
     uint32_t enabled; // Nonzero is regulation in enabled
+
+    uint32_t limiting; // Non-zero when this feedback controller is railing
 
     void (*cv_setter)(float); // Pointer to cv setter function
     float (*value_getter)(); // Pointer to value getter function
