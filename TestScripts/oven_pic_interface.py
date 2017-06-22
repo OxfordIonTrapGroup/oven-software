@@ -414,9 +414,10 @@ class OvenPICInterface:
         return results
 
 
-    def fb_config(self, name, p, i, d):
+    def fb_config(self, name, p, i, d, sample_decimation):
         line = CMD_FEEDBACK_CONFIG \
-            + " {:s} {:f} {:f} {:f}".format(name, p, i, d)
+            + " {:s} {:f} {:f} {:f} {:d}".format(
+                name, p, i, d, sample_decimation)
         self._send_command(line)
 
     def fb_start(self, name):
