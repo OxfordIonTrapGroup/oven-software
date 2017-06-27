@@ -182,7 +182,7 @@ void cmd_feedback_setpoint(char* line, uint32_t length) {
         return;
     }
 
-    c->setpoint = setpoint;
+    c->target_setpoint = setpoint;
 
     uart_printf(">%s %f\n", name, setpoint);
 }
@@ -201,9 +201,10 @@ void cmd_feedback_read_status(char* line, uint32_t length) {
         return;
     }
 
-    uart_printf(">%s %f %f %f %f %f %i\n", 
+    uart_printf(">%s %f %f %f %f %f %f %i\n", 
         name,
         c->setpoint,
+        c->target_setpoint,
         c->value,
         c->error,
         c->integrator,

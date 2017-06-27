@@ -14,6 +14,8 @@ typedef struct {
     float cv_limit_max; // Max allowable value of control var
     float cv_limit_min; // Min allowable value of control var
 
+    float setpoint_slewrate; // Max slew rate magnitude of setpoint in degrees per second
+
     float default_setpoint; // Default setpoint for controller
     // This is used only during initialisation
 
@@ -34,7 +36,11 @@ typedef struct {
     float value; // Last actual value
     float error; // Last error
     float integrator; // Value of the integrator
-    float cv; // Value of control variable
+    float cv; // Current value of control variable
+
+    float target_setpoint; // Target value the setpoint...
+    // When the target setpoint is changed, the setpoint is adjusted to match it
+    // in accordance with the max slew rate
 
     // Counter used for sample decimation
     uint32_t sample_decimation_counter;

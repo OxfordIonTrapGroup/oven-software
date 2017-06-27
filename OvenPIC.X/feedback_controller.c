@@ -7,6 +7,9 @@
 #include "settings.h"
 #include "calibration.h"
 
+// Sampling rate of ADC
+#define ADC_SAMPLE_RATE 1000.0
+
 // Array of pointers to controllers
 controller_t* fbc_controllers[N_MAX_CONTROLLERS] = {NULL};
 uint32_t n_fbc_controllers = 0; // Number of valid controller pointsers
@@ -25,6 +28,7 @@ controller_t* fbc_init(char* name, uint32_t index) {
     c->s = &settings.controller_settings[index];
 
     c->setpoint = c->s->default_setpoint;
+    c->target_setpoint = c->s->default_setpoint;
     c->value = 0;
     c->error = 0;
     c->integrator = 0;
@@ -112,6 +116,26 @@ void fbc_update(controller_t* c) {
 
     c->value = new_value;
 
+    // Update the current setpoint if we are slew-rate limited
+    if(c->setpoint != c->target_setpoint) {
+
+        if(c->s->setpoint_slewrate == 0) {
+            c->setpoint = c->target_setpoint;
+        } else {
+            float delta = c->target_setpoint - c->setpoint;
+            float max_delta = c->s->setpoint_slewrate*(c->s->sample_decimation+1.0) /ADC_SAMPLE_RATE;
+
+            if(abs(delta) > max_delta) {
+                if(delta > 0)
+                    c->setpoint += max_delta;
+                else
+                    c->setpoint -= max_delta;
+            } else {
+                c->setpoint = c->target_setpoint;
+            }
+        }
+    }
+
     // Check if we should limit the output
     c->limiting = fbc_check_limits(c);
 
@@ -185,7 +209,7 @@ controller_t* temperature_controller = NULL;
 // The temperature controller regulates the setpoint
 // of the current controller
 void temperature_controller_setter(float new_cv) {
-    current_controller->setpoint = new_cv*new_cv;
+    current_controller->target_setpoint = new_cv*new_cv;
 }
 
 float temperature_controller_getter() {

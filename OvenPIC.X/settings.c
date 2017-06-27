@@ -69,9 +69,14 @@ void settings_set_to_factory() {
 
         settings.controller_settings[i].sample_decimation = 0; // ADC sample decimation
 
+        settings.controller_settings[i].setpoint_slewrate = 100; // Max slew rate of setpoint
+
         settings.controller_settings[i].default_setpoint = 0; // Default setpoint for controller
         // This is used only during initialisation
     }
+
+    settings.controller_settings[0].setpoint_slewrate = 0; // Max slew rate of setpoint
+
 }
 
 // Read the setting strcuture from flash
@@ -118,7 +123,7 @@ void settings_printout() {
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {
-        uart_printf("FBC%i %g,%g,%g,%g,%g,%g,%d,%g; ", i,
+        uart_printf("FBC%i %g,%g,%g,%g,%g,%g,%d,%g,%g; ", i,
             settings.controller_settings[i].p_gain,
             settings.controller_settings[i].i_gain,
             settings.controller_settings[i].d_gain,
@@ -126,6 +131,7 @@ void settings_printout() {
             settings.controller_settings[i].cv_limit_max,
             settings.controller_settings[i].cv_limit_min,
             settings.controller_settings[i].sample_decimation,
+            settings.controller_settings[i].setpoint_slewrate,
             settings.controller_settings[i].default_setpoint);
         //uart_printf(">t=%d", sys_time);
     }
