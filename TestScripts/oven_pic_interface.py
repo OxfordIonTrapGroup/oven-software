@@ -60,37 +60,6 @@ CALIBRATION_KEYS = {
     "V": ["oven_voltage_scale", "oven_voltage_offset"],
 }
 
-ADC_CONVERSION_FACTORS = {
-    "T": (1*(1000.0/40.0)*(1000.0/51.)),
-    "I": 5,
-    "V_out": 3,
-    "V": -3,
-}
-
-ADC_CONVERSION_OFFSETS = {
-    "T": 20,
-    "I": 0,
-    "V_out": 0,
-    "V": 0,
-}
-
-def convert_samples(channel, samples):
-    """Convert adc samples into calibrated data"""
-
-    results = {}
-
-    for name in ADC_CHANNELS:
-        # Get the data array
-        data = samples[ADC_CHANNELS[name][channel]]
-
-        if len(data) != 0:
-
-            data *= ADC_CONVERSION_FACTORS[name]
-            data += ADC_CONVERSION_OFFSETS[name]
-
-            results[name] = data
-    return results
-
 
 class PICError(Exception):
     pass
@@ -284,7 +253,6 @@ class OvenPICInterface:
 
         return values
 
-
     def adc_decimate(self, decimation):
 
         line = CMD_ADC_DECIMATE + " {:d}".format(decimation)
@@ -353,7 +321,6 @@ class OvenPICInterface:
         unit_length = 1 + 4*len(self._streaming_channels)
         array_data = array_data[:unit_length*int(len(array_data)/unit_length)]
 
-  
         # Reshape the array so that the first index references the 
         # sample number
         array_data = np.reshape(
@@ -412,7 +379,6 @@ class OvenPICInterface:
                         "temperature_current_coefficient"]
 
         return results
-
 
     def fb_config(self, name, p, i, d, sample_decimation):
         line = CMD_FEEDBACK_CONFIG \
@@ -525,55 +491,3 @@ class OvenPICInterface:
 
         response = self._send_command(line)
 
-def TCCal(data):
-    TC = ((-data*(1000.0/40.0)*(1000.0/51.)) + 20) 
-    return TC
-
-def ICal(data):
-    I = data/0.2 # 0.2 V / A
-    return I
-
-def VCal(data):
-    V = data*3 # 1/3 V/V
-    return V
-
-if __name__ == "__main__":
-    a = ADC_CHANNELS
-
-    p = OvenPICInterface()
-
-    p.echo("Hi!")
-    #p.set_pwm_duty(0, 0.01)
-
-
-    channels = [a["T"][1], a["I"][1], a["V_out"][1], a["V"][1]]
-
-    p.adc_decimate(10)
-
-    p.adc_start_streaming(channels)
-    time.sleep(0.5)
-    p.set_pwm_duty(1, 0.1)
-    time.sleep(0.5)
-    p.set_pwm_duty(1, 0)
-    time.sleep(0.5)
-
-    data = p.adc_stop_streaming()
-
-    T = data[a["T"][1]]
-    T = TCCal(T)
-
-    I = data[a["I"][1]]
-    I= ICal(I)
-
-    V = data[a["V"][1]]
-    V= VCal(V)
-
-    V_out = data[a["V_out"][1]]
-    V_out= VCal(V_out)
-
-    print(I)
-    print(T)
-    print(V)
-    print(V_out)
-
-    print(p.adc_read_sample())
