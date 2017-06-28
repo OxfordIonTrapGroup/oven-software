@@ -69,13 +69,13 @@ void settings_set_to_factory() {
 
         settings.controller_settings[i].sample_decimation = 0; // ADC sample decimation
 
-        settings.controller_settings[i].setpoint_slewrate = 100; // Max slew rate of setpoint
+        // Max slew rate of setpoint, or 0 for no limit
+        settings.controller_settings[i].setpoint_slewrate = 0;
 
         settings.controller_settings[i].default_setpoint = 0; // Default setpoint for controller
         // This is used only during initialisation
     }
 
-    settings.controller_settings[0].setpoint_slewrate = 0; // Max slew rate of setpoint
 
 }
 

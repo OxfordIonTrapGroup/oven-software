@@ -112,7 +112,8 @@ void cmd_feedback_config(char* line, uint32_t length) {
     uint32_t sample_decimation;
     char name[FBC_NAME_LEN];
 
-    sscanf(line, "%s %f %f %f %d", &name, &p, &i, &d, &sample_decimation);
+    sscanf(line, "%s %f %f %f %d",\
+        &name, &p, &i, &d, &sample_decimation);
 
     // Find the feedback controller with the given name
     controller_t* c = fbc_get_by_name(name);
@@ -128,7 +129,8 @@ void cmd_feedback_config(char* line, uint32_t length) {
     c->s->d_gain = d;
     c->s->sample_decimation = sample_decimation;
 
-    uart_printf(">%f %f %f %d\n", p, i, d, sample_decimation);
+    uart_printf(">%f %f %f %d\n",\
+        p, i, d, sample_decimation);
 }
 
 void cmd_feedback_start(char* line, uint32_t length) {
@@ -217,9 +219,10 @@ void cmd_feedback_set_limits(char* line, uint32_t length) {
     float cv_limit_min;
     float cv_limit_max;
     float value_limit_max;
+    float setpoint_slewrate;
     char name[FBC_NAME_LEN];
-    sscanf(line, "%s %g %g %g", &name, &cv_limit_min, &cv_limit_max,\
-        &value_limit_max);
+    sscanf(line, "%s %g %g %g %g", &name, &cv_limit_min, &cv_limit_max,\
+        &value_limit_max, &setpoint_slewrate);
 
     // Find the feedback controller with the given name
     controller_t* c = fbc_get_by_name(name);
@@ -233,9 +236,10 @@ void cmd_feedback_set_limits(char* line, uint32_t length) {
     c->s->cv_limit_min = cv_limit_min;
     c->s->cv_limit_max = cv_limit_max;
     c->s->value_limit_max = value_limit_max;
+    c->s->setpoint_slewrate = setpoint_slewrate;
 
-    uart_printf(">%s %g %g %g\n", name, cv_limit_min, cv_limit_max,\
-        value_limit_max);
+    uart_printf(">%s %g %g %g %g\n", name, cv_limit_min, cv_limit_max,\
+        value_limit_max, setpoint_slewrate);
 }
 
 

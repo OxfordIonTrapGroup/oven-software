@@ -136,6 +136,9 @@ void fbc_update(controller_t* c) {
         }
     }
 
+    // Keep the last error value, for calculating the derivative
+    float old_error = c->error;
+
     // Check if we should limit the output
     c->limiting = fbc_check_limits(c);
 
@@ -159,8 +162,14 @@ void fbc_update(controller_t* c) {
         c->integrator += c->error*c->s->i_gain;
     }
 
+    // Calculate d component
+    float d_value = 0;
+    if(c->s->d_gain != 0) {
+        d_value = c->s->d_gain*(c->error - old_error);
+    }
+
     // Calculate the new control variable
-    new_cv = c->error*c->s->p_gain + c->integrator;
+    new_cv = c->error*c->s->p_gain + c->integrator + d_value;
 
 
     // Clip the new control variable to be in range
