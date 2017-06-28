@@ -2,77 +2,33 @@
 #ifndef _COMMANDS_H    
 #define _COMMANDS_H
 
-#define CMD_ECHO                        0x00
+#define CMD_ECHO                        "echo"
+#define CMD_VERSION                     "version"
 
-#define CMD_PWM_SET_DUTY                0x10
+#define CMD_SET_PWM_DUTY                "set_pwm_duty"
 
-#define CMD_ADC_STREAM                  0x20
-#define CMD_ADC_DECIMATE                0x21
-#define CMD_ADC_READ_LAST_CONVERSION    0x22
+#define CMD_ADC_STREAM                  "adc_stream_channels"
+#define CMD_ADC_DECIMATE                "adc_set_decimation"
+#define CMD_ADC_READ_LAST_CONVERSION    "adc_read_sample"
+#define CMD_ADC_READ_LAST_CALIBRATED_DATA "adc_read_calibrated_sample"
 
-#define CMD_FEEDBACK_CONFIG             0x30
-#define CMD_FEEDBACK_START              0x31
-#define CMD_FEEDBACK_STOP               0x32
-#define CMD_FEEDBACK_SETPOINT           0x33
-#define CMD_FEEDBACK_READ_STATUS        0x34
-#define CMD_FEEDBACK_SET_LIMITS         0x35
+#define CMD_FEEDBACK_CONFIG             "fb_config"
+#define CMD_FEEDBACK_START              "fb_start"
+#define CMD_FEEDBACK_STOP               "fb_stop"
+#define CMD_FEEDBACK_SETPOINT           "fb_set_setpoint"
+#define CMD_FEEDBACK_READ_STATUS        "fb_read_status"
+#define CMD_FEEDBACK_SET_LIMITS         "fb_set_limits"
 
-#define CMD_ERROR                       0xFF
+#define CMD_SETTINGS_LOAD "settings_load"
+#define CMD_SETTINGS_SET_TO_FACTORY "settings_set_to_factory"
+#define CMD_SETTINGS_SAVE "settings_save"
+#define CMD_SETTINGS_PRINT "settings_print"
 
+#define CMD_SAFETY_STATUS "safety_status"
+#define CMD_SAFETY_READ_CHANNEL "safety_read_channel"
+#define CMD_SAFETY_SET_CHANNEL "safety_set_channel"
 
-
-
-// PWM commands
-
-typedef struct {
-    uint16_t new_duty;
-} __attribute__((packed)) cmd_pwm_set_duty_args_t;
-
-
-// ADC commands
-
-typedef struct {
-    uint8_t channels;
-} __attribute__((packed)) cmd_adc_stream_args_t;
-
-typedef struct  {
-    uint32_t decimation;
-} __attribute__((packed)) cmd_adc_decimate_args_t;
-
-typedef struct  {
-    int32_t samples[8];
-} __attribute__((packed)) cmd_adc_read_last_conversion_reply_t;
-
-// Feedback commands
-
-#define CMD_FEEDBACK_CONFIG_MODE_CONSTANTDUTY          0x00
-#define CMD_FEEDBACK_CONFIG_MODE_CONSTANTCURRENT       0x01
-#define CMD_FEEDBACK_CONFIG_MODE_CONSTANTTEMPERATURE   0x02
-#define CMD_FEEDBACK_CONFIG_MODE_CONSTANTVOLTAGE       0x03
-
-typedef struct {
-    int32_t gain_p;
-    int32_t gain_i;
-    int32_t gain_d;
-    //uint8_t mode; // Feedback mode
-} __attribute__((packed)) cmd_feedback_config_args_t;
-
-typedef struct {
-    int32_t setpoint;
-} __attribute__((packed)) cmd_feedback_setpoint_args_t;
-
-
-typedef struct {
-    int32_t setpoint;
-    int32_t last_sample;
-    int32_t last_error;
-    int64_t last_duty;
-    int64_t integrator;
-} __attribute__((packed)) cmd_feedback_read_status_reply_t;
-
-typedef struct {
-    int32_t limit_i;
-    int32_t limit_t;
-} __attribute__((packed)) cmd_feedback_set_limits_args_t;
+#define CMD_CALIBRATION_READ_CHANNEL "calibration_read_channel"
+#define CMD_CALIBRATION_SET_CHANNEL "calibration_set_channel"
 
 #endif

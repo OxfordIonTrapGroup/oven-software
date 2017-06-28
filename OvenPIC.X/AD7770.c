@@ -1,14 +1,12 @@
 
-#include "HardwareProfile.h"
+#include "hardware_profile.h"
 
-#include <plib.h>
 #include <stdint.h>
 #include "AD7770.h"
-#include "feedback.h"
 #include "interface.h"
+#include "calibration.h"
 
-#define ADC_CLOCK_FREQ 8000000
-#define ADC_RESET LATBbits.LATB5
+#define ADC_RESET LATBbits.LATB14
 
 #define _GENERAL_USER_CONFIG_1  0x11
 #define _GENERAL_USER_CONFIG_2  0x12
@@ -32,6 +30,7 @@
 
 uint32_t last_samples[8]; // Storage of samples
 int32_t last_samples_signed[8]; // Storage of samples
+float last_samples_float[8];
 
 uint32_t streaming_decimation = 0; // How many samples to skip before sending the next
                                     // sample whilst streaming
@@ -39,12 +38,15 @@ uint32_t streaming_decimation_counter = 0; // Counter for decimation
 
 uint8_t streaming_channels = 0;
 
+uint32_t adc_sample_index = 0; // Counter incremented every sample
+uint32_t adc_crc_failure_count = 0; // Counter for CRC failures
+
 void adc_streaming_start(uint8_t channels) {
     // Start streaming to uart
     if( channels == 0 ) {
         adc_streaming_stop();
     } else {
-        ins_enable_streaming();
+        //ins_enable_streaming();
         streaming_decimation_counter = 0;
         streaming_channels = channels;
     }
@@ -53,7 +55,7 @@ void adc_streaming_start(uint8_t channels) {
 void adc_streaming_stop() {
     streaming_channels = 0;
     
-    ins_disable_streaming();
+    //ins_disable_streaming();
 }
 
 void adc_set_streaming_decimation(uint32_t decimation) {
@@ -74,103 +76,122 @@ void adc_streaming_interrupt() {
         }
     }
     // Cat the streaming_channels byte
-    uart_write(&streaming_channels, 1);
-    
+    uart_write_data(&streaming_channels, 1);
+
+    // Cat the sample index
+    //uart_write_data(&adc_sample_index, 4);
+
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
             // Cat the data to the uart if the channel is enabled
-            uart_write(&last_samples[i], 4);
+            uart_write_data(&last_samples[i], 4);
         }
     }
 }
 
 void adc_config() {
+    // ADC_MCLK is on RD5
+    // SPI_CLK is on RD1 (SCK1)
+    // SPI_MOSI is on RD10
+    // SPI_MISO is on RD2
+    // SPI_CS is on RD4
+    // ADC_RESET is on RB14
+    // ADC_DRDY is on RB15
 
-    // Use Timer 2 and OC1 to generate ADC clock on RB3
-    PR2 = (SYSCLK/ADC_CLOCK_FREQ) - 1;
+    // ADC_MCLK:
+    // Use Timer 2 and OC1 to generate ADC clock on RD5
+    // PBCLK3 is 100 MHz, ADC_MCLK is 5 MHz
+    PR2 = (100/5) - 1;
     OC1RS = (PR2 + 1)*0.5;
     T2CONbits.ON = 1;
     OC1CONbits.OCM = 6;
     OC1CONbits.ON = 1;
-    RPB3R = 0b101; // OC1 on RB3 (pin 7)
+    TRISDbits.TRISD5 = 0;
+    RPD5R = 0b1100; // OC1 on RD5
    
-    // Configure ADC reset pin
-    TRISBbits.TRISB5 = 0;
+    // ADC_RESET:
+    // On RB14
+    ANSELBbits.ANSB14 = 0;
+    TRISBbits.TRISB14 = 0;
     ADC_RESET = 0;
     
-
+    // SPI_1:
+    // SCK1 - RD1
+    // SDI1 - RD2
+    // SDO1 - RD10
+    // SS1 -  RD4
+    SDI1R = 0b0000; // SDI1 -> RD2
+    RPD10R = 0b0101; // SDO1 -> RD10
+    RPD4R = 0b0101; // SS1 -> RD4
     
-    // Use SPI2
-    // SCK2 - RB15 (26)
-    // SDI2 - RB13 (24)
-    // SDO2 - RB11 (22)
-    // SS2 -  RB10 (21)
-    // RESET - RB5(14)
-    RPB11R = 0b0100; // SDO2
-    RPB10R = 0b0100; // SS2
-    SDI2R = 0b0011; // SDI2
+    SPI1STATbits.SPIROV = 0; // Clear overflow flag
+    // SPI clock is 25 MHz 
+    SPI1BRG = 100; // PBCLK2 / 4 (100/4 = 25MHz)
     
-    SPI2STATbits.SPIROV = 0; // Clear overflow flag
-    SPI2BRG = 2; // SPI clkc is PBCLK / 4 (5MHz)
+    SPI1CONbits.DISSDO = 0; // SDO enabled
+    SPI1CONbits.CKP = 1; // Clock idles high
+    SPI1CONbits.CKE = 0; // SPI mode 3
+    SPI1CONbits.SMP = 1;
+    SPI1CONbits.MSTEN = 1; // SPI master mode
+    SPI1CONbits.MSSEN = 1; // SPI master SS enable
+    SPI1CONbits.MODE32 = 0;
+    SPI1CONbits.MODE16 = 1; // 16bit mode
     
-    SPI2CONbits.DISSDO = 0; // SDO enabled
-    SPI2CONbits.CKP = 1; // Clock idles high
-    SPI2CONbits.CKE = 0; // SPI mode 3
-    SPI2CONbits.SMP = 1;
-    SPI2CONbits.MSTEN = 1; // SPI master mode
-    SPI2CONbits.MSSEN = 1; // SPI master SS enable
-    SPI2CONbits.MODE32 = 0;
-    SPI2CONbits.MODE16 = 1; // 16bit mode
-    
-    SPI2CONbits.ON = 1; // Enable SPI
+    SPI1CONbits.ON = 1; // Enable SPI
     
     ADC_RESET = 1; // Take ADC out of reset
     
-    int i;
+    uint32_t i;
     for(i=0;i<1000;i++); // Wait for a while
-    
+
     adc_set_high_power();
     adc_set_reference_internal();
     //adc_set_decimation( 2048 );
-    adc_set_decimation( 2000 );
+    adc_set_decimation(1250); // MCLK/(4*decimation) = 1 kHz 
+    //adc_set_decimation(2000); // MCLK/(4*decimation) = 625 Hz 
     adc_enable_readout(1);
     
-    // Configure interrupt on ADC sample read pin (RB7)
-    INTCONbits.INT0EP = 0; // Set polarity to falling edge   
-    IFS0bits.INT0IF = 0; // Clear the flag
-    IEC0bits.INT0IE = 1; // Enable the interrupt
-    IPC0bits.INT0IP = 3; // Set the priority to 1
+    // Configure interrupt on ADC sample read pin (RB15)
+    ANSELBbits.ANSB15 = 0;
+    INT2R = 0b0011;
+    INTCONbits.INT2EP = 0; // Set polarity to falling edge   
+    IFS0bits.INT2IF = 0; // Clear the flag
+    IEC0bits.INT2IE = 1; // Enable the interrupt
+    IPC3bits.INT2IP = 1; // Set the priority to 1
 
 }
 
-void __ISR( _EXTERNAL_0_VECTOR, IPL3AUTO) adc_ext_interrupt() {
-
+void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
     // Read the samples
-    adc_read_samples(last_samples, last_samples_signed);
-    LED_GREEN = !LED_GREEN;
+    adc_read_samples(last_samples, last_samples_signed, last_samples_float);
     
+    // Update the sample counter
+    adc_sample_index += 1;
     // Update the feedback loop
-    fb_update();
+    update_controllers();
 
     if(streaming_channels != 0)
         adc_streaming_interrupt();
+
+    // Check the safety margins
+    safety_check();
     
-    IFS0bits.INT0IF = 0; // Clear the flag
+    IFS0bits.INT2IF = 0; // Clear the flag
 }
 
 char adc_read(char address) {
-    while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-    SPI2BUF = (0x80 | address) << 8;
-    while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-    return SPI2BUF & 0xFF;
+    while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+    SPI1BUF = (0x80 | address) << 8;
+    while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+    return SPI1BUF & 0xFF;
 }
 
 char adc_write(char address, char value) {
-    while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-    SPI2BUF = ((address) << 8) | (value & 0xFF);
+    while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+    SPI1BUF = ((address) << 8) | (value & 0xFF);
   
-    while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-    return SPI2BUF & 0xFF;
+    while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+    return SPI1BUF & 0xFF;
 }
 
 void adc_set_high_power() {
@@ -186,7 +207,7 @@ void adc_set_decimation(int decimation) {
         return; // bad decimation
     
     adc_write(_SRC_N_MSB, (decimation & 0xFF00) >> 8);
-    adc_write(_SRC_N_LSB, (decimation & 0x00FF) >> 8);
+    adc_write(_SRC_N_LSB, (decimation & 0x00FF));
     
     adc_write(_SRC_UPDATE, 0x01);
 }
@@ -199,42 +220,52 @@ void adc_enable_readout(char enable) {
         value = 0x80;
     adc_write(_GENERAL_USER_CONFIG_3, value);
     
-    SPI2CONbits.MSSEN = 0; // SPI master SS disable
-    RPB10R = 0b0000; // Take manual control of SS2 
-    TRISBbits.TRISB10 = 0;
-    LATBbits.LATB10 = 1;
+    SPI1CONbits.MSSEN = 0; // SPI master SS disable
+    RPD4R = 0b0000; // Take manual control of SS2 
+    TRISDbits.TRISD4 = 0;
+    LATDbits.LATD4 = 1;
 }
 
-void adc_read_samples(uint32_t* data, int32_t* data_signed) {
+void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
+    uint32_t data_buffer[8];
     
-    //SPI2CONbits.FRMCNT = 0b100; // Hold SS down for 8x2 16bit words
-    //SPI2CONbits.FRMSYPW = 1; 
-    //SPI2CONbits.FRMEN = 1; // Enable framed mode
-    LATBbits.LATB10 = 0;
-
+    // Read in the raw data
+    LATDbits.LATD4 = 0;
     for(i=0; i<8; i++) {
-        while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-        SPI2BUF = 0x8000;
-        while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] = (SPI2BUF & 0xFFFF) << 16;
-        while(SPI2STATbits.SPITBF == 1); // Wait for tx buffer to clear
-        SPI2BUF = 0x8000;
-        while(SPI2STATbits.SPIRBF == 0); // Wait for data transfer
-        data[i] |= (SPI2BUF & 0xFFFF);
+        while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+        SPI1BUF = 0x8000;
+        while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+        data_buffer[i] = (SPI1BUF & 0xFFFF) << 16;
+        while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
+        SPI1BUF = 0x8000;
+        while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
+        data_buffer[i] |= (SPI1BUF & 0xFFFF);
     }
-    LATBbits.LATB10 = 1;
+    LATDbits.LATD4 = 1;
         
-    for(i=0; i<8; i++) {
-        data_signed[i] = (data[i] & 0x7FFFFF);
-        if(data[i] & (1<<23))
-            data_signed[i] = data_signed[i] - 0x800000;
+    // Check for crc failure
+    uint8_t crc_fails;
+    crc_fails = adc_check_samples(data_buffer);
+
+    if(crc_fails > 0) {
+        // If the samples do no pass the CRC, then increment the failure count
+        // and do not update the samples
+        adc_crc_failure_count += 1;
+    } else {
+        // Otherwise, we are free to update the samples
+        for(i=0; i<8; i++) {
+            data[i] = data_buffer[i];
+            data_signed[i] = (data_buffer[i] & 0x7FFFFF);
+            if(data_buffer[i] & (1<<23))
+                data_signed[i] = data_signed[i] - 0x800000;
+
+            data_float[i] = data_signed[i]/(0x800000*1.0);
+        }
+
+        // Update the calibrated samples
+        calibration_update_samples();
     }
-    
-    //SPI2CONbits.FRMEN = 0; // Disable framed mode
-    //SPI2CONbits.FRMCNT = 0b000; // Return SS to normal behaviour
-    
-    //return data;
 }
 
 uint8_t calculate_crc(uint32_t* data) {
