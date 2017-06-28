@@ -435,9 +435,9 @@ class OvenPICInterface:
 
         return response.decode()
 
-    def fb_set_limits(self, name, cv_min, cv_max, value_max):
+    def fb_set_limits(self, name, cv_min, cv_max, value_max, setpoint_slewrate):
         line = CMD_FEEDBACK_SET_LIMITS + " {:s}".format(name)
-        line += " {:f} {:f} {:f}".format(cv_min, cv_max, value_max)
+        line += " {:f} {:f} {:f} {:f}".format(cv_min, cv_max, value_max, setpoint_slewrate)
         self._send_command(line)
 
     def settings_load(self):

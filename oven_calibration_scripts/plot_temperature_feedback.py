@@ -31,6 +31,12 @@ for i in range(3):
     ax[i].grid(c='grey', linestyle='--', which='minor', alpha=0.2)
     ax[i].set_axisbelow(True)
 
+ax[0].set_ylabel("Temperature (C)")
+ax[1].set_ylabel("Current (A)")
+ax[2].set_ylabel("Voltage (V)")
+
+ax[-1].set_xlabel("Time (s)")
+
 plt.tight_layout()
 #plt.show()
 plt.savefig("measure_temperature_feedback_data.pdf")

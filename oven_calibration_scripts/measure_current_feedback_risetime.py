@@ -21,10 +21,10 @@ p.set_pwm_duty(channel, 0)
 
 print(p.fb_read_status("current"))
 
-p.fb_set_limits("current", 0, 0.2, 6)
+p.fb_set_limits("current", 0, 0.2, 6, 0)
 
 
-p.fb_config("current", 0.008, 0.007, 0)
+p.fb_config("current", 0.008, 0.007, 0, 0)
 p.fb_set_setpoint("current", 1)
 p.adc_decimate(0)
 
