@@ -11,6 +11,7 @@
 Oven safety scheme:
 
 -> over-temperature shutdown
+-> under-temperature shutdown
 -> over-current shutdown
 -> maximum on-time
 -> watchdog timer
