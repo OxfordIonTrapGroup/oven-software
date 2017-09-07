@@ -44,7 +44,8 @@ void settings_set_to_factory() {
 
 
         // Set default safety settings
-        settings.safety_settings.oven_temperature_max[i] = 200;
+        settings.safety_settings.oven_temperature_max[i] = 50;
+        settings.safety_settings.oven_temperature_min[i] = 0;
         settings.safety_settings.oven_temperature_check_disabled[i] = 0;
 
         settings.safety_settings.oven_current_max[i] = 8;
@@ -53,7 +54,7 @@ void settings_set_to_factory() {
         settings.safety_settings.on_time_max[i] = 30;
         settings.safety_settings.on_time_check_disabled[i] = 0;
 
-        settings.safety_settings.duty_max[i] = 0.2;
+        settings.safety_settings.duty_max[i] = 0.02;
     }
 
     for(i=0;i<N_MAX_CONTROLLERS;i++) {

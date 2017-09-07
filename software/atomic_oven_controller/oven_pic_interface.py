@@ -395,6 +395,7 @@ class OvenPICInterface:
 
         safety_settings = {}
         safety_settings["oven_temperature_max"] = float(next(response_split))
+        safety_settings["oven_temperature_min"] = float(next(response_split))
         safety_settings["oven_temperature_check_disabled"] = float(next(response_split))
         safety_settings["oven_current_max"] = float(next(response_split))
         safety_settings["oven_current_check_disabled"] = float(next(response_split))

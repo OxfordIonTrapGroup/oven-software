@@ -27,6 +27,7 @@ uint32_t safety_error_records[2];
 #define SAFETY_ERROR_OVERCURRENT     0x01
 #define SAFETY_ERROR_OVERTEMPERATURE 0x02
 #define SAFETY_ERROR_OVERTIME        0x04
+#define SAFETY_ERROR_UNDERTEMPERATURE 0x08
 
 
 // Initialise the safety routines
@@ -67,6 +68,8 @@ void safety_print_errors() {
             uart_printf(" over-temperature");
         if(safety_error_records[i] & SAFETY_ERROR_OVERTIME)
             uart_printf(" over-time");
+        if(safety_error_records[i] & SAFETY_ERROR_UNDERTEMPERATURE)
+            uart_printf(" under-temperature");
         if(safety_error_records[i] == 0)
             uart_printf(" no-errors");
         uart_printf(", ");
@@ -85,6 +88,10 @@ void safety_check() {
             if(calibrated_oven[i].temperature > \
                 settings.safety_settings.oven_temperature_max[i]) {
                 safety_error_records[i] |= SAFETY_ERROR_OVERTEMPERATURE;
+                pwm_disable(i);
+            } else if(calibrated_oven[i].temperature < \
+                settings.safety_settings.oven_temperature_min[i]) {
+                safety_error_records[i] |= SAFETY_ERROR_UNDERTEMPERATURE;
                 pwm_disable(i);
             }
         }
@@ -108,8 +115,10 @@ void safety_print_channel(uint32_t channel) {
     }
 
     uart_printf("%i", channel);
-    uart_printf(" %g %i", settings.safety_settings.oven_temperature_max[channel],\
+    uart_printf(" %g %g %i", settings.safety_settings.oven_temperature_max[channel],\
+        settings.safety_settings.oven_temperature_min[channel], \
         settings.safety_settings.oven_temperature_check_disabled[channel]);
+
     uart_printf(" %g %i", settings.safety_settings.oven_current_max[channel],\
         settings.safety_settings.oven_current_check_disabled[channel]);
     uart_printf(" %g %i", settings.safety_settings.on_time_max[channel],\
@@ -128,6 +137,9 @@ void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
 
     if(strcmp(key_name, "oven_temperature_max") == 0) {
         settings.safety_settings.oven_temperature_max[channel] = value;
+    }
+    else if(strcmp(key_name, "oven_temperature_min") == 0) {
+        settings.safety_settings.oven_temperature_min[channel] = value;
     }
     else if(strcmp(key_name, "oven_current_max") == 0) {
         settings.safety_settings.oven_current_max[channel] = value;

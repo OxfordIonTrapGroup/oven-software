@@ -11,6 +11,7 @@ typedef struct {
     // If a temperature is read which exceeds these, and checking
     // is not disabled, then the pwm output is disabled.
     float oven_temperature_max[2];
+    float oven_temperature_min[2];
     uint32_t oven_temperature_check_disabled[2];
 
     // Maximum current allowed to be driven through the oven.
