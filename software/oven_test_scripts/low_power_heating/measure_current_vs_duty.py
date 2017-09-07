@@ -10,7 +10,7 @@ if channel < 0 or channel > 1:
 p = atomic_oven_controller.OvenPICInterface()
 
 min_duty = 0
-max_duty = 0.02
+max_duty = 0.025
 
 n_steps = 101
 

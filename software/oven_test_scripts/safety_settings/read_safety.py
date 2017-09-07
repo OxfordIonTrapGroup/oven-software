@@ -3,7 +3,7 @@ import time
 import atomic_oven_controller
 
 
-channel = int(input("Oven channel to test (0,1): "))
+channel = int(input("Oven channel to read (0,1): "))
 if channel < 0 or channel > 1:
     raise Exception("Bad channel: {}".format(channel))
 
