@@ -47,9 +47,8 @@ void main() {
     adc_config();
     pwm_config();
 
-    configure_current_controller();
-    configure_temperature_controller();
-
+    configure_controllers();
+    
     // Enable interrupts
     INTCONbits.MVEC = 1;
     asm volatile("ei");

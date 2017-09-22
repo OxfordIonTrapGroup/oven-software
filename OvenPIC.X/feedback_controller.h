@@ -74,4 +74,6 @@ extern controller_t* fbc_get_by_name(char* name);
 #define N_MAX_CONTROLLERS 5
 
 
+extern void configure_controllers();
+
 #endif

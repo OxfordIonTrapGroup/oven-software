@@ -10,6 +10,7 @@
       <itemPath>commands.h</itemPath>
       <itemPath>interface.h</itemPath>
       <itemPath>hardware_profile.h</itemPath>
+      <itemPath>feedback_controller.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

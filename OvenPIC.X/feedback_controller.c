@@ -263,6 +263,15 @@ void configure_temperature_controller_1() {
     temperature_controller_1->value_getter = temperature_controller_getter_1;
 }
 
+
+void configure_controllers() {
+    configure_current_controller_0();
+    configure_current_controller_1();
+    
+    configure_temperature_controller_0();
+    configure_temperature_controller_1();
+}
+
 /////////////////////
 
 

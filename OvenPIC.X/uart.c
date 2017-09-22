@@ -75,6 +75,9 @@ void __ISR(_UART5_TX_VECTOR, IPL2AUTO) uart_data_tx_interrupt() {
     }
 }
 
+// Declare blocking print to placate compiler
+void uart_printf_blocking(uint8_t* format, ...);
+
 
 // UART1-TX on BB -> U1RX (RB9) (p22)
 // UART1-RX on BB -> U1TX (RD11) (p45)
