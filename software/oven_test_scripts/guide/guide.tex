@@ -66,6 +66,39 @@ Figures \ref{fig:duty_impulse_response_low} and \ref{fig:duty_impulse_response_h
 Once the coupling coefficient is measured, it can be saved in the flash calibration for the microcontroller with the script \texttt{calibration\_settings/set\_tc\_current\_compensation.py}. To confirm that the compensation works, the duty impulse response script can be run again and the measurement should give a much lower coupling value.
 
 
+\clearpage
+\section{Setup current feedback}
 
+Now the current feedback coefficients need to be set for each channel.
+The current feedback controller is a PID controller taking a setpoint in Amps and controlling the duty cycle between 0 and 1.
+
+There are four key parameters for this:
+\begin{enumerate}
+\item P gain,
+\item I gain,
+\item D gain,
+\item Sample decimation\footnote{Sample decimation is the number of samples to skip before applying feedback. The ADC sampling frequency is \SI{1}{kHz}, so a decimation of 0 will lead to \SI{1}{kHz} update rate, whereas decimation of 5 will lead to \SI{200}{Hz}. This is useful when the feedback controller needs to act on long timescales compared with the ADC sampling rate}.
+\end{enumerate}
+These can be adjusted to optimise the performance of the controller, however I have found the following configuration to work in all cases:
+0.008, 0.007, 0, 0.
+
+The script \texttt{setup\_current\_feedback/measure\_current\_feedback\_risetime.py} will test the current feedback on the given channel. The feedback controller parameters are set within the script to the values above. The output of this script will result in a plot like the one shown in figure \ref{fig:current_feedback}, which allows us to verify that the feedback controller is working correctly (i.e. no oscillation, reasonable response time).
+
+\begin{figure}
+    \center
+    \includegraphics[scale=1]{figures/current_feedback_risetime_data_1.pdf} 
+    \caption{Example data for seting up the current controller parameters.}
+    \label{fig:current_feedback}
+\end{figure}
+
+With the desired current feedback parameters known, program them into the microcontroller with the script in \texttt{calibration\_settings/set\_current\_controller\_settings.py}. This script also asks for the following parameters:
+\begin{enumerate}
+\item Min/max duty cycle soft limits
+\item Maximum setpoint (A)
+\item Maximum setpoint slew rate (A/s)
 \end{document}
+
+
+\clearpage
+\section{Setup temperature feedback}
 
