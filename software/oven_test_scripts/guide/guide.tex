@@ -77,7 +77,7 @@ There are four key parameters for this:
 \item P gain,
 \item I gain,
 \item D gain,
-\item Sample decimation\footnote{Sample decimation is the number of samples to skip before applying feedback. The ADC sampling frequency is \SI{1}{kHz}, so a decimation of 0 will lead to \SI{1}{kHz} update rate, whereas decimation of 5 will lead to \SI{200}{Hz}. This is useful when the feedback controller needs to act on long timescales compared with the ADC sampling rate}.
+\item Sample decimation\footnote{Sample decimation is the number of samples to skip before applying feedback. The ADC sampling frequency is \SI{1}{kHz}, so a decimation of 0 will lead to \SI{1}{kHz} update rate, whereas decimation of 4 will lead to one sample every 5 ADC samples giving \SI{200}{Hz}. This is useful when the feedback controller needs to act on long timescales compared with the ADC sampling rate}.
 \end{enumerate}
 These can be adjusted to optimise the performance of the controller, however I have found the following configuration to work in all cases:
 0.008, 0.007, 0, 0.
