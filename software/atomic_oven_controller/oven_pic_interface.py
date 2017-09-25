@@ -339,11 +339,34 @@ class OvenPICInterface:
 
         return results
 
-    def fb_config(self, name, p, i, d, sample_decimation):
-        line = c.CMD_FEEDBACK_CONFIG \
+    def fb_set_config(self, name, config):
+
+        p = config['p']
+        i = config['i']
+        d = config['d']
+        sample_decimation = config['sample_decimation']
+
+        line = c.CMD_FEEDBACK_SET_CONFIG \
             + " {:s} {:f} {:f} {:f} {:d}".format(
                 name, p, i, d, sample_decimation)
         self._send_command(line)
+
+    def fb_get_config(self, name):
+        line = c.CMD_FEEDBACK_GET_CONFIG \
+            + " {:s}".format(name)
+        response = self._send_command(line)
+        response_split = iter(response.decode().split(" "))
+
+        if name != next(response_split):
+            raise Exception("Bad response during get_config: "+str(response))
+
+        config = {}
+        config['p'] = float(next(response_split))
+        config['i'] = float(next(response_split))
+        config['d'] = float(next(response_split))
+        config['sample_decimation'] = float(next(response_split))
+        return config
+
 
     def fb_start(self, name):
         self._send_command(c.CMD_FEEDBACK_START + " " + name)
@@ -360,10 +383,31 @@ class OvenPICInterface:
 
         return response.decode()
 
-    def fb_set_limits(self, name, cv_min, cv_max, value_max, setpoint_slewrate):
+    def fb_set_limits(self, name, limits):
+        
+        cv_min = limits['cv_min']
+        cv_max = limits['cv_max']
+        value_max = limits['value_max']
+        setpoint_slewrate = limits['setpoint_slewrate']
+
         line = c.CMD_FEEDBACK_SET_LIMITS + " {:s}".format(name)
         line += " {:f} {:f} {:f} {:f}".format(cv_min, cv_max, value_max, setpoint_slewrate)
         self._send_command(line)
+
+    def fb_get_limits(self, name):
+        line = c.CMD_FEEDBACK_GET_LIMITS + " {:s}".format(name)
+        response = self._send_command(line)
+        response_split = iter(response.decode().split(" "))
+
+        if name != next(response_split):
+            raise Exception("Bad response during get_limits: "+str(response))
+
+        limits = {}
+        limits['cv_min'] = float(next(response_split))
+        limits['cv_max'] = float(next(response_split))
+        limits['value_max'] = float(next(response_split))
+        limits['setpoint_slewrate'] = float(next(response_split))
+        return limits
 
     def settings_load(self):
         self._send_command(c.CMD_SETTINGS_LOAD)
