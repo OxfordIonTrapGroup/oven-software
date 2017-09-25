@@ -106,7 +106,7 @@ void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
 }
 
 
-void cmd_feedback_config(char* line, uint32_t length) {
+void cmd_feedback_set_config(char* line, uint32_t length) {
 
     float p, i, d;
     uint32_t sample_decimation;
@@ -129,9 +129,32 @@ void cmd_feedback_config(char* line, uint32_t length) {
     c->s->d_gain = d;
     c->s->sample_decimation = sample_decimation;
 
-    uart_printf(">%f %f %f %d\n",\
-        p, i, d, sample_decimation);
+    uart_printf(">%s %f %f %f %d\n",\
+        name, p, i, d, sample_decimation);
 }
+
+void cmd_feedback_get_config(char* line, uint32_t length) {
+    char name[FBC_NAME_LEN];
+
+    sscanf(line, "%s", &name);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    uart_printf(">%s %f %f %f %d\n",\
+        name,\
+        c->s->p_gain,\
+        c->s->i_gain,\
+        c->s->d_gain,\
+        c->s->sample_decimation);
+}
+
 
 void cmd_feedback_start(char* line, uint32_t length) {
 
@@ -242,6 +265,25 @@ void cmd_feedback_set_limits(char* line, uint32_t length) {
         value_limit_max, setpoint_slewrate);
 }
 
+void cmd_feedback_get_limits(char* line, uint32_t length) {
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s", &name);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    uart_printf(">%s %g %g %g %g\n", name,\
+        c->s->cv_limit_min,\
+        c->s->cv_limit_max,\
+        c->s->value_limit_max,\
+        c->s->setpoint_slewrate);
+}
 
 
 void cmd_settings_load(char* line, uint32_t length) {

@@ -99,8 +99,11 @@ void ins_process_line(char* data, uint32_t length) {
     // --------------------------------------------------------------
     // Feedback commands
     // --------------------------------------------------------------
-    else if(strcmp(command, CMD_FEEDBACK_CONFIG) == 0) {
-        cmd_feedback_config(residual_line, residual_line_length);
+    else if(strcmp(command, CMD_FEEDBACK_SET_CONFIG) == 0) {
+        cmd_feedback_set_config(residual_line, residual_line_length);
+    } 
+    else if(strcmp(command, CMD_FEEDBACK_GET_CONFIG) == 0) {
+        cmd_feedback_get_config(residual_line, residual_line_length);
     } 
     else if(strcmp(command, CMD_FEEDBACK_START) == 0) {
         cmd_feedback_start(residual_line, residual_line_length);
@@ -116,6 +119,9 @@ void ins_process_line(char* data, uint32_t length) {
     }
     else if(strcmp(command, CMD_FEEDBACK_SET_LIMITS) == 0) {
         cmd_feedback_set_limits(residual_line, residual_line_length);
+    }
+    else if(strcmp(command, CMD_FEEDBACK_GET_LIMITS) == 0) {
+        cmd_feedback_get_limits(residual_line, residual_line_length);
     }
 
     // --------------------------------------------------------------
