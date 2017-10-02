@@ -6,7 +6,7 @@
 \usepackage[htt]{hyphenat}
 \usepackage{graphicx}
 \usepackage{courier}
-
+\usepackage{siunitx}
 
 
 \begin{document}
@@ -17,6 +17,8 @@
 \maketitle
 
 \section{Wiring}
+
+On the PCB the two output channels are named \textit{0} and \textit{1}, with \textit{0} being the channel furthest away from the beagle bone. In the HOA2 systems, oven \textit{0} should be filled with calcium and oven \textit{1} with strontium.\footnote{This is because oven \textit{1} has fewer conductors so is less suitable for calcium which has a higher operating temperature. This is a very mild preference.}
 
 \begin{figure}[H]
     \center
@@ -96,9 +98,12 @@ With the desired current feedback parameters known, program them into the microc
 \item Min/max duty cycle soft limits
 \item Maximum setpoint (A)
 \item Maximum setpoint slew rate (A/s)
-\end{document}
+\end{enumerate}
 
 
 \clearpage
 \section{Setup temperature feedback}
 
+
+
+\end{document}
