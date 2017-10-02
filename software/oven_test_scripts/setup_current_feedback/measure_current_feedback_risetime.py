@@ -20,10 +20,22 @@ p.set_pwm_duty(channel, 0)
 
 print(p.fb_read_status(controller_name))
 
-p.fb_set_limits(controller_name, 0, 0.1, 6, 0)
+
+current_limits = {}
+current_limits['cv_min'] = 0
+current_limits['cv_max'] = 0.1
+current_limits['value_max'] = 8
+current_limits['setpoint_slewrate'] = 0
+p.fb_set_limits(controller_name, current_limits)
 
 
-p.fb_set_config(controller_name, 0.008, 0.007, 0, 0)
+current_config = {}
+current_config['p'] = 0.008
+current_config['i'] = 0.007
+current_config['d'] = 0
+current_config['sample_decimation'] = 0 # 1000 Hz update rate
+
+p.fb_set_config(controller_name, current_config)
 p.fb_set_setpoint(controller_name, 1)
 p.adc_decimate(0)
 
