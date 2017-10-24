@@ -17,8 +17,11 @@ t_start = 1
 t_on = 10
 t_off = 5
 
+t_on = 20
+t_off = 10
+
 # Temperature to regulate to
-test_setpoint = 100
+test_setpoint = 150
 
 try:
 
@@ -31,7 +34,7 @@ try:
     temperature_limits = {}
     temperature_limits['cv_min'] = 0
     temperature_limits['cv_max'] = np.sqrt(current_limits['value_max'])
-    temperature_limits['value_max'] = 420
+    temperature_limits['value_max'] = 450
     temperature_limits['setpoint_slewrate'] = 400 # C/s
     p.fb_set_limits(temperature_controller, temperature_limits)
 

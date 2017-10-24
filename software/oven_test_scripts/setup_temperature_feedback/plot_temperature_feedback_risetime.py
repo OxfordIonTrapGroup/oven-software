@@ -32,14 +32,14 @@ for channel in range(2):
     fig, ax = plt.subplots(nrows=3, sharex=True)
     t = np.arange(len(results["T"]))/100
 
-    ax[0].plot(t, results["T"], '.')
+    ax[0].plot(t, results["T"], '-')
     ax[0].set_ylabel("Temperature (C)")
 
 
-    ax[1].plot(t, results["I"], '.')
+    ax[1].plot(t, results["I"], '-')
     ax[1].set_ylabel("Current (A)")
 
-    ax[2].plot(t, results["V_out"], '.')
+    ax[2].plot(t, results["V_out"], '-')
     ax[2].set_ylabel("Voltage (V)")
 
     ax[2].set_xlabel("Time (s)")
