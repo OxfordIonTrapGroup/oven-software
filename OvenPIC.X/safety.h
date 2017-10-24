@@ -22,7 +22,7 @@ typedef struct {
 
     // After the oven has been powered for this duration, the
     // pwm output is disabled.
-    float on_time_max[2];
+    uint32_t on_time_max[2]; // max on time in ms
     uint32_t on_time_check_disabled[2];
 
     // Maximum duty cycle

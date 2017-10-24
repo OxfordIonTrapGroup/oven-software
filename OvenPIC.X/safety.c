@@ -5,6 +5,7 @@
 #include "settings.h"
 #include "safety.h"
 #include "pwm.h"
+#include "timer.h"
 
 /*
 
@@ -30,6 +31,15 @@ uint32_t safety_error_records[2];
 #define SAFETY_ERROR_OVERTIME        0x04
 #define SAFETY_ERROR_UNDERTEMPERATURE 0x08
 
+// Local variables used to record on-times
+// When the duty cycle > 0, on_time_started is set to 1
+//  and the sys_time is recorded into on_time_start_times
+// If the sys_time > on_time_start_times + max on time
+//  then the output is disabled and error is flagged
+// If the duty cycle is set to 0 again, the on_time_started
+//  is reset to 0
+uint32_t on_time_started[2];
+uint32_t on_time_start_times[2];
 
 // Initialise the safety routines
 void safety_config() {
@@ -104,6 +114,27 @@ void safety_check() {
                 pwm_disable(i);
             }
         }
+
+        if(!settings.safety_settings.on_time_check_disabled[i]) {
+            // While the oven is turned on, increment the counter
+            // and die if needed
+            if(pwm_duty[i] > 0) {
+                if(on_time_started[i] == 0) {
+                    on_time_started[i] = 1;
+                    on_time_start_times[i] = sys_time;
+                } else {
+                    uint32_t time_to_die = on_time_start_times[i] + \
+                        settings.safety_settings.on_time_max[i];
+                    if(sys_time >= time_to_die) {
+                        safety_error_records[i] |= SAFETY_ERROR_OVERTIME;
+                        pwm_disable(i);
+                    }
+                }
+            } else {
+                // If the output is off, then reset the on_time_started flag
+                on_time_started[i] = 0;
+            }
+        }
     }
 }
 
@@ -122,7 +153,7 @@ void safety_print_channel(uint32_t channel) {
 
     uart_printf(" %g %i", settings.safety_settings.oven_current_max[channel],\
         settings.safety_settings.oven_current_check_disabled[channel]);
-    uart_printf(" %g %i", settings.safety_settings.on_time_max[channel],\
+    uart_printf(" %i %i", settings.safety_settings.on_time_max[channel],\
         settings.safety_settings.on_time_check_disabled[channel]);
     uart_printf(" %g", settings.safety_settings.duty_max[channel]);
 
@@ -146,6 +177,11 @@ void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
         settings.safety_settings.oven_current_max[channel] = value;
     }
     else if(strcmp(key_name, "on_time_max") == 0) {
+        uint32_t value_int;
+        if(value > 0)
+            value_int = value;
+        else
+            value_int = 0;
         settings.safety_settings.on_time_max[channel] = value;
     }
     else if(strcmp(key_name, "duty_max") == 0) {
