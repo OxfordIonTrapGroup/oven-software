@@ -114,6 +114,9 @@ void ins_process_line(char* data, uint32_t length) {
     else if(strcmp(command, CMD_FEEDBACK_SETPOINT) == 0) {
         cmd_feedback_setpoint(residual_line, residual_line_length);
     } 
+    else if(strcmp(command, CMD_FEEDBACK_SETPOINT_IMMEDIATE) == 0) {
+        cmd_feedback_setpoint_immediate(residual_line, residual_line_length);
+    } 
     else if(strcmp(command, CMD_FEEDBACK_READ_STATUS) == 0) {
         cmd_feedback_read_status(residual_line, residual_line_length);
     }

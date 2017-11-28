@@ -25,7 +25,7 @@ void settings_set_to_factory() {
         // Thermocouple has sensitivity of 40uV / C
         // Instrumentation amp has gain 51
         // Offset is the temperature of the cold junction ~20 C
-        settings.calibration_data[i].temperature_scale = (2.5*(1000.0/40.0)*(1000.0/51.));
+        settings.calibration_data[i].temperature_scale = -(2.5*(1000.0/40.0)*(1000.0/51.));
         settings.calibration_data[i].temperature_offset = 20;
 
         // Current sensor has a gain of 5 A / V
@@ -51,7 +51,7 @@ void settings_set_to_factory() {
         settings.safety_settings.oven_current_max[i] = 8;
         settings.safety_settings.oven_current_check_disabled[i] = 0;
 
-        settings.safety_settings.on_time_max[i] = 30;
+        settings.safety_settings.on_time_max[i] = 30000;
         settings.safety_settings.on_time_check_disabled[i] = 0;
 
         settings.safety_settings.duty_max[i] = 0.02;

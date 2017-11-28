@@ -212,6 +212,27 @@ void cmd_feedback_setpoint(char* line, uint32_t length) {
     uart_printf(">%s %f\n", name, setpoint);
 }
 
+// Immediately set the setpoint, regardless of slew rate limit
+void cmd_feedback_setpoint_immediate(char* line, uint32_t length) {
+    float setpoint;
+    char name[FBC_NAME_LEN];
+    sscanf(line, "%s %f", &name, &setpoint);
+
+    // Find the feedback controller with the given name
+    controller_t* c = fbc_get_by_name(name);
+
+    if(c == NULL) {
+        // If get_by_name has returned null, then the name was not found
+        uart_printf("! No controller with name \"%s\"\n", name);
+        return;
+    }
+
+    c->target_setpoint = setpoint;
+    c->setpoint = setpoint;
+
+    uart_printf(">%s %f\n", name, setpoint);
+}
+
 void cmd_feedback_read_status(char* line, uint32_t length) {
 
     char name[FBC_NAME_LEN];
