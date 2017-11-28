@@ -30,7 +30,7 @@ new_config['sample_decimation'] = 0
 new_limits = {}
 new_limits['cv_min'] = 0
 new_limits['cv_max'] = 0.1 # 10% max duty cycle
-new_limits['value_max'] = 8 # 8A max current
+new_limits['value_max'] = 3.95 # 3.95A max current
 new_limits['setpoint_slewrate'] = 0 # No slew rate limit
 
 p.fb_set_config(controller_name, new_config)

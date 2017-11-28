@@ -8,6 +8,7 @@ import atomic_oven_controller
 # if channel < 0 or channel > 1:
 #     raise Exception("Bad channel: {}".format(channel))
 
+# Alice - Ca: 0, Sr: 1
 channel = 1
 
 
@@ -15,7 +16,8 @@ p = atomic_oven_controller.OvenPICInterface(timeout=2)
 current_controller = "current_{}".format(channel)
 temperature_controller = "temperature_{}".format(channel)
 
-t_on = 60*5
+# oven on time in seconds
+t_on = 60*2
 poll_time = 0.1
 
 
