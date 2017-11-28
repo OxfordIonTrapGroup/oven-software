@@ -374,8 +374,12 @@ class OvenPICInterface:
     def fb_stop(self, name):
         self._send_command(c.CMD_FEEDBACK_STOP + " " + name)
 
-    def fb_set_setpoint(self, name, new_setpoint):
-        line = c.CMD_FEEDBACK_SETPOINT + " {:s} {:f}".format(name, new_setpoint)
+    def fb_set_setpoint(self, name, new_setpoint, immediate=False):
+        if immediate:
+            command = c.CMD_FEEDBACK_SETPOINT_IMMEDIATE
+        else:
+            command = c.CMD_FEEDBACK_SETPOINT
+        line = command + " {:s} {:f}".format(name, new_setpoint)
         self._send_command(line)
 
     def fb_read_status(self, name):
@@ -420,7 +424,7 @@ class OvenPICInterface:
 
     def settings_print(self):
         response = self._send_command(c.CMD_SETTINGS_PRINT)
-        print(response)
+        return response
 
     def safety_status(self, print_output=True):
         response = self._send_command(c.CMD_SAFETY_STATUS)
