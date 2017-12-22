@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 #include "uart.h"
 #include "AD7770.h"
 #include "feedback_controller.h"

@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include <stdio.h>
 #include "hardware_profile.h"
 #include "calibration.h"
 #include "settings.h"
