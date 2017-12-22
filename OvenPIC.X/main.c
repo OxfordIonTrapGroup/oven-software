@@ -42,7 +42,6 @@ void main() {
     safety_config();
 
     settings_read();
-    //settings_set_to_factory();
 
     adc_config();
     pwm_config();
@@ -62,10 +61,10 @@ void main() {
         // Clear the watchdog timer
         safety_clear_watchdog();
 
-        // if((sys_time % 1000) >= 500)
-        //     LATEbits.LATE5 = 1;
-        // else
-        //     LATEbits.LATE5 = 0;
+        if((sys_time % 1000) >= 500)
+            LATEbits.LATE5 = 1;
+        else
+            LATEbits.LATE5 = 0;
 
         if(sys_time != last_time) {
             LATEbits.LATE5 = !LATEbits.LATE5;

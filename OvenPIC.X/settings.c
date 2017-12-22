@@ -77,12 +77,14 @@ void settings_set_to_factory() {
         // This is used only during initialisation
     }
 
-
+    settings.magic = SETTINGS_MAGIC;
 }
 
-// Read the setting strcuture from flash
+// Read the setting structure from flash
+// If the structure is not valid (i.e. no saved settings) use defaults
 void settings_read() {
     memcpy((void*)&settings, (void*)settings_in_flash, sizeof(settings_t));
+    if(settings.magic != SETTINGS_MAGIC) settings_set_to_factory();
 }
 
 // Write the setting structure to flash

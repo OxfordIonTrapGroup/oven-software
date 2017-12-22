@@ -7,8 +7,9 @@
 #include "calibration.h"
 #include "safety.h"
 
-typedef struct {
+#define SETTINGS_MAGIC (0xdeadbeef)
 
+typedef struct {
     float test_value;
     uint32_t test_int;
 
@@ -21,6 +22,8 @@ typedef struct {
     // Safety measure settings
     safety_settings_t safety_settings;
 
+    // Should be SETTINGS_MAGIC
+    uint32_t magic;
 } settings_t;
 
 extern settings_t settings;
