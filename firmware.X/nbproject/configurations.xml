@@ -11,6 +11,7 @@
       <itemPath>interface.h</itemPath>
       <itemPath>hardware_profile.h</itemPath>
       <itemPath>feedback_controller.h</itemPath>
+      <itemPath>leds.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -30,6 +31,7 @@
       <itemPath>safety.c</itemPath>
       <itemPath>settings.c</itemPath>
       <itemPath>timer.c</itemPath>
+      <itemPath>leds.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
