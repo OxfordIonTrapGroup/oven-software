@@ -8,6 +8,6 @@
 #include <xc.h>
 #include <sys/attribs.h>
 
-#define VERSION_STRING "1.00"
+#define VERSION_STRING "1.01"
 
 #endif

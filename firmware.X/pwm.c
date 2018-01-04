@@ -5,6 +5,7 @@
 #include "uart.h"
 #include "pwm.h"
 #include "settings.h"
+#include "leds.h"
 
 
 uint8_t pwm_decimation_counter = 0;
@@ -29,7 +30,7 @@ void __ISR(_TIMER_3_VECTOR, IPL4AUTO) t3_interrupt() {
         PWM_1_REG = (pwm_duty[1] >> PWM_DECIMATION_BITS);
 
 
-    if(pwm_decimation_counter == 0) {    
+    if(pwm_decimation_counter == 0) {
         pwm_decimation_counter = ((1 << PWM_DECIMATION_BITS));
     }
 
@@ -38,7 +39,6 @@ void __ISR(_TIMER_3_VECTOR, IPL4AUTO) t3_interrupt() {
 
 
 void pwm_set_duty(uint32_t channel, float duty) {
-
     if(channel > 1) {
         return;
     }
@@ -51,11 +51,15 @@ void pwm_set_duty(uint32_t channel, float duty) {
 
     pwm_duty[channel] = (uint16_t)(duty*(OVEN_PWM_PERIOD << PWM_DECIMATION_BITS));
 
+    uint16_t hw_duty = pwm_duty[channel] >> PWM_DECIMATION_BITS;
     if(channel == 0) {
-        PWM_0_REG = pwm_duty[channel] >> PWM_DECIMATION_BITS;
+        PWM_0_REG = hw_duty;
     } else {
-        PWM_1_REG = pwm_duty[channel] >> PWM_DECIMATION_BITS;
+        PWM_1_REG = hw_duty;
     }
+
+    // Turn on channel LED if duty is non-zero
+    leds_channel_set(channel, pwm_duty[channel] != 0);
 }
 
 

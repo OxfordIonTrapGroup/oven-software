@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <math.h>
@@ -56,12 +55,12 @@ void main() {
 
         if((sys_time % 1000) >= 500) {
             leds_status_set(1);
-            leds_channel_set(0,1);
-            leds_channel_set(1,1);
+            // leds_channel_set(0,1);
+            // leds_channel_set(1,1);
         }else{
             leds_status_set(0);
-            leds_channel_set(0,0);
-            leds_channel_set(1,0);
+            // leds_channel_set(0,0);
+            // leds_channel_set(1,0);
         }
 
         ins_read_next();
