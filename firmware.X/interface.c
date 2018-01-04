@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>
@@ -27,10 +26,12 @@ void ins_disable_streaming() {
     streaming = 0;
 }*/
 
+
 void ins_unknown_command(char* data, uint32_t length) {
 
     uart_printf("! Unknown command: %s\n", data);
 }
+
 
 void ins_process_line(char* data, uint32_t length) {
 
@@ -171,10 +172,8 @@ void ins_process_line(char* data, uint32_t length) {
     else {
         ins_unknown_command(data_buffer, length);
     }
-
-
-
 }
+
 
 void ins_rebase_buffer(uint32_t index) {
     // Copy the contents of the buffer starting at 'index'
@@ -189,6 +188,7 @@ void ins_rebase_buffer(uint32_t index) {
     }
     instruction_buffer_end = len;
 }
+
 
 void ins_invalidate_buffer() {
     
@@ -225,5 +225,3 @@ void ins_read_next() {
     // Rebase to the end of the line
     ins_rebase_buffer(i_new_line + 1);
 }
-
-

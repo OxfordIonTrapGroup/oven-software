@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>

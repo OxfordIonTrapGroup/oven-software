@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>
@@ -15,6 +14,7 @@
 volatile void* settings_in_flash = (void*)0xBD080000; // Start of bank 2
 
 settings_t settings;
+
 
 // Set the settings to sane 'factory defaults'
 void settings_set_to_factory() {
@@ -80,12 +80,14 @@ void settings_set_to_factory() {
     settings.magic = SETTINGS_MAGIC;
 }
 
+
 // Read the setting structure from flash
 // If the structure is not valid (i.e. no saved settings) use defaults
 void settings_read() {
     memcpy((void*)&settings, (void*)settings_in_flash, sizeof(settings_t));
     if(settings.magic != SETTINGS_MAGIC) settings_set_to_factory();
 }
+
 
 // Write the setting structure to flash
 void settings_write() {
@@ -98,8 +100,8 @@ void settings_write() {
         (void*)settings_in_flash,
         &settings,
         sizeof(settings_t));
-
 }
+
 
 // Print out all the the settings
 void settings_printout() {
@@ -143,6 +145,7 @@ void settings_printout() {
     uart_printf("\n");
 }
 
+
 // Copied from reference manual (DS61193A)
 void nvm_initiate_operation() {
     int int_status;
@@ -176,6 +179,7 @@ void nvm_clear_errors() {
     // uart_printf(">c %x ", NVMCON);
 }
 
+
 // Erase a page of the NVM
 void nvm_erase_page(void* page_address) {
 
@@ -201,6 +205,7 @@ void nvm_erase_page(void* page_address) {
 
     // uart_printf(">%x %x ", NVMADDR, NVMCON);
 }
+
 
 // Program a word into the NVM
 void nvm_program_word(void* destination, uint32_t value) {
@@ -228,6 +233,7 @@ void nvm_program_word(void* destination, uint32_t value) {
     //     ((uint32_t*)destination)[0], NVMCON);
 }
 
+
 // Program n_bytes of data from *data to the destination in the NVM
 void nvm_program(void* destination, void* data, uint32_t n_bytes) {
 
@@ -248,5 +254,3 @@ void nvm_program(void* destination, void* data, uint32_t n_bytes) {
     }
 
 }
-
-

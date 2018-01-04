@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>
@@ -41,6 +40,7 @@ uint8_t streaming_channels = 0;
 uint32_t adc_sample_index = 0; // Counter incremented every sample
 uint32_t adc_crc_failure_count = 0; // Counter for CRC failures
 
+
 void adc_streaming_start(uint8_t channels) {
     // Start streaming to uart
     if( channels == 0 ) {
@@ -52,15 +52,18 @@ void adc_streaming_start(uint8_t channels) {
     }
 }
 
+
 void adc_streaming_stop() {
     streaming_channels = 0;
     
     //ins_disable_streaming();
 }
 
+
 void adc_set_streaming_decimation(uint32_t decimation) {
     streaming_decimation = decimation;
 }
+
 
 void adc_streaming_interrupt() {
     int i;
@@ -88,6 +91,7 @@ void adc_streaming_interrupt() {
         }
     }
 }
+
 
 void adc_config() {
     // ADC_MCLK is on RD5
@@ -161,6 +165,7 @@ void adc_config() {
 
 }
 
+
 void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
@@ -179,12 +184,14 @@ void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
     IFS0bits.INT2IF = 0; // Clear the flag
 }
 
+
 char adc_read(char address) {
     while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
     SPI1BUF = (0x80 | address) << 8;
     while(SPI1STATbits.SPIRBF == 0); // Wait for data transfer
     return SPI1BUF & 0xFF;
 }
+
 
 char adc_write(char address, char value) {
     while(SPI1STATbits.SPITBF == 1); // Wait for tx buffer to clear
@@ -194,13 +201,16 @@ char adc_write(char address, char value) {
     return SPI1BUF & 0xFF;
 }
 
+
 void adc_set_high_power() {
     adc_write(_GENERAL_USER_CONFIG_1, 0x74);
 }
 
+
 void adc_set_reference_internal() {
     adc_write(_ADC_MUX_CONFIG, 0x58);
 }
+
 
 void adc_set_decimation(int decimation) {
     if ((decimation < 64) || (decimation > 2048))
@@ -211,6 +221,7 @@ void adc_set_decimation(int decimation) {
     
     adc_write(_SRC_UPDATE, 0x01);
 }
+
 
 void adc_enable_readout(char enable) {
     char value;
@@ -225,6 +236,7 @@ void adc_enable_readout(char enable) {
     TRISDbits.TRISD4 = 0;
     LATDbits.LATD4 = 1;
 }
+
 
 void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     int i;
@@ -268,6 +280,7 @@ void adc_read_samples(uint32_t* data, int32_t* data_signed, float* data_float) {
     }
 }
 
+
 uint8_t calculate_crc(uint32_t* data) {
     // Calculates the CRC of data[0] and data[1]
     
@@ -304,7 +317,8 @@ uint8_t calculate_crc(uint32_t* data) {
     }
     return crc & 0xFF;
 }
-    
+
+
 uint8_t adc_check_samples(uint32_t* data) {
     int i;
     uint8_t crc_fails = 0;
@@ -321,6 +335,7 @@ uint8_t adc_check_samples(uint32_t* data) {
     return crc_fails;
 }
 
+
 void adc_convert_samples(uint32_t* data, float* floatData) {
     
     int i;
@@ -333,5 +348,3 @@ void adc_convert_samples(uint32_t* data, float* floatData) {
         floatData[i] = value/(0x800000*1.0);
     }
 }
-
-

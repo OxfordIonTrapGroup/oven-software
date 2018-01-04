@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>
@@ -15,6 +14,7 @@
 
 #define ERROR -1
 
+
 void cmd_echo(char* line, uint32_t length) {
     if(length > 0) {
         uart_printf(">echo %s\n", line);
@@ -23,11 +23,16 @@ void cmd_echo(char* line, uint32_t length) {
     }
 }
 
+
 void cmd_version(char* line, uint32_t length) {
     uart_printf(">version %s\n", VERSION_STRING);
 }
 
+
+
+
 // PWM commands
+
 
 void cmd_pwm_set_duty(char* line, uint32_t length) {
 
@@ -67,6 +72,7 @@ void cmd_adc_stream(char* line, uint32_t length) {
     uart_printf(">%i\n", channels);
 }
 
+
 void cmd_adc_decimate(char* line, uint32_t length) {
 
     uint32_t decimation;
@@ -77,6 +83,7 @@ void cmd_adc_decimate(char* line, uint32_t length) {
     adc_set_streaming_decimation(decimation);
     uart_printf(">%i\n", decimation);
 }
+
 
 void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     
@@ -89,6 +96,7 @@ void cmd_adc_read_last_conversion(char* line, uint32_t length) {
     // Also print the crc failure count
     uart_printf(" %i\n", adc_crc_failure_count);
 }
+
 
 void cmd_adc_read_last_calibrated_data(char* line, uint32_t length) {
     
@@ -134,6 +142,7 @@ void cmd_feedback_set_config(char* line, uint32_t length) {
         name, p, i, d, sample_decimation);
 }
 
+
 void cmd_feedback_get_config(char* line, uint32_t length) {
     char name[FBC_NAME_LEN];
 
@@ -175,6 +184,7 @@ void cmd_feedback_start(char* line, uint32_t length) {
     uart_printf(">%s enabled\n", name);
 }
 
+
 void cmd_feedback_stop(char* line, uint32_t length) {
 
     char name[FBC_NAME_LEN];
@@ -194,6 +204,7 @@ void cmd_feedback_stop(char* line, uint32_t length) {
     uart_printf(">%s disabled\n", name);
 }
 
+
 void cmd_feedback_setpoint(char* line, uint32_t length) {
     float setpoint;
     char name[FBC_NAME_LEN];
@@ -212,6 +223,7 @@ void cmd_feedback_setpoint(char* line, uint32_t length) {
 
     uart_printf(">%s %f\n", name, setpoint);
 }
+
 
 // Immediately set the setpoint, regardless of slew rate limit
 void cmd_feedback_setpoint_immediate(char* line, uint32_t length) {
@@ -233,6 +245,7 @@ void cmd_feedback_setpoint_immediate(char* line, uint32_t length) {
 
     uart_printf(">%s %f\n", name, setpoint);
 }
+
 
 void cmd_feedback_read_status(char* line, uint32_t length) {
 
@@ -287,6 +300,7 @@ void cmd_feedback_set_limits(char* line, uint32_t length) {
         value_limit_max, setpoint_slewrate);
 }
 
+
 void cmd_feedback_get_limits(char* line, uint32_t length) {
     char name[FBC_NAME_LEN];
     sscanf(line, "%s", &name);
@@ -314,6 +328,7 @@ void cmd_settings_load(char* line, uint32_t length) {
     uart_printf(">loaded\n");
 }
 
+
 void cmd_settings_set_to_factory(char* line, uint32_t length) {
 
     settings_set_to_factory();
@@ -326,6 +341,7 @@ void cmd_settings_save(char* line, uint32_t length) {
     settings_write();
     uart_printf(">saved\n");
 }
+
 
 void cmd_settings_print(char* line, uint32_t length) {
 
@@ -340,6 +356,7 @@ void cmd_safety_status(char* line, uint32_t length) {
     uart_printf("\n");
 }
 
+
 void cmd_safety_read_channel(char* line, uint32_t length) {
 
     uint32_t channel;
@@ -349,6 +366,7 @@ void cmd_safety_read_channel(char* line, uint32_t length) {
     safety_print_channel(channel);
     uart_printf("\n");
 }
+
 
 void cmd_safety_set_channel(char* line, uint32_t length) {
 
@@ -361,6 +379,7 @@ void cmd_safety_set_channel(char* line, uint32_t length) {
     uart_printf("\n");
 }
 
+
 void cmd_calibration_read_channel(char* line, uint32_t length) {
     uint32_t channel;
 
@@ -370,6 +389,7 @@ void cmd_calibration_read_channel(char* line, uint32_t length) {
     calibration_print_channel(channel);
     uart_printf("\n");
 }
+
 
 void cmd_calibration_set_channel(char* line, uint32_t length) {
     uint32_t channel;
@@ -391,6 +411,3 @@ void cmd_calibration_set_channel(char* line, uint32_t length) {
 
     uart_printf(">ok\n");
 }
-
-
-

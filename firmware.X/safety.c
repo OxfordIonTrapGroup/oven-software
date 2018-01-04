@@ -1,4 +1,3 @@
-
 #include <string.h>
 #include <stdio.h>
 #include "hardware_profile.h"
@@ -42,6 +41,7 @@ uint32_t safety_error_records[2];
 uint32_t on_time_started[2];
 uint32_t on_time_start_times[2];
 
+
 // Initialise the safety routines
 void safety_config() {
 
@@ -62,12 +62,14 @@ void safety_config() {
     safety_error_records[1] = 0;
 }
 
+
 // Update the watchdog timer
 void safety_clear_watchdog() {
     asm volatile("di");
     *wd_clear_pointer = 0x5743;
     asm volatile("ei");
 }
+
 
 void safety_print_errors() {
     uint32_t i;
@@ -87,6 +89,7 @@ void safety_print_errors() {
         uart_printf(", ");
     }
 }
+
 
 // Check for oven safety
 // Should be called after ADC samples have been calibrated
@@ -160,6 +163,7 @@ void safety_print_channel(uint32_t channel) {
 
 }
 
+
 // Set the given parameter
 void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
 
@@ -223,4 +227,3 @@ void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
         uart_printf(">success");
     }
 }
-

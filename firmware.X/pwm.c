@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <stdint.h>
@@ -13,6 +12,7 @@ uint16_t pwm_duty[2] = {0,0};
 
 #define PWM_0_REG OC5RS
 #define PWM_1_REG OC4RS
+
 
 void __ISR(_TIMER_3_VECTOR, IPL4AUTO) t3_interrupt() {
     pwm_decimation_counter--;
@@ -91,6 +91,7 @@ void pwm_config() {
     OC4CONbits.ON = 1;
 }
 
+
 void pwm_enable(uint32_t channel) {
     if(channel == 0) {
         OC5CONbits.ON = 1;
@@ -98,6 +99,7 @@ void pwm_enable(uint32_t channel) {
         OC4CONbits.ON = 1;
     }
 }
+
 
 void pwm_disable(uint32_t channel) {
     if(channel == 0) {

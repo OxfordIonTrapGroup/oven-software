@@ -1,4 +1,3 @@
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -54,15 +53,18 @@ controller_t* fbc_init(char* name, uint32_t index) {
     return c;
 }
 
+
 // Enable feedback controller
 void fbc_enable(controller_t* c) {
     c->enabled = 1;
 }
 
+
 // Disable feedback controller
 void fbc_disable(controller_t* c) {
     c->enabled = 0;
 }
+
 
 controller_t* fbc_get_by_name(char* name) {
     // Get a feedback controller by name
@@ -88,6 +90,7 @@ uint32_t fbc_check_limits(controller_t* c) {
         return 1;
     return 0;
 }
+
 
 // Update the feedback control loop
 void fbc_update(controller_t* c) {
@@ -188,25 +191,34 @@ void fbc_update(controller_t* c) {
 }
 
 
+
+
 // Controller instances
 
 
 controller_t* current_controller_0 = NULL;
 controller_t* current_controller_1 = NULL;
 
+
 void current_controller_setter_0(float new_cv) {
     pwm_set_duty(0, new_cv);
 }
+
+
 void current_controller_setter_1(float new_cv) {
     pwm_set_duty(1, new_cv);
 }
 
+
 float current_controller_getter_0() {
     return calibrated_oven[0].current;
 }
+
+
 float current_controller_getter_1() {
     return calibrated_oven[1].current;
 }
+
 
 void configure_current_controller_0() {
 
@@ -217,6 +229,8 @@ void configure_current_controller_0() {
     current_controller_0->cv_setter = current_controller_setter_0;
     current_controller_0->value_getter = current_controller_getter_0;
 }
+
+
 void configure_current_controller_1() {
 
     // Configure the current feedback controller
@@ -228,16 +242,21 @@ void configure_current_controller_1() {
 }
 
 
+
+
 //////
 
 controller_t* temperature_controller_0 = NULL;
 controller_t* temperature_controller_1 = NULL;
+
 
 // The temperature controller regulates the setpoint
 // of the current controller
 void temperature_controller_setter_0(float new_cv) {
     current_controller_0->target_setpoint = new_cv*new_cv;
 }
+
+
 void temperature_controller_setter_1(float new_cv) {
     current_controller_1->target_setpoint = new_cv*new_cv;
 }
@@ -246,9 +265,12 @@ void temperature_controller_setter_1(float new_cv) {
 float temperature_controller_getter_0() {
     return calibrated_oven[0].temperature;
 }
+
+
 float temperature_controller_getter_1() {
     return calibrated_oven[1].temperature;
 }
+
 
 void configure_temperature_controller_0() {
     temperature_controller_0 = fbc_init("temperature_0", 2);
@@ -256,6 +278,8 @@ void configure_temperature_controller_0() {
     temperature_controller_0->cv_setter = temperature_controller_setter_0;
     temperature_controller_0->value_getter = temperature_controller_getter_0;
 }
+
+
 void configure_temperature_controller_1() {
     temperature_controller_1 = fbc_init("temperature_1", 3);
 
@@ -272,11 +296,13 @@ void configure_controllers() {
     configure_temperature_controller_1();
 }
 
+
+
+
 /////////////////////
 
 
 void update_controllers() {
-
     fbc_update(current_controller_0);
     fbc_update(current_controller_1);
     fbc_update(temperature_controller_0);

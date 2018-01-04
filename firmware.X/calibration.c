@@ -1,4 +1,3 @@
-
 #include <string.h>
 #include "settings.h"
 #include "calibration.h"
@@ -15,6 +14,7 @@
 #define CHANNEL_1_OVEN_VOLTAGE 7
 
 calibrated_values_t calibrated_oven[2];
+
 
 // Update the calibrated data values from last_samples_float
 // This should be called directly after the ADC has been read out
@@ -68,6 +68,7 @@ void calibration_update_samples() {
         + settings.calibration_data[1].oven_voltage_offset;
 }
 
+
 void calibration_print_channel(uint32_t channel) {
 
     if(channel != 0)
@@ -85,6 +86,7 @@ void calibration_print_channel(uint32_t channel) {
         settings.calibration_data[channel].temperature_current_coefficient);
 }
 
+
 void calibration_set_channel(uint32_t channel,\
     calibration_data_t* new_calibration) {
 
@@ -95,5 +97,3 @@ void calibration_set_channel(uint32_t channel,\
         (void*)new_calibration, sizeof(calibration_data_t));
 
 }
-
-
