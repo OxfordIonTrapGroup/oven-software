@@ -3,14 +3,13 @@
 
 import atomic_oven_controller
 import argparse
-import cPickle as pickle
+import artiq.protocols.pyon as pyon
 
 parser = argparse.ArgumentParser()
 parser.add_argument("file")
 args = parser.parse_args()
 
-with open(args.file, "r") as f:
-     settings = pickle.load(f)
+settings = pyon.load_file(args.file)
 
 print(settings)
 
