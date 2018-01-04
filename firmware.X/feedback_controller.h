@@ -1,7 +1,4 @@
-
-#ifndef _FEEDBACK_CONTROLLER_H
-#define _FEEDBACK_CONTROLLER_H
-
+#pragma once
 
 typedef struct {
     // PID gains
@@ -75,5 +72,3 @@ extern controller_t* fbc_get_by_name(char* name);
 
 
 extern void configure_controllers();
-
-#endif

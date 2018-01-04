@@ -1,6 +1,4 @@
-
-#ifndef _AD7770_H    
-#define _AD7770_H
+#pragma once
 
 extern void adc_config();
 
@@ -21,6 +19,3 @@ extern uint32_t last_samples[8];
 extern int32_t last_samples_signed[8];
 extern float last_samples_float[8];
 extern uint32_t adc_crc_failure_count;
-
-
-#endif

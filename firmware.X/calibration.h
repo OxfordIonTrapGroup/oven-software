@@ -1,6 +1,4 @@
-
-#ifndef _CALIBRATION_H
-#define _CALIBRATION_H
+#pragma once
 
 #include <stdint.h>
 
@@ -41,5 +39,3 @@ extern void calibration_update_samples();
 extern void calibration_print_channel(uint32_t channel);
 extern void calibration_set_channel(uint32_t channel,\
     calibration_data_t* new_calibration);
-
-#endif

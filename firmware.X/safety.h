@@ -1,7 +1,4 @@
-
-
-#ifndef _SAFETY_H
-#define _SAFETY_H
+#pragma once
 
 #include <stdint.h>
 
@@ -36,5 +33,3 @@ extern void safety_check();
 
 extern void safety_print_channel(uint32_t channel);
 extern void safety_set_channel(uint32_t channel, char* key_name, char* key_value);
-
-#endif

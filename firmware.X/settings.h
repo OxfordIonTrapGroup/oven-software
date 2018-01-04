@@ -1,6 +1,4 @@
-
-#ifndef _SETTINGS_H
-#define _SETTINGS_H
+#pragma once
 
 #include <stdint.h>
 #include "feedback_controller.h"
@@ -32,6 +30,3 @@ extern void nvm_clear_errors();
 extern void nvm_erase_page(void* page_address);
 extern void nvm_program_word(void* destination, uint32_t value);
 extern void nvm_program(void* destination, void* data, uint32_t n_bytes);
-
-
-#endif

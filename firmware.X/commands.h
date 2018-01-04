@@ -1,6 +1,4 @@
-
-#ifndef _COMMANDS_H    
-#define _COMMANDS_H
+#pragma once
 
 #define CMD_ECHO                        "echo"
 #define CMD_VERSION                     "version"
@@ -33,5 +31,3 @@
 
 #define CMD_CALIBRATION_READ_CHANNEL "calibration_read_channel"
 #define CMD_CALIBRATION_SET_CHANNEL "calibration_set_channel"
-
-#endif
