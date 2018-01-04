@@ -1,4 +1,3 @@
-
 #include "hardware_profile.h"
 
 #include <math.h>
@@ -9,6 +8,7 @@
 #include "feedback_controller.h"
 #include "pwm.h"
 #include "timer.h"
+#include "leds.h"
 
 #pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
 #pragma config FPLLRNG = RANGE_5_10_MHZ
@@ -29,15 +29,8 @@
 void ins_read_next();
 
 void main() {
-    
-    // Configure the status light
-    ANSELEbits.ANSE5 = 0;
-    TRISEbits.TRISE5 = 0;
-    LATEbits.LATE5 = 0;
-    //LATEbits.LATE5 = !RCONbits.WDTO;
-
+    leds_config();
     timer_config();
-
     uart_config();
     safety_config();
 
@@ -57,20 +50,18 @@ void main() {
     uint32_t last_time = 0;
 
     while(1) {
-
         // Clear the watchdog timer
         safety_clear_watchdog();
 
-        if((sys_time % 1000) >= 500)
-            LATEbits.LATE5 = 1;
-        else
-            LATEbits.LATE5 = 0;
-
-        if(sys_time != last_time) {
-            LATEbits.LATE5 = !LATEbits.LATE5;
-            last_time = sys_time;
+        if((sys_time % 1000) >= 500) {
+            leds_status_set(1);
+            // leds_channel_set(0,1);
+            // leds_channel_set(1,1);
+        }else{
+            leds_status_set(0);
+            // leds_channel_set(0,0);
+            // leds_channel_set(1,0);
         }
-
 
         ins_read_next();
     }
