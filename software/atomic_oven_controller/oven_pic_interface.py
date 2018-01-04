@@ -340,7 +340,7 @@ class OvenPICInterface:
         p = config['p']
         i = config['i']
         d = config['d']
-        sample_decimation = config['sample_decimation']
+        sample_decimation = int(config['sample_decimation'])
 
         line = c.CMD_FEEDBACK_SET_CONFIG \
             + " {:s} {:f} {:f} {:f} {:d}".format(
