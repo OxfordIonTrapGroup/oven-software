@@ -23,8 +23,8 @@ def reset_pic():
 class PICError(Exception):
     pass
 
-class OvenPICInterface:
 
+class OvenPICInterface:
     # Baud rate for the command and data ports
     _command_baudrate = 410000
     _data_baudrate = 410000
@@ -100,7 +100,6 @@ class OvenPICInterface:
 
         return response
 
-
     def _streaming_thread_exec(self):
         """This is executed in a separate thread to read out the data port"""
 
@@ -116,7 +115,6 @@ class OvenPICInterface:
             time.sleep(self._streaming_poll_time)
 
     def _process_channel_data(self, channel_array):
-
         values = np.bitwise_and(channel_array, 0x7FFFFF).astype('int32')
         # Generate logical array of signs (+ = 0, - = 1)
         signs  = np.bitwise_and(channel_array, 1 << 23) != 0 
@@ -152,7 +150,6 @@ class OvenPICInterface:
             target=self._streaming_thread_exec,
             daemon=True,
             )
-
 
         version = self.get_version()
         print("Connected to PIC, firmware version: " + version)
@@ -340,7 +337,6 @@ class OvenPICInterface:
         return results
 
     def fb_set_config(self, name, config):
-
         p = config['p']
         i = config['i']
         d = config['d']
@@ -413,16 +409,20 @@ class OvenPICInterface:
         limits['setpoint_slewrate'] = float(next(response_split))
         return limits
 
-    def settings_load(self):
+    def settings_reload(self):
+        """Reload settings from flash"""
         self._send_command(c.CMD_SETTINGS_LOAD)
 
     def settings_set_to_factory(self):
+        """Reset settings to factory defaults"""
         self._send_command(c.CMD_SETTINGS_SET_TO_FACTORY)
 
     def settings_save(self):
+        """Save current settings to flash"""
         self._send_command(c.CMD_SETTINGS_SAVE)
 
     def settings_print(self):
+        """Dump out all current settings"""
         response = self._send_command(c.CMD_SETTINGS_PRINT)
         return response
 
@@ -454,7 +454,6 @@ class OvenPICInterface:
         return safety_settings
 
     def safety_set_channel(self, channel, key_name, key_value):
-
         line = c.CMD_SAFETY_SET_CHANNEL + " {:d} ".format(channel)
         line += key_name + " {:g}".format(key_value)
         response = self._send_command(line)
@@ -499,3 +498,31 @@ class OvenPICInterface:
 
         response = self._send_command(line)
 
+    def settings_read(self):
+        """Read all user configurable settings to a dictionary"""
+        settings = {}
+        settings["cals"] = {}
+        settings["safetys"] = {}
+        settings["configs"] = {}
+        settings["limits"] = {}
+        for ch in range(2):
+            settings["cals"][ch] = self.calibration_read_channel(ch)
+            settings["safetys"][ch] = self.safety_read_channel(ch)
+        for name in ["current_0", "current_1",
+                     "temperature_0", "temperature_1"]:
+            settings["configs"][name] = self.fb_get_config(name)
+            settings["limits"][name] = self.fb_get_limits(name)
+        return settings
+
+    def settings_write(self, settings):
+        """Set all user configurable settings from a dictionary. These are not
+        programmed into flash hence are volatile. To save these settings to
+        flash call settings_save()"""
+        for ch in range(2):
+            self.calibration_set_channel(ch, settings["cals"][ch])
+            for k,v in settings["safetys"][ch].items():
+                self.safety_set_channel(ch, k, v)
+        for name in ["current_0", "current_1",
+                     "temperature_0", "temperature_1"]:
+            self.fb_set_config(name, settings["configs"][name])
+            self.fb_set_limits(name, settings["limits"][name])
