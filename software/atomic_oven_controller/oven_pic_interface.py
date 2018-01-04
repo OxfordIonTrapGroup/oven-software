@@ -26,8 +26,8 @@ class PICError(Exception):
 class OvenPICInterface:
 
     # Baud rate for the command and data ports
-    _command_baudrate = 900000
-    _data_baudrate = 900000
+    _command_baudrate = 410000
+    _data_baudrate = 410000
 
     # How long to wait between polling the data port
     _streaming_poll_time = 0.1
