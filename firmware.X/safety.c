@@ -8,16 +8,28 @@
 #include "timer.h"
 
 /*
-
 Oven safety scheme:
 
--> over-temperature shutdown
--> under-temperature shutdown
--> over-current shutdown
--> maximum on-time
--> watchdog timer
-
-
+* over-temperature shutdown:
+    If any calibrated temperature sample is above the limit shutdown the PWM.
+    This protects against thermocouple faults, temperature typos (!), and
+    oscillating PI controllers.
+* under-temperature shutdown:
+    If any calibrated temperature sample is below the limit shutdown the PWM.
+    This protects against thermocouple faults, and inverted thermocouples
+    giving positive feedback.
+* over-current shutdown:
+    If any calibrated current sample is above the limit shutdown the PWM.
+    This protects against oscillating PI controllers or miscalibrated
+    temperature sensors.
+* maximum on-time:
+    If the time the duty-cycle has been non-zero is above the limit shutdown the
+    PMW. This protects against communication bugs, the Beaglebone crashing, or
+    any other upstream programming errors
+* watchdog timer:
+    The watchdog is kicked in the main processing loop. If it is not kicked 
+    for more than 128 ms the PIC is reset. This protects against runaway code or
+    infinite loops in the command handling logic.
 */
 
 
@@ -44,7 +56,6 @@ uint32_t on_time_start_times[2];
 
 // Initialise the safety routines
 void safety_config() {
-
     wd_clear_pointer = (uint16_t*)0xBF800800 + 1;
 
     // Initialise the watchdog timer
@@ -94,11 +105,10 @@ void safety_print_errors() {
 // Check for oven safety
 // Should be called after ADC samples have been calibrated
 void safety_check() {
-
     uint32_t i;
 
     for(i=0; i<2; i++) {
-
+        // Check oven temperature against min and max limits
         if(!settings.safety_settings.oven_temperature_check_disabled[i]) {
             if(calibrated_oven[i].temperature > \
                 settings.safety_settings.oven_temperature_max[i]) {
@@ -111,6 +121,7 @@ void safety_check() {
             }
         }
 
+        // Check oven current against max
         if(!settings.safety_settings.oven_current_check_disabled[i]) {
             if(calibrated_oven[i].current > \
                 settings.safety_settings.oven_current_max[i]) {
@@ -119,6 +130,7 @@ void safety_check() {
             }
         }
 
+        // Check oven run-time against max
         if(!settings.safety_settings.on_time_check_disabled[i]) {
             // While the oven is turned on, increment the counter
             // and die if needed
@@ -145,7 +157,6 @@ void safety_check() {
 
 // Print out the safety parameters for a given channel
 void safety_print_channel(uint32_t channel) {
-
     if(channel > 1) {
         uart_printf("Bad channel");
     }
@@ -160,13 +171,11 @@ void safety_print_channel(uint32_t channel) {
     uart_printf(" %i %i", settings.safety_settings.on_time_max[channel],\
         settings.safety_settings.on_time_check_disabled[channel]);
     uart_printf(" %g", settings.safety_settings.duty_max[channel]);
-
 }
 
 
 // Set the given parameter
 void safety_set_channel(uint32_t channel, char* key_name, char* key_value) {
-
     float value;
     sscanf(key_value, "%g", &value);
 
