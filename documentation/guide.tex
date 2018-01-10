@@ -11,12 +11,50 @@
 
 \begin{document}
 
-\title{Atomic oven testing guide}
+\title{Fast oven controller guide}
 \date{\today}
 
 \maketitle
 
-\section{Wiring}
+
+\section{Safety interlocks}
+There are several layers of interlock that should protect us from unintentionally
+demolishing our ovens.
+
+The first layer of interlock sets an error flag and disables the PWM module if a
+fault condition is detected. If the PWM module is disabled, the PIC pin reverts
+to an input. The H-bridge driver detects this (pull to mid-rail) and shuts down,
+safeing the system. The conditions that trigger this interlock are:
+\begin{itemize}
+\item \textbf{Temperature:}
+If any temperature reading is outside the valid range. This protects
+against thermocouple faults (open, short, inverted), temperature typos (!), and
+oscillating PI controllers.
+\item \textbf{Current:}
+If any current readying is above the limit. This protects against
+oscillating PI controllers or gross temperature errors.
+\item \textbf{Burn time:}
+If the duty-cycle has been non-zero for longer than the limit. This stops the
+oven burning forever if there are communication bugs, the Beaglebone crashes, or
+the controlling experiment crashes.
+\item \textbf{ADC CRC:}
+If several ADC data CRCs fail in a given time window. If the CRC fails the data
+is skipped. This means that we cannot continuously skip on bad data.
+\end{itemize}
+If one of these errors occurs, the PWM is not enabled until the PIC is reset.
+Note that by default the PIC is reset at the start of each oven burn cycle.
+
+The second layer of interlock ensures that the command processing logic is
+intact. The watchdog is kicked in the main processing loop. If it is not kicked 
+for more than 128 ms the PIC is reset. This protects against runaway code or
+infinite loops in the command handling logic.
+
+The final layer of interlock is built into the Artiq RPC server running on the
+BeagleBone. The caller must kick the RPC server every 20s to keep the oven running,
+otherwise the oven controller turns itself off.
+
+
+\section{HOA2 wiring}
 
 On the PCB the two output channels are named \textit{0} and \textit{1}, with \textit{0} being the channel furthest away from the beagle bone. In the HOA2 systems, oven \textit{0} should be filled with calcium and oven \textit{1} with strontium.\footnote{This is because oven \textit{1} has fewer conductors so is less suitable for calcium which has a higher operating temperature. This is a very mild preference.}
 
