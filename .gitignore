@@ -6,3 +6,9 @@ firmware.X/nbproject/Package-default.bash
 
 software/atomic_oven_controller.egg-info
 software/atomic_oven_controller/__pycache__
+
+*.aux
+*.log
+*.synctex.gz
+*.pdf
+*.pkl
