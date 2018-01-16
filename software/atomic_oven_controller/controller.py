@@ -54,7 +54,6 @@ class OvenController:
 
     def turn_off(self, channel):
         """Turn off the oven"""
-
         channel_id = self._channel_sanitiser(channel)
 
         # Set the temperature setpoint to 20 C
@@ -101,7 +100,7 @@ def get_argparser():
     verbosity_args(parser)
     for ch in ["0","1"]:
         parser.add_argument("--ch"+ch,
-                            default="ch"+ch+",0"
+                            default="ch"+ch+",0",
                             help="<name>,<temperature> for channel "+ch)
     return parser
 
