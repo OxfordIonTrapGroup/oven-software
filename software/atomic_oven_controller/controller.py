@@ -1,30 +1,24 @@
+import argparse
+from artiq.protocols.pc_rpc import simple_server_loop
+from artiq.tools import *
 
-#from . import oven_pic_interface
 from atomic_oven_controller import oven_pic_interface
 
-class OvenController:
 
-    def __init__(self, channel_0_name, channel_0_temperature,
-            channel_1_name, channel_1_temperature):
+class OvenController:
+    def __init__(self, names, temperatures):
         """Intialise the oven rpc controller.
-        channel_0_temperature and channel_1_temperature are the temperature
-        setpoints for the respective channels,"""
+        names and temperatures are two-element lists containing the names 
+        and temperature setpoints for channels 0 and 1"""
 
         # Initialise the HAL
         self.pic = oven_pic_interface.OvenPICInterface()
 
-        # Bool to tell if we are currently loading
-        self.loading = False
-
         # Names of the channels
-        self.names = [
-            channel_0_name.lower(),
-            channel_1_name.lower()]
+        self.names = [name.lower() for name in names]
 
         # Temperature setpoints to use when the oven channels are turned on
-        self.temperature_setpoints = [
-            channel_0_temperature,
-            channel_1_temperature]
+        self.temperature_setpoints = temperatures
 
     def _channel_sanitiser(self, channel):
         if channel.lower() == self.names[0]:
@@ -40,11 +34,9 @@ class OvenController:
 
     def turn_on(self, channel):
         """Turn the oven channel on to the set temperature"""
-
         channel_id = self._channel_sanitiser(channel)
 
-
-		# Zero the current setpoint
+        # Zero the current setpoint
         self.pic.fb_set_setpoint(
             "current_{}".format(channel_id),
             0)
@@ -59,7 +51,6 @@ class OvenController:
 
         # Start temperature feedback
         self.pic.fb_start("temperature_{}".format(channel_id))
-
 
     def turn_off(self, channel):
         """Turn off the oven"""
@@ -84,7 +75,6 @@ class OvenController:
 
         # Turn pwm off
         self.pic.set_pwm_duty(channel_id, 0)
-     
 
     def read_status(self, channel):
         """Read the current and temperature of a given channel
@@ -99,27 +89,42 @@ class OvenController:
         return temperature, current
 
     def close(self):
+        self.turn_off("ca")
+        self.turn_off("sr")
 
-    	self.turn_off("ca")
-    	self.turn_off("sr")
 
-import argparse
-from artiq.protocols.pc_rpc import simple_server_loop
-from artiq.tools import *
+
 
 def get_argparser():
     parser = argparse.ArgumentParser()
     simple_network_args(parser, 4000)
     verbosity_args(parser)
+    for ch in ["0","1"]:
+        parser.add_argument("--ch"+ch,
+                            default="ch"+ch+",0"
+                            help="<name>,<temperature> for channel "+ch)
     return parser
 
 def main():
     args = get_argparser().parse_args()
     init_logger(args)
-    product = 'atomic_oven_controller'
-    dev = OvenController("ca", 200, "sr" , 100)
+
+    def parse_channel(ch, s):
+        parts = s.split(s)
+        assert len(parts)==2
+        name = parts[0]
+        temp = float(parts[1])
+        print("Channel {} : name = {}, temperature = {}".format(ch, name, temp))
+        return name, temp
+
+    ch0_config = parse_channel("0", args.ch0)
+    ch1_config = parse_channel("1", args.ch1)
+
+    chs = [ch0_config, ch1_config]
+
+    dev = OvenController([ch[0] for ch in chs], [ch[1] for ch in chs])
     try:
-        simple_server_loop({product: dev},
+        simple_server_loop({"atomic_oven_controller": dev},
             bind_address_from_args(args), args.port)
     finally:
         dev.close()
