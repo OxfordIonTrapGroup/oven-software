@@ -426,9 +426,23 @@ class OvenPICInterface:
         response = self._send_command(c.CMD_SETTINGS_PRINT)
         return response
 
-    def safety_status(self, print_output=True):
+    def safety_status(self, print_output=False):
+        """Get list of status flags for channel 0 and 1. Any True flags indicate
+        errors that have tripped the interlock"""
         response = self._send_command(c.CMD_SAFETY_STATUS)
-        print(response)
+        if print_output:
+            print(response)
+        responses = response.decode().split(",")
+        statuses = []
+        for ch, s in zip(range(2), responses):
+            status = {}
+            for err in ["over-current",
+                        "over-temperature",
+                        "over-time",
+                        "under-temperature"]:
+                status[err] = err in s
+            statuses.append(status)
+        return statuses
 
     def safety_read_channel(self, channel):
         line = c.CMD_SAFETY_READ_CHANNEL + " {:d}".format(channel)
