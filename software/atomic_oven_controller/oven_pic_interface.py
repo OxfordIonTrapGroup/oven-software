@@ -433,6 +433,7 @@ class OvenPICInterface:
         if print_output:
             print(response)
         responses = response.decode().split(",")
+        assert len(responses) == 2
         statuses = []
         for ch, s in zip(range(2), responses):
             status = {}
