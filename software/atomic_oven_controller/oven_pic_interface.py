@@ -433,9 +433,9 @@ class OvenPICInterface:
         if print_output:
             print(response)
         responses = response.decode().split(",")
-        assert len(responses) == 2
+        assert len(responses) == 3
         statuses = []
-        for ch, s in zip(range(2), responses):
+        for ch, s in zip(range(2), responses[0:2]):
             status = {}
             for err in ["over-current",
                         "over-temperature",
