@@ -126,11 +126,11 @@ void safety_check() {
             if(calibrated_oven[i].temperature > \
                 settings.safety_settings.oven_temperature_max[i]) {
                 safety_error_records[i] |= SAFETY_ERROR_OVERTEMPERATURE;
-                pwm_disable(i);
+                pwm_shutdown();
             } else if(calibrated_oven[i].temperature < \
                 settings.safety_settings.oven_temperature_min[i]) {
                 safety_error_records[i] |= SAFETY_ERROR_UNDERTEMPERATURE;
-                pwm_disable(i);
+                pwm_shutdown();
             }
         }
 
@@ -139,7 +139,7 @@ void safety_check() {
             if(calibrated_oven[i].current > \
                 settings.safety_settings.oven_current_max[i]) {
                 safety_error_records[i] |= SAFETY_ERROR_OVERCURRENT;
-                pwm_disable(i);
+                pwm_shutdown();
             }
         }
 
@@ -158,7 +158,7 @@ void safety_check() {
                         settings.safety_settings.on_time_max[i];
                     if(sys_time >= time_to_die) {
                         safety_error_records[i] |= SAFETY_ERROR_OVERTIME;
-                        pwm_disable(i);
+                        pwm_shutdown();
                     }
                 }
             } else {
@@ -171,7 +171,7 @@ void safety_check() {
         if(pwm_duty[i] > 0) {
             if(adc_crc_failure_count - adc_crc_failure_count_started > 
                     ADC_CRC_MAX_FAILURES) {
-                pwm_disable(i);
+                pwm_shutdown();
                 safety_error_records[i] |= SAFETY_ERROR_ADC_CRC;
             }
         }

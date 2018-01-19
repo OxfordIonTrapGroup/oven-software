@@ -120,3 +120,10 @@ void pwm_disable(uint32_t channel) {
     }
     _make_channel_led_consistent(channel);
 }
+
+
+// Called to shutdown all PWM channels unambiguously in case of emergency
+void pwm_shutdown() {
+    pwm_disable(0);
+    pwm_disable(1);
+}
