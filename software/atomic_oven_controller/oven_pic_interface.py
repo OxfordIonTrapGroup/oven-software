@@ -440,7 +440,8 @@ class OvenPICInterface:
             for err in ["over-current",
                         "over-temperature",
                         "over-time",
-                        "under-temperature"]:
+                        "under-temperature",
+                        "adc-crc"]:
                 status[err] = err in s
             statuses.append(status)
         return statuses
