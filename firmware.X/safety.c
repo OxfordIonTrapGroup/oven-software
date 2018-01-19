@@ -6,6 +6,7 @@
 #include "safety.h"
 #include "pwm.h"
 #include "timer.h"
+#include "AD7770.h"
 
 /*
 Oven safety scheme:
@@ -30,6 +31,9 @@ Oven safety scheme:
     The watchdog is kicked in the main processing loop. If it is not kicked 
     for more than 128 ms the PIC is reset. This protects against runaway code or
     infinite loops in the command handling logic.
+* ADC CRC:
+    If more than ADC_CRC_MAX_FAILURES ADC CRC failures occur during any one
+    oven burn shutdown the PWM.
 */
 
 
@@ -42,6 +46,7 @@ uint32_t safety_error_records[2];
 #define SAFETY_ERROR_OVERTEMPERATURE 0x02
 #define SAFETY_ERROR_OVERTIME        0x04
 #define SAFETY_ERROR_UNDERTEMPERATURE 0x08
+#define SAFETY_ERROR_ADC_CRC         0x10
 
 // Local variables used to record on-times
 // When the duty cycle > 0, on_time_started is set to 1
@@ -52,6 +57,12 @@ uint32_t safety_error_records[2];
 //  is reset to 0
 uint32_t on_time_started[2];
 uint32_t on_time_start_times[2];
+
+// Local variable used to record the total CRC failure count when any duty cycle
+// goes above zero. If more than ADC_CRC_MAX_FAILURES occur during any one oven
+// burn the interlock is tripped.
+uint32_t adc_crc_failure_count_started;
+#define ADC_CRC_MAX_FAILURES (1)
 
 
 // Initialise the safety routines
@@ -67,10 +78,10 @@ void safety_config() {
     // Clear reset status flags
     RCON = 0;
 
-    //*wd_clear_pointer = 0x5743;
-
     safety_error_records[0] = 0;
     safety_error_records[1] = 0;
+
+    adc_crc_failure_count_started = 0;
 }
 
 
@@ -95,6 +106,8 @@ void safety_print_errors() {
             uart_printf(" over-time");
         if(safety_error_records[i] & SAFETY_ERROR_UNDERTEMPERATURE)
             uart_printf(" under-temperature");
+        if(safety_error_records[i] & SAFETY_ERROR_ADC_CRC)
+            uart_printf(" adc-crc");
         if(safety_error_records[i] == 0)
             uart_printf(" no-errors");
         uart_printf(", ");
@@ -136,8 +149,10 @@ void safety_check() {
             // and die if needed
             if(pwm_duty[i] > 0) {
                 if(on_time_started[i] == 0) {
+                    // Oven just turned on
                     on_time_started[i] = 1;
                     on_time_start_times[i] = sys_time;
+                    adc_crc_failure_count_started = adc_crc_failure_count;
                 } else {
                     uint32_t time_to_die = on_time_start_times[i] + \
                         settings.safety_settings.on_time_max[i];
@@ -149,6 +164,15 @@ void safety_check() {
             } else {
                 // If the output is off, then reset the on_time_started flag
                 on_time_started[i] = 0;
+            }
+        }
+
+        // ADC CRC failure check
+        if(pwm_duty[i] > 0) {
+            if(adc_crc_failure_count - adc_crc_failure_count_started > 
+                    ADC_CRC_MAX_FAILURES) {
+                pwm_disable(i);
+                safety_error_records[i] |= SAFETY_ERROR_ADC_CRC;
             }
         }
     }
