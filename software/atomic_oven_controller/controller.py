@@ -193,7 +193,7 @@ def main():
         assert len(parts)==2
         name = parts[0]
         temp = float(parts[1])
-        print("Channel {} : name = {}, temperature = {}".format(ch, name, temp))
+        logger.info("Channel {} : name = {}, temperature = {}".format(ch, name, temp))
         return name, temp
 
     ch0_config = parse_channel("0", args.ch0)
