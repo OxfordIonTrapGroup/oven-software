@@ -1,4 +1,5 @@
 #include "hardware_profile.h"
+#include "safety.h"
 #include <stdint.h>
 
 uint32_t sys_time;
@@ -7,6 +8,8 @@ uint32_t sys_time;
 void __ISR(_TIMER_4_VECTOR, IPL1AUTO) t4_interrupt() {
     IFS0bits.T4IF = 0; // Clear T4 interrupt
     sys_time += 1;
+
+    safety_timer();
 }
 
 

@@ -18,4 +18,5 @@ extern void adc_streaming_stop();
 extern uint32_t last_samples[8];
 extern int32_t last_samples_signed[8];
 extern float last_samples_float[8];
+extern uint32_t adc_sample_index;
 extern uint32_t adc_crc_failure_count;

@@ -47,6 +47,7 @@ uint32_t safety_error_records[2];
 #define SAFETY_ERROR_OVERTIME        0x04
 #define SAFETY_ERROR_UNDERTEMPERATURE 0x08
 #define SAFETY_ERROR_ADC_CRC         0x10
+#define SAFETY_ERROR_ADC_SAMPLING    0x20
 
 // Local variables used to record on-times
 // When the duty cycle > 0, on_time_started is set to 1
@@ -63,6 +64,14 @@ uint32_t on_time_start_times[2];
 // burn the interlock is tripped.
 uint32_t adc_crc_failure_count_started;
 #define ADC_CRC_MAX_FAILURES (1)
+
+// Local variables used to ensure the ADC sampling interrupt is running at the
+// same rate as the safety_timer() interrupt loop. adc_sample_unchanged_count
+// counts how many times the ADC sample index has not changed. If this increases
+// past ADC_SAMPLE_MAX_UNCHANGED_COUNT the interlock is tripped.
+uint32_t adc_sample_index_last;
+uint32_t adc_sample_unchanged_count;
+#define ADC_SAMPLE_MAX_UNCHANGED_COUNT (2)
 
 
 // Initialise the safety routines
@@ -82,6 +91,9 @@ void safety_config() {
     safety_error_records[1] = 0;
 
     adc_crc_failure_count_started = 0;
+
+    adc_sample_index_last = 0;
+    adc_sample_unchanged_count = 0;
 }
 
 
@@ -108,6 +120,8 @@ void safety_print_errors() {
             uart_printf(" under-temperature");
         if(safety_error_records[i] & SAFETY_ERROR_ADC_CRC)
             uart_printf(" adc-crc");
+        if(safety_error_records[i] & SAFETY_ERROR_ADC_SAMPLING)
+            uart_printf(" adc-sampling");
         if(safety_error_records[i] == 0)
             uart_printf(" no-errors");
         uart_printf(", ");
@@ -116,7 +130,7 @@ void safety_print_errors() {
 
 
 // Check for oven safety
-// Should be called after ADC samples have been calibrated
+// Called after ADC samples have been calibrated from ADC interrupt loop
 void safety_check() {
     uint32_t i;
 
@@ -176,6 +190,25 @@ void safety_check() {
             }
         }
     }
+}
+
+
+// Called from an auxiliary 1 kHz interrupt loop to check the ADC read triggered
+// interrupt loop is still running
+void safety_timer()
+{
+    if(adc_sample_index_last != adc_sample_index) {
+        // Sample index has changed - everything is OK
+        adc_sample_unchanged_count = 0;
+    } else {
+        adc_sample_unchanged_count ++;
+        if(adc_sample_unchanged_count > ADC_SAMPLE_MAX_UNCHANGED_COUNT) {
+            pwm_shutdown();
+            safety_error_records[0] |= SAFETY_ERROR_ADC_SAMPLING;
+            safety_error_records[1] |= SAFETY_ERROR_ADC_SAMPLING;
+        }
+    }
+    adc_sample_index_last = adc_sample_index;
 }
 
 

@@ -30,6 +30,7 @@ typedef struct {
 extern void safety_config();
 extern void safety_clear_watchdog();
 extern void safety_check();
+extern void safety_timer();
 
 extern void safety_print_channel(uint32_t channel);
 extern void safety_set_channel(uint32_t channel, char* key_name, char* key_value);

@@ -46,7 +46,6 @@ void adc_streaming_start(uint8_t channels) {
     if( channels == 0 ) {
         adc_streaming_stop();
     } else {
-        //ins_enable_streaming();
         streaming_decimation_counter = 0;
         streaming_channels = channels;
     }
@@ -55,8 +54,6 @@ void adc_streaming_start(uint8_t channels) {
 
 void adc_streaming_stop() {
     streaming_channels = 0;
-    
-    //ins_disable_streaming();
 }
 
 
@@ -67,6 +64,7 @@ void adc_set_streaming_decimation(uint32_t decimation) {
 
 void adc_streaming_interrupt() {
     int i;
+
     if(streaming_decimation > 0) {
         // If we need to decimate
         if(streaming_decimation_counter != 0) {
@@ -78,11 +76,9 @@ void adc_streaming_interrupt() {
             streaming_decimation_counter = streaming_decimation;
         }
     }
+
     // Cat the streaming_channels byte
     uart_write_data(&streaming_channels, 1);
-
-    // Cat the sample index
-    //uart_write_data(&adc_sample_index, 4);
 
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
@@ -140,11 +136,11 @@ void adc_config() {
     SPI1CONbits.MSSEN = 1; // SPI master SS enable
     SPI1CONbits.MODE32 = 0;
     SPI1CONbits.MODE16 = 1; // 16bit mode
-    
+
     SPI1CONbits.ON = 1; // Enable SPI
-    
+
     ADC_RESET = 1; // Take ADC out of reset
-    
+
     uint32_t i;
     for(i=0;i<1000;i++); // Wait for a while
 
@@ -154,7 +150,7 @@ void adc_config() {
     adc_set_decimation(1250); // MCLK/(4*decimation) = 1 kHz 
     //adc_set_decimation(2000); // MCLK/(4*decimation) = 625 Hz 
     adc_enable_readout(1);
-    
+
     // Configure interrupt on ADC sample read pin (RB15)
     ANSELBbits.ANSB15 = 0;
     INT2R = 0b0011;
@@ -162,14 +158,13 @@ void adc_config() {
     IFS0bits.INT2IF = 0; // Clear the flag
     IEC0bits.INT2IE = 1; // Enable the interrupt
     IPC3bits.INT2IP = 1; // Set the priority to 1
-
 }
 
 
 void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
     // Read the samples
     adc_read_samples(last_samples, last_samples_signed, last_samples_float);
-    
+
     // Update the sample counter
     adc_sample_index += 1;
     // Update the feedback loop
@@ -180,7 +175,7 @@ void __ISR( _EXTERNAL_2_VECTOR, IPL1AUTO) adc_ext_interrupt() {
 
     // Check the safety margins
     safety_check();
-    
+
     IFS0bits.INT2IF = 0; // Clear the flag
 }
 
