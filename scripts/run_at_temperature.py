@@ -1,32 +1,27 @@
-
 import time
 import numpy as np
 import pickle
 import atomic_oven_controller
+import argparse
 
-# channel = int(input("Oven channel to set current controller settings of (0,1): "))
-# if channel < 0 or channel > 1:
-#     raise Exception("Bad channel: {}".format(channel))
+parser = argparse.ArgumentParser()
+parser.add_argument("channel", type=int)
+parser.add_argument("--temperature", type=float, default=80.0)
+parser.add_argument("--duration", type=float, default=20)
+args = parser.parse_args()
 
-# Alice - Ca: 0, Sr: 1
-channel = 1
 
+channel = args.channel
+assert channel in [0,1]
 
 p = atomic_oven_controller.OvenPICInterface(timeout=2)
 current_controller = "current_{}".format(channel)
 temperature_controller = "temperature_{}".format(channel)
 
-# oven on time in seconds
-t_on = 60*2
 poll_time = 0.1
 
 
-# Temperature to regulate to
-test_setpoint = 300 # Sr trapping 
-# test_setpoint = 320 # Sr neutral fluor 
-
 try:
-
     current_limits = p.fb_get_limits(current_controller)
     current_limits['value_max'] = 3.95
     p.fb_set_limits(current_controller, current_limits)
@@ -35,22 +30,7 @@ try:
     p.fb_set_setpoint(current_controller, 0)
     p.fb_start(current_controller)
 
-
-    temperature_limits = {}
-    temperature_limits['cv_min'] = 0
-    temperature_limits['cv_max'] = np.sqrt(current_limits['value_max'])
-    temperature_limits['value_max'] = 350
-    temperature_limits['setpoint_slewrate'] = 100 # C/s
-    p.fb_set_limits(temperature_controller, temperature_limits)
-
-    temperature_config = {}
-    temperature_config['p'] = 0.08
-    temperature_config['i'] = 0.0008
-    temperature_config['d'] = -0.1
-    temperature_config['sample_decimation'] = 9 # 100 Hz update rate
-
-    p.fb_set_config(temperature_controller, temperature_config)
-    p.fb_set_setpoint(temperature_controller, test_setpoint)
+    p.fb_set_setpoint(temperature_controller, args.temperature)
 
     print(p.fb_read_status(temperature_controller))
     print(p.fb_read_status(current_controller))
@@ -59,12 +39,9 @@ try:
 
     p.fb_start(temperature_controller)
 
-    while time.time() < start_time + t_on:
-
+    while time.time() < start_time + args.duration:
         values = p.adc_read_calibrated_sample()
         print("{:0.2f} C, {:0.2f} A".format(values[channel]["temperature"], values[channel]["current"]))
-        #print(p.fb_read_status(temperature_controller), end='')
-        #print(p.fb_read_status(current_controller), end='')
         time.sleep(poll_time)
 
     p.fb_stop(temperature_controller)
