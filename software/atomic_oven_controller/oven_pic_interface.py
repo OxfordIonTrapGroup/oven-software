@@ -139,8 +139,7 @@ class OvenPICInterface:
         # Clear the input buffers
         self.sd.reset_input_buffer()
 
-        response = self.sc.readline()
-        print("DD: "+str(response))
+        self.sc.readline()
 
         # When streaming, this is non-zero
         self._streaming_mode = None
@@ -177,7 +176,6 @@ class OvenPICInterface:
             raise PICError("Bad duty cycle: {}".format(duty))
 
         line = c.CMD_SET_PWM_DUTY + " {:d} {:f}".format(channel, duty)
-        print(line)
         response = self._send_command(line)
 
     def adc_read_sample(self):
@@ -474,7 +472,6 @@ class OvenPICInterface:
         line = c.CMD_SAFETY_SET_CHANNEL + " {:d} ".format(channel)
         line += key_name + " {:g}".format(key_value)
         response = self._send_command(line)
-        print(response)
 
     def calibration_read_channel(self, channel):
         line = c.CMD_CALIBRATION_READ_CHANNEL + " {:d}".format(channel)
