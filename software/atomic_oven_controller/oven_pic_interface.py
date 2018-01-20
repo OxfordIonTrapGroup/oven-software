@@ -441,7 +441,8 @@ class OvenPICInterface:
                         "over-temperature",
                         "over-time",
                         "under-temperature",
-                        "adc-crc"]:
+                        "adc-crc",
+                        "adc-sampling"]:
                 status[err] = err in s
             statuses.append(status)
         return statuses
