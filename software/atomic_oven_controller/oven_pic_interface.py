@@ -441,7 +441,7 @@ class OvenPICInterface:
                         "under-temperature",
                         "adc-crc",
                         "adc-sampling"]:
-                status[err] = err in s
+                status[err.replace("-","")] = err in s
             statuses.append(status)
         return statuses
 
