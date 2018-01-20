@@ -121,6 +121,11 @@ class OvenController:
         if self.timed_out[channel_id]:
             raise TimedOut()
 
+        # Cancel timeout
+        h = self.timeout_handles[channel_id]
+        if h is not None:
+            h.cancel()
+
         # Set the temperature setpoint to 20 C
         self.pic.fb_set_setpoint(
             "temperature_{}".format(channel_id),
