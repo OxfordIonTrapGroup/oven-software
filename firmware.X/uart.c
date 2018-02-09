@@ -95,7 +95,7 @@ void uart_config() {
     // PBCLK2 is 0.5*SYS_CLK = 100 MHz
     //U1BRG = 27; // 0.9 MHz
     // U1BRG = 216; // 115.2 kHz
-    U1BRG = 60; // 0.41 MHz
+    U1BRG = 58; // 0.4237 MHz
     
     // Set up transmission
     U1STAbits.UTXEN = 1; // Enable TX
@@ -119,7 +119,7 @@ void uart_config() {
 
     U5MODE = 0;
     U5MODEbits.BRGH = 1; // 4x divisor
-    U5BRG = 60;
+    U5BRG = 58;
 
     // Set up transmission
     U5STAbits.UTXEN = 1; // Enable TX
