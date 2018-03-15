@@ -14,20 +14,21 @@ Controller has two UART channels to BB host:
 
 */
 
-#define UART_TX_BUFFER_LEN 1024
+#define UART_TX_BUFFER_LEN (1024)
 char uart_tx_buffer[UART_TX_BUFFER_LEN];
 int uart_tx_buffer_start = 0;
 int uart_tx_buffer_end = 0;
 
-#define UART_RX_BUFFER_LEN 256
+#define UART_RX_BUFFER_LEN (256)
 char uart_rx_buffer[UART_RX_BUFFER_LEN];
 int uart_rx_buffer_start = 0;
 int uart_rx_buffer_end = 0;
 
-#define UART_DATA_TX_BUFFER_LEN 256*2
+#define UART_DATA_TX_BUFFER_LEN (256*2)
 char uart_data_tx_buffer[UART_DATA_TX_BUFFER_LEN];
 int uart_data_tx_buffer_start = 0;
 int uart_data_tx_buffer_end = 0;
+
 
 void __ISR(_UART1_TX_VECTOR, IPL2AUTO) uart_tx_interrupt() {
     // Process TX interrupt
@@ -38,12 +39,14 @@ void __ISR(_UART1_TX_VECTOR, IPL2AUTO) uart_tx_interrupt() {
             uart_tx_buffer_start++;
             if(uart_tx_buffer_start >= UART_TX_BUFFER_LEN)
                 uart_tx_buffer_start = 0;
-        } else
+        } else {
             IEC3bits.U1TXIE = 0;
-           
+        }
+        
         IFS3bits.U1TXIF = 0;
     }
 }
+
 
 void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
     // Process RX interrupt
@@ -52,12 +55,14 @@ void __ISR(_UART1_RX_VECTOR, IPL2AUTO) uart_rx_interrupt() {
         uart_rx_buffer[uart_rx_buffer_end] = U1RXREG;
         //uart_write_data(&uart_rx_buffer[uart_rx_buffer_end], 1);
         uart_rx_buffer_end++; 
-        if(uart_rx_buffer_end >= UART_RX_BUFFER_LEN)
-            uart_rx_buffer_end = 0;    
+        if(uart_rx_buffer_end >= UART_RX_BUFFER_LEN) {
+            uart_rx_buffer_end = 0;
+        }
         
         IFS3bits.U1RXIF = 0;
     }
 }
+
 
 void __ISR(_UART5_TX_VECTOR, IPL2AUTO) uart_data_tx_interrupt() {
     // Process TX interrupt
@@ -68,12 +73,14 @@ void __ISR(_UART5_TX_VECTOR, IPL2AUTO) uart_data_tx_interrupt() {
             uart_data_tx_buffer_start++;
             if(uart_data_tx_buffer_start >= UART_DATA_TX_BUFFER_LEN)
                 uart_data_tx_buffer_start = 0;
-        } else
+        } else {
             IEC5bits.U5TXIE = 0;
+        }
            
         IFS5bits.U5TXIF = 0;
     }
 }
+
 
 // Declare blocking print to placate compiler
 void uart_printf_blocking(uint8_t* format, ...);
@@ -84,7 +91,6 @@ void uart_printf_blocking(uint8_t* format, ...);
 // UART4-TX on BB -> U5RX (RC14) (p48)
 // UART4-RX on BB -> U5TX (RC13) (p47)
 void uart_config() {
-    
     // Configure UART1 - command channel
     ANSELBbits.ANSB9 = 0; // Disable analog input on RB9
     U1RXR = 0b0101; // RB9 = U1RX
@@ -142,8 +148,8 @@ void uart_config() {
     uart_printf_blocking("booted! %i %x\n", sys_time, RCON);
 }
 
+
 void uart_write(uint8_t* buffer, uint32_t len) {
-    
     uint32_t i;
     // Copy the data into the send buffer
     for(i=0; i<len; i++) {
@@ -158,8 +164,8 @@ void uart_write(uint8_t* buffer, uint32_t len) {
     }
 }
 
+
 void uart_write_blocking(uint8_t* buffer, uint32_t len ) {
-    
     uint32_t i=0;
     
     while(i < len) {
@@ -170,6 +176,7 @@ void uart_write_blocking(uint8_t* buffer, uint32_t len ) {
     }
 }
 
+
 uint32_t uart_read(uint8_t* buffer, uint32_t max_len) {
     uint32_t len;
     for(len = 0; len < max_len; len++) {
@@ -177,21 +184,23 @@ uint32_t uart_read(uint8_t* buffer, uint32_t max_len) {
             break;
         buffer[len] = uart_rx_buffer[uart_rx_buffer_start];
         uart_rx_buffer_start++;
-        if(uart_rx_buffer_start >= UART_RX_BUFFER_LEN)
+        if(uart_rx_buffer_start >= UART_RX_BUFFER_LEN) {
             uart_rx_buffer_start = 0;
+        }
     }
     return len;
 }
 
+
 void uart_write_data(uint8_t* buffer, uint32_t len) {
-    
     uint32_t i;
     // Copy the data into the send buffer
     for(i=0; i<len; i++) {
         uart_data_tx_buffer[uart_data_tx_buffer_end] = buffer[i];
         uart_data_tx_buffer_end++;
-        if(uart_data_tx_buffer_end >= UART_DATA_TX_BUFFER_LEN)
+        if(uart_data_tx_buffer_end >= UART_DATA_TX_BUFFER_LEN) {
             uart_data_tx_buffer_end = 0;
+        }
     }
     // If no transmission is currently happening, initiate it
     if(IEC5bits.U5TXIE == 0) {
@@ -199,8 +208,8 @@ void uart_write_data(uint8_t* buffer, uint32_t len) {
     }
 }
 
-void uart_printf(uint8_t* format, ...) {
 
+void uart_printf(uint8_t* format, ...) {
     va_list arg_list;
     uint8_t message[UART_TX_BUFFER_LEN];
 
@@ -211,8 +220,8 @@ void uart_printf(uint8_t* format, ...) {
     uart_write(message, strlen(message));
 }
 
-void uart_printf_blocking(uint8_t* format, ...) {
 
+void uart_printf_blocking(uint8_t* format, ...) {
     va_list arg_list;
     uint8_t message[UART_TX_BUFFER_LEN];
 
