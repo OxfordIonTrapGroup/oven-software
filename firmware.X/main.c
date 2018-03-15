@@ -21,12 +21,13 @@
 #pragma config OSCIOFNC = OFF // CLKO Output Signal Active on the OSCO Pin (Disabled)
 #pragma config FDMTEN = OFF // Disable deadman timer
 #pragma config WDTPS = 0x09// 512ms watchdog
-//#pragma config WDTPS = 0x0B// 2s watchdog
 #pragma config WINDIS = NORMAL // Watchdog in non-windowed mode
 #pragma config FWDTEN = OFF
 #pragma config WDTSPGM = STOP // Watchdog timer stopped during flash programming
 
+
 void ins_read_next();
+
 
 void main() {
     leds_config();
@@ -53,14 +54,10 @@ void main() {
         // Clear the watchdog timer
         safety_clear_watchdog();
 
-        if((sys_time % 1000) >= 500) {
+        if((sys_time % 1000) < 200) {
             leds_status_set(1);
-            // leds_channel_set(0,1);
-            // leds_channel_set(1,1);
         }else{
             leds_status_set(0);
-            // leds_channel_set(0,0);
-            // leds_channel_set(1,0);
         }
 
         ins_read_next();
