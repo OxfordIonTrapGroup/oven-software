@@ -4,7 +4,7 @@ from artiq.tools import *
 import asyncio
 import logging
 
-from atomic_oven_controller import oven_pic_interface
+from atomic_oven_controller import interface
 
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class OvenController:
         and temperature setpoints for channels 0 and 1"""
 
         # Initialise the HAL
-        self.pic = oven_pic_interface.OvenPICInterface()
+        self.pic = interface.Interface()
 
         # Names of the channels
         self.names = [name.lower() for name in names]

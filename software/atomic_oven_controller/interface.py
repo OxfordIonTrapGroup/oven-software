@@ -24,7 +24,7 @@ class PICError(Exception):
     pass
 
 
-class OvenPICInterface:
+class Interface:
     # Baud rate for the command and data ports
     _command_baudrate = 423700
     _data_baudrate = 423700
