@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 settings = pyon.load_file(args.file)
 
-p = atomic_oven_controller.OvenPICInterface(timeout=2)
+p = atomic_oven_controller.Interface(timeout=2)
 
 p.settings_write(settings)
 p.settings_save()

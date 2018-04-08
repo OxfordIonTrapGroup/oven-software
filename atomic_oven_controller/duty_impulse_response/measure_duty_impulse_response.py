@@ -1,5 +1,3 @@
-
-
 import time
 import pickle
 
@@ -10,7 +8,7 @@ if channel < 0 or channel > 1:
     raise Exception("Bad channel: {}".format(channel))
 
 
-p = atomic_oven_controller.OvenPICInterface()
+p = atomic_oven_controller.Interface()
 
 on_duty = 0.05
 #on_duty = 0.01

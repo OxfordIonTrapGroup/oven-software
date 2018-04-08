@@ -14,7 +14,7 @@ args = parser.parse_args()
 channel = args.channel
 assert channel in [0,1]
 
-p = atomic_oven_controller.OvenPICInterface(timeout=2)
+p = atomic_oven_controller.Interface(timeout=2)
 current_controller = "current_{}".format(channel)
 temperature_controller = "temperature_{}".format(channel)
 

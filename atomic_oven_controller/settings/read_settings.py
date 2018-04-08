@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("file")
 args = parser.parse_args()
 
-p = atomic_oven_controller.OvenPICInterface(timeout=2)
+p = atomic_oven_controller.Interface(timeout=2)
 
 settings = p.settings_read()
 

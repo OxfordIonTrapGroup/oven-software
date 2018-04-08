@@ -3,7 +3,7 @@ import time
 
 import atomic_oven_controller
 
-p = atomic_oven_controller.OvenPICInterface()
+p = atomic_oven_controller.Interface()
 p._DEBUG = False
 
 while(1):

@@ -7,7 +7,7 @@ channel = int(input("Oven channel to test (0,1): "))
 if channel < 0 or channel > 1:
     raise Exception("Bad channel: {}".format(channel))
 
-p = atomic_oven_controller.OvenPICInterface()
+p = atomic_oven_controller.Interface()
 
 min_duty = 0
 max_duty = 0.025
