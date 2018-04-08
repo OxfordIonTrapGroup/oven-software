@@ -19,7 +19,7 @@ Controller has two UART channels to BB host:
 
 // Command Rx & Tx circular buffers
 #define UART_RX_BUFFER_LEN 1024
-#define UART_TX_BUFFER_LEN 256
+#define UART_TX_BUFFER_LEN 1024
 
 uint8_t cmd_rx_buff_raw[UART_RX_BUFFER_LEN];
 circBuff cmd_rx_buff;
