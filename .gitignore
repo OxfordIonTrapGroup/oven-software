@@ -4,8 +4,8 @@ firmware.X/build/default/
 firmware.X/nbproject/Makefile*
 firmware.X/nbproject/Package-default.bash
 
-software/atomic_oven_controller.egg-info
-software/atomic_oven_controller/__pycache__
+atomic_oven_controller.egg-info
+__pycache__
 
 *.aux
 *.log
