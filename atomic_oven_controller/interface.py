@@ -26,8 +26,8 @@ class PICError(Exception):
 
 class Interface:
     # Baud rate for the command and data ports
-    _command_baudrate = 423700
-    _data_baudrate = 423700
+    _command_baudrate = 900000
+    _data_baudrate = 900000
 
     # How long to wait between polling the data port
     _streaming_poll_time = 0.1
