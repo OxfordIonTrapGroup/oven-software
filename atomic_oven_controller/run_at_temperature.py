@@ -22,11 +22,6 @@ poll_time = 0.1
 
 
 try:
-    current_limits = p.fb_get_limits(current_controller)
-    current_limits['value_max'] = 3.95
-    p.fb_set_limits(current_controller, current_limits)
-
-
     p.fb_set_setpoint(current_controller, 0)
     p.fb_start(current_controller)
 
