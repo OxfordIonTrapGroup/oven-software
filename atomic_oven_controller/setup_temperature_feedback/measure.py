@@ -3,7 +3,7 @@ import numpy as np
 import pickle
 import argparse
 
-import atomic_oven_controller
+import atomic_oven_controller.interface
 
 
 parser = argparse.ArgumentParser()
@@ -14,7 +14,7 @@ if args.channel < 0 or args.channel > 1:
     raise Exception("Bad channel: {}".format(args.channel))
 
 
-p = atomic_oven_controller.Interface(timeout=2)
+p = atomic_oven_controller.interface.Interface(timeout=2)
 current_controller = "current_{}".format(args.channel)
 temperature_controller = "temperature_{}".format(args.channel)
 

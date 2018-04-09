@@ -2,7 +2,7 @@ import numpy as np
 import time
 import argparse
 
-import atomic_oven_controller
+import atomic_oven_controller.interface
 
 
 parser = argparse.ArgumentParser()
@@ -12,7 +12,7 @@ args = parser.parse_args()
 if args.channel < 0 or args.channel > 1:
     raise Exception("Bad channel: {}".format(args.channel))
 
-p = atomic_oven_controller.Interface()
+p = atomic_oven_controller.interface.Interface()
 
 min_duty = 0
 max_duty = 0.025

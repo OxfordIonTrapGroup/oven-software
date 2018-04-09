@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import pickle
-import atomic_oven_controller
+import atomic_oven_controller.interface
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -14,7 +14,7 @@ args = parser.parse_args()
 channel = args.channel
 assert channel in [0,1]
 
-p = atomic_oven_controller.Interface(timeout=2)
+p = atomic_oven_controller.interface.Interface(timeout=2)
 current_controller = "current_{}".format(channel)
 temperature_controller = "temperature_{}".format(channel)
 
