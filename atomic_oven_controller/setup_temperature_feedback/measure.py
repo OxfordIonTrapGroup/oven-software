@@ -1,17 +1,22 @@
-
 import time
 import numpy as np
 import pickle
+import argparse
+
 import atomic_oven_controller
 
-channel = int(input("Oven channel to set current controller settings of (0,1): "))
-if channel < 0 or channel > 1:
-    raise Exception("Bad channel: {}".format(channel))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("channel", type=int)
+args = parser.parse_args()
+
+if args.channel < 0 or args.channel > 1:
+    raise Exception("Bad channel: {}".format(args.channel))
 
 
 p = atomic_oven_controller.Interface(timeout=2)
-current_controller = "current_{}".format(channel)
-temperature_controller = "temperature_{}".format(channel)
+current_controller = "current_{}".format(args.channel)
+temperature_controller = "temperature_{}".format(args.channel)
 
 t_start = 1
 t_on = 10
@@ -69,14 +74,14 @@ try:
     p.fb_stop(temperature_controller)
     print(p.fb_read_status(current_controller))
 
-    results = p.adc_stop_streaming()[channel]
+    results = p.adc_stop_streaming()[args.channel]
 
-    f = open("temperature_feedback_risetime_data_{}.pkl".format(channel), "wb")
+    f = open("temperature_feedback_risetime_data_{}.pkl".format(args.channel), "wb")
     pickle.dump(results, f, -1)
 
 
 finally:
     p.fb_set_setpoint(temperature_controller, 0)
     p.fb_set_setpoint(current_controller, 0)
-    p.set_pwm_duty(channel, 0)
+    p.set_pwm_duty(args.channel, 0)
 

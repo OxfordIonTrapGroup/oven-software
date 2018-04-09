@@ -1,11 +1,16 @@
-
 import numpy as np
 import time
+import argparse
+
 import atomic_oven_controller
 
-channel = int(input("Oven channel to test (0,1): "))
-if channel < 0 or channel > 1:
-    raise Exception("Bad channel: {}".format(channel))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("channel", type=int)
+args = parser.parse_args()
+
+if args.channel < 0 or args.channel > 1:
+    raise Exception("Bad channel: {}".format(args.channel))
 
 p = atomic_oven_controller.Interface()
 
@@ -25,17 +30,17 @@ for i in range(n_steps):
     p.set_pwm_duty(channel, duties[i])
     time.sleep(t_per_step)
     values = p.adc_read_calibrated_sample()
-    currents[i] = values[channel]["current"]
-    temperatures[i] = values[channel]["temperature"]
-    voltages[i] = values[channel]["output_voltage"]
+    currents[i] = values[args.channel]["current"]
+    temperatures[i] = values[args.channel]["temperature"]
+    voltages[i] = values[args.channel]["output_voltage"]
 
     print(
         duties[i],
-        values[channel]["current"],
-        values[channel]["temperature"],
-        values[channel]["output_voltage"])
+        values[args.channel]["current"],
+        values[args.channel]["temperature"],
+        values[args.channel]["output_voltage"])
 
-p.set_pwm_duty(channel, 0)
+p.set_pwm_duty(args.channel, 0)
 
 
-np.savetxt("current_vs_duty_{}.txt".format(channel), np.c_[duties, currents, temperatures, voltages])
+np.savetxt("current_vs_duty_{}.txt".format(args.channel), np.c_[duties, currents, temperatures, voltages])

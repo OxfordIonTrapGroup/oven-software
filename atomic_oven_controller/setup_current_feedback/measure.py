@@ -1,21 +1,25 @@
-
-
 import time
 import pickle
+import argparse
+
 import atomic_oven_controller
 
-channel = int(input("Oven channel to test (0,1): "))
-if channel < 0 or channel > 1:
-    raise Exception("Bad channel: {}".format(channel))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("channel", type=int)
+args = parser.parse_args()
+
+if args.channel < 0 or args.channel > 1:
+    raise Exception("Bad channel: {}".format(args.channel))
 
 p = atomic_oven_controller.Interface()
-controller_name = "current_{}".format(channel)
+controller_name = "current_{}".format(args.channel)
 
 
 
 dt = 0.05
 
-p.set_pwm_duty(channel, 0)
+p.set_pwm_duty(args.channel, 0)
 
 
 print(p.fb_read_status(controller_name))
@@ -57,17 +61,17 @@ time.sleep(dt)
 p.fb_stop(controller_name)
 print(p.fb_read_status(controller_name))
 
-p.set_pwm_duty(channel, 0)
+p.set_pwm_duty(args.channel, 0)
 
 p.safety_status()
 
 #samples = p.adc_stop_streaming()
-results = p.adc_stop_streaming()[channel]
+results = p.adc_stop_streaming()[args.channel]
 
 
-#results = oven_pic_interface.convert_samples(channel, samples)
+#results = oven_pic_interface.convert_samples(args.channel, samples)
 
-f = open("current_feedback_risetime_data_{}.pkl".format(channel), "wb")
+f = open("current_feedback_risetime_data_{}.pkl".format(args.channel), "wb")
 pickle.dump(results, f, -1)
 f.close()
 
