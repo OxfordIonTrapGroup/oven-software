@@ -12,13 +12,9 @@ logger = logging.getLogger(__name__)
 
 class InterlockTripped(Exception):
     """Raised if a safety interlock has tripped on the on oven controller - this
-    indicates something pretty out-of-whack"""
+    indicates something pretty out-of-whack, or that the oven reached the
+    maximum burn time"""
     pass
-
-
-class TimedOut(Exception):
-    """Raised if the Artiq interface has not been poked frequently enough - 
-    you should be more attentive"""
 
 
 class OvenController:
@@ -27,15 +23,12 @@ class OvenController:
     High level interface to the oven controllers. This is designed to be pretty
     safe - the maximum temperature is flashed into the PIC (via the 
     write_settings script), hence if one goes crazy with the setpoint here
-    nothing will likely happen. There are two restrictions on oven burn time:
-    1) A maximum value flashed into the PIC (again, write_settings) - the oven
-    interlock will trip if the oven is on for longer than this). 
-    2) A soft value enforced by this interface (poke_timeout) - poke() must be
-    called at least every poke_timeout. This also checks for any oven interlock
-    trips, so if the oven turns off for some other reason you will know!
+    nothing will likely explode. The maximum oven burn time is set my a value
+    flashed into the PIC (again, write_settings) - the oven
+    interlock will trip if the oven is on for longer than this.
     """
 
-    def __init__(self, names, temperatures, poke_timeout=15):
+    def __init__(self, names, temperatures):
         """Initialise the oven rpc controller.
         names and temperatures are two-element lists containing the names 
         and temperature setpoints for channels 0 and 1"""
@@ -49,10 +42,6 @@ class OvenController:
         # Temperature setpoints to use when the oven channels are turned on
         self.temperature_setpoints = temperatures
 
-        self.timeout_handles = [None]*2
-        self.timed_out = [False]*2
-        self.poke_timeout = poke_timeout
-
     def _channel_sanitiser(self, channel):
         if channel.lower() == self.names[0]:
             channel_id = 0
@@ -65,28 +54,15 @@ class OvenController:
                     self.names[0],self.names[1]))
         return channel_id
 
+    def check_interlocks(self, channel):
+        channel_id = self._channel_sanitiser(channel)
+        self._check_interlocks(channel_id)
+
     def _check_interlocks(self, channel_id):
         status = self.pic.safety_status()
         any_tripped = any(v for k,v in status[channel_id].items())
         if any_tripped:
             raise InterlockTripped(status)
-
-    def _reschedule_timeout(self, channel_id):
-        """Schedules a timeout callback for poke_timeout in the future,
-        cancelling any existing timeouts"""
-        if self.timeout_handles[channel_id] is not None:
-            # Even if the timeout has fired, cancel() is still safe to call
-            self.timeout_handles[channel_id].cancel()
-        self.timed_out[channel_id] = False
-        self.timeout_handles[channel_id] = \
-                asyncio.get_event_loop().call_later(self.poke_timeout,
-                                                    self._timeout,
-                                                    channel_id)
-
-    def _timeout(self, channel_id):
-        self.turn_off(self.names[channel_id])
-        self.timed_out[channel_id] = True
-        logger.error("Channel '{}' timed out".format(self.names[channel_id]))
 
     def turn_on(self, channel):
         """Turn the oven channel on to the set temperature"""
@@ -108,8 +84,6 @@ class OvenController:
         # Start temperature feedback
         self.pic.fb_start("temperature_{}".format(channel_id))
 
-        self._reschedule_timeout(channel_id)
-
     def turn_off(self, channel):
         """Turn off the oven"""
         channel_id = self._channel_sanitiser(channel)
@@ -118,13 +92,6 @@ class OvenController:
         # something funny happened on this oven burn
         self._check_interlocks(channel_id)
 
-        if self.timed_out[channel_id]:
-            raise TimedOut()
-
-        # Cancel timeout
-        h = self.timeout_handles[channel_id]
-        if h is not None:
-            h.cancel()
 
         # Set the temperature setpoint to 20 C
         self.pic.fb_set_setpoint(
@@ -156,12 +123,8 @@ class OvenController:
 
         return temperature, current
 
-    def poke(self, channel):
-        channel_id = self._channel_sanitiser(channel)
-        self._check_interlocks(channel_id)
-        if self.timed_out[channel_id]:
-            raise TimedOut()
-        self._reschedule_timeout(channel_id)
+    def reset_interlocks(self):
+        self.pic.reset()
 
     def close(self):
         self.turn_off("ca")
@@ -180,8 +143,6 @@ def get_argparser():
         parser.add_argument("--ch"+ch,
                             default="ch"+ch+",0",
                             help="<name>,<temperature> for channel "+ch)
-    parser.add_argument("--poke_timeout", type=int, default=15,
-                        help="Turns off oven if no pokes received for this time")
     return parser
 
 def main():
@@ -202,8 +163,7 @@ def main():
     chs = [ch0_config, ch1_config]
 
     dev = OvenController([ch[0] for ch in chs],
-                         [ch[1] for ch in chs],
-                         poke_timeout=args.poke_timeout)
+                         [ch[1] for ch in chs])
     try:
         simple_server_loop({"atomic_oven_controller": dev},
             bind_address_from_args(args), args.port)
