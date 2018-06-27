@@ -37,6 +37,8 @@ try:
     while time.time() < start_time + args.duration:
         values = p.adc_read_calibrated_sample()
         print("{:0.2f} C, {:0.2f} A".format(values[channel]["temperature"], values[channel]["current"]))
+        #print(p._send_command("adc_get_crc_stats"))
+        p.safety_status(print_output=True)
         time.sleep(poll_time)
 
     p.fb_stop(temperature_controller)
