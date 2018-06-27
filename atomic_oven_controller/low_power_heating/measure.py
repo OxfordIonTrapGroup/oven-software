@@ -27,7 +27,7 @@ temperatures = np.zeros(n_steps)
 voltages = np.zeros(n_steps)
 
 for i in range(n_steps):
-    p.set_pwm_duty(channel, duties[i])
+    p.set_pwm_duty(args.channel, duties[i])
     time.sleep(t_per_step)
     values = p.adc_read_calibrated_sample()
     currents[i] = values[args.channel]["current"]
