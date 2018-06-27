@@ -90,6 +90,10 @@ class OvenController:
 
         # Check no interlocks have already tripped, so the user knows if
         # something funny happened on this oven burn
+        # NB: it seems that the overtemperature interlock can be tripped
+        # if the setpoint is close (~20 degrees) to the safety upper limit.
+        # If this occurs, verify that it is a glitch before ignoring
+        # in user code
         self._check_interlocks(channel_id)
 
 
