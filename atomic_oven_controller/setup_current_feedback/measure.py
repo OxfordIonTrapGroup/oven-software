@@ -2,7 +2,7 @@ import time
 import pickle
 import argparse
 
-import atomic_oven_controller
+from atomic_oven_controller.interface import Interface
 
 
 parser = argparse.ArgumentParser()
@@ -12,7 +12,7 @@ args = parser.parse_args()
 if args.channel < 0 or args.channel > 1:
     raise Exception("Bad channel: {}".format(args.channel))
 
-p = atomic_oven_controller.Interface()
+p = Interface()
 controller_name = "current_{}".format(args.channel)
 
 

@@ -1,9 +1,9 @@
 
 import time
 
-import atomic_oven_controller
+from atomic_oven_controller.interface import Interface
 
-p = atomic_oven_controller.Interface()
+p = Interface()
 p._DEBUG = False
 
 while(1):
