@@ -5,7 +5,8 @@ import atomic_oven_controller.interface
 import argparse
 import artiq.protocols.pyon as pyon
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    description="Read all of the user adjustable settings to file")
 parser.add_argument("file")
 args = parser.parse_args()
 
