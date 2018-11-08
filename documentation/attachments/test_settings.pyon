@@ -1,0 +1,100 @@
+{
+    "limits": {
+        "temperature_0": {
+            "cv_max": 2.0,                           # PID loop control value maximum
+            "cv_min": 0.0,                           # PID loop control value minimum
+            "setpoint_slewrate": 100.0,              # maximum rate of change (degrees C/s)
+            "value_max": 350.0                       # maximum temperature setpoint (C)
+        },
+        "temperature_1": {
+            "cv_max": 2.0,
+            "setpoint_slewrate": 100.0,
+            "value_max": 350.0,
+            "cv_min": 0.0
+        },
+        "current_0": {
+            "cv_max": 0.1,                           # duty cycle soft upper limit
+            "cv_min": 0.0
+            "setpoint_slewrate": 0.0,                # rate of change limit disabled
+            "value_max": 3.9,                        # maximum current setpoint (A)
+        },
+        "current_1": {
+            "cv_max": 0.1,
+            "setpoint_slewrate": 0.0,
+            "value_max": 3.9,
+            "cv_min": 0.0
+        },
+    },
+    "cals": {
+        0: {
+            "current_offset": 0.0,
+            "current_scale": 12.5,                   # ADC LSB conversion value
+            "output_voltage_offset": 0.0,
+            "output_voltage_scale": 7.5,             # ADC LSB conversion value
+            "oven_voltage_offset": 0.0,
+            "oven_voltage_scale": 7.5,
+            "temperature_current_coefficient": 13.8,
+            "temperature_offset": 20.0               # cold junction temperature degrees C
+            "temperature_scale": -1225.49,           # negative because thermocouple is inverse polarity
+        },
+        1: {
+            "oven_voltage_offset": 0.0,
+            "temperature_scale": -1225.49,
+            "oven_voltage_scale": 7.5,
+            "temperature_current_coefficient": 0.0,
+            "current_offset": 0.0,
+            "current_scale": 12.5,
+            "output_voltage_scale": 7.5,
+            "output_voltage_offset": 0.0,
+            "temperature_offset": 20.0
+        }
+    },
+    "safetys": {
+        0: {
+            "duty_max": 0.1                          # duty cycle hard limit
+            "oven_current_check_disabled": 0.0,
+            "oven_current_max": 4.0,                 # in A
+            "oven_temperature_check_disabled": 0.0,
+            "oven_temperature_max": 320.0,           # degrees C relative to "temperature offset"
+            "oven_temperature_min": -50.0,           # degrees C relative to "temperature offset"
+            "on_time_check_disabled": 0.0,
+            "on_time_max": 300000.0,                 # in ms
+        },
+        1: {
+            "oven_temperature_max": 320.0,
+            "oven_current_max": 4.0,
+            "oven_temperature_check_disabled": 0.0,
+            "oven_temperature_min": 0.0,
+            "on_time_max": 300000.0,
+            "oven_current_check_disabled": 0.0,
+            "on_time_check_disabled": 0.0,
+            "duty_max": 0.1
+        }
+    },
+    "configs": {                                     # PID loop parameters
+        "temperature_0": {
+            "p": 0.08,
+            "i": 0.0008,
+            "d": -0.1,
+            "sample_decimation": 9,
+        },
+        "temperature_1": {
+            "p": 0.08,
+            "i": 0.0008,
+            "d": -0.1,
+            "sample_decimation": 9,
+        },
+        "current_0": {
+            "p": 0.008,
+            "i": 0.007,
+            "d": 0,
+            "sample_decimation": 0.0,
+        },
+        "current_1": {
+            "p": 0.008,
+            "i": 0.007,
+            "d": 0.0,
+            "sample_decimation": 0.0,
+        },
+    }
+}
