@@ -7,7 +7,9 @@
 \usepackage{graphicx}
 \usepackage{courier}
 \usepackage{siunitx}
+\usepackage{hyperref}
 
+\newcommand{\refsettings}{\texttt{attachments/test\_settings.pyon}}
 
 \begin{document}
 
@@ -16,6 +18,11 @@
 
 \maketitle
 
+
+\section{Introduction}
+This documentation accompanies the short response time atomic source detailed in \url{https://doi.org/10.1063/1.5025713}.
+The controller consists of two PID loops - the first is a temperature feedback loop that outputs a desired current setpoint by feeding back on a thermocouple reading.
+The second maintains the desired current setpoint by varying the duty cycle of the PWM module.
 
 \section{Safety interlocks}
 There are several layers of interlock that should protect us from unintentionally
@@ -31,7 +38,7 @@ If any temperature reading is outside the valid range. This protects
 against thermocouple faults (open, short, inverted), temperature typos (!), and
 oscillating PI controllers.
 \item \textbf{Current:}
-If any current readying is above the limit. This protects against
+If any current reading is above the limit. This protects against
 oscillating PI controllers or gross temperature errors.
 \item \textbf{Burn time:}
 If the duty-cycle has been non-zero for longer than the limit. This stops the
@@ -45,7 +52,7 @@ If one of these errors occurs, the PWM is not enabled until the PIC is reset.
 Note that by default the PIC is reset at the start of each oven burn cycle.
 
 The second layer of interlock ensures that the command processing logic is
-intact. The watchdog is kicked in the main processing loop. If it is not kicked 
+intact. The watchdog is kicked in the main processing loop. If it is not kicked
 for more than 128 ms the PIC is reset. This protects against runaway code or
 infinite loops in the command handling logic.
 
@@ -55,56 +62,72 @@ otherwise the oven controller turns itself off.
 
 
 \section{HOA2 wiring}
-
 On the PCB the two output channels are named \textit{0} and \textit{1}, with \textit{0} being the channel furthest away from the beagle bone. In the HOA2 systems, oven \textit{0} should be filled with calcium and oven \textit{1} with strontium.\footnote{This is because oven \textit{1} has fewer conductors so is less suitable for calcium which has a higher operating temperature. This is a very mild preference.}
 
 \begin{figure}[H]
     \center
-    \includegraphics[scale=1]{figures/baseflange_wiring.pdf} 
+    \includegraphics[scale=1]{figures/baseflange_wiring.pdf}
     \caption{Wiring of in vacuum oven connector}
     \label{fig:baseflange_wiring}
 \end{figure}
 
+\section{Firmware settings}
+All firmware settings are stored within the firmware after writing them in from a configuration file.
+An example configuration file can be found in \refsettings{} - some parameters are annotated in that file, others are explained below.
+These values are what we have used without issues for a year in two systems, each with two ovens.
+To write settings to firmware, you must use \texttt{settings/write.py}, supplying the configuration file as a command line argument.
+The programmed settings can be read back using \texttt{settings/read.py}.
+
 \section{Temperature readout}
-Run the script in \texttt{oven\_test\_scripts/temperature\_readout} to print out temperature measurements in real time. Touch the thermocouples on each tube one after the other to check that the temperature reading changes.
+Run the script \texttt{print\_temperature.py} to print out temperature measurements from both channels in real time. Touch the thermocouples on each tube (with e.g. clean metal tweezers) one after the other to check that the temperature reading changes.
 
 \clearpage
 \section{Low power testing}
-Measure the current, voltage, and temperature characteristics of the oven at a low/safe power. Run the script in \texttt{oven\_test\_scripts/low\_power\_heating} and enter the channel of oven to be tested. Use the plotter script to make the graph, and the output should look like figure \ref{fig:low_power_heating}.
-This measurement determines that everything is connected correctly, the restance of the oven and wiring, and the polarity of the thermocouple connection.
+Measure the current, voltage, and temperature characteristics of the oven at a low/safe power.
+Run the script \texttt{low\_power\_heating/measure.py} and enter the channel of oven to be tested.
+Use \texttt{low\_power\_heating/plot.py} to make the graph, and the output should look like figure \ref{fig:low_power_heating}.
+This measurement determines that everything is connected correctly, the resistance of the oven and wiring, and the polarity of the thermocouple connection.
 
 \begin{figure}
     \center
-    \includegraphics[scale=1]{figures/current_vs_duty_0.pdf} 
+    \includegraphics[scale=1]{figures/current_vs_duty_0.pdf}
     \caption{Example data for low\_power\_heating test. NB if the temperature reading decreases throughout the measurement, this indicates that the sensor polarity is inverted}
     \label{fig:low_power_heating}
 \end{figure}
 
-To invert the sensor polarity, run the script \texttt{calibration\_settings/reverse\_tc\_polarity.py} on the channel in question. This will save this configuration in firmware.
+In the settings file, the \texttt{cals:<channel>:temperature\_scale} value should be negative if the polarity is inverted.
+The numeric value listed in the file is a linearisation around room temperature.
 
 \clearpage
 \section{Duty impulse response}
 
 This measurement allows us to determine the temperature-current (T-C) cross-coupling of the oven.
-This effect occurs when oven current flows through the thermocouple wiring in the vicinity of the spot weld.
+This effect occurs when oven current flows through the thermocouple wiring in the vicinity of the spot weld, which can be mitigated with the weld configuration shown in figure \ref{fig:weld_layout}.
 Figures \ref{fig:duty_impulse_response_low} and \ref{fig:duty_impulse_response_high} show this measurement when there is a low and high T-C coefficient respectively.
 
 \begin{figure}
     \center
-    \includegraphics[scale=1]{figures/duty_impulse_response_data_0.pdf} 
+    \includegraphics[scale=0.4]{figures/weld_layout.pdf}
+    \caption{The thermocouple wires are spot welded to each other at junction W1.
+    If the spot weld to the oven tube(W2) is located outside the oven circuit as shown, then no ohmic current flows through the thermocouple circuit and minimal temperature-current cross-coupling occurs.}
+    \label{fig:weld_layout}
+\end{figure}
+
+\begin{figure}
+    \center
+    \includegraphics[scale=1]{figures/duty_impulse_response_data_0.pdf}
     \caption{Example data for "duty impulse response" test where there is a low T-C coefficient.}
     \label{fig:duty_impulse_response_low}
 \end{figure}
 
 \begin{figure}
     \center
-    \includegraphics[scale=1]{figures/duty_impulse_response_data_1.pdf} 
+    \includegraphics[scale=1]{figures/duty_impulse_response_data_1.pdf}
     \caption{Example data for "duty impulse response" test where there is a high T-C coefficient.}
     \label{fig:duty_impulse_response_high}
 \end{figure}
 
-Once the coupling coefficient is measured, it can be saved in the flash calibration for the microcontroller with the script \texttt{calibration\_settings/set\_tc\_current\_compensation.py}. To confirm that the compensation works, the duty impulse response script can be run again and the measurement should give a much lower coupling value.
-
+This value is set from \texttt{cals:<channel>:temperature\_current\_coefficient} value in the settings file.
 
 \clearpage
 \section{Setup current feedback}
@@ -122,26 +145,25 @@ There are four key parameters for this:
 These can be adjusted to optimise the performance of the controller, however I have found the following configuration to work in all cases:
 0.008, 0.007, 0, 0.
 
-The script \texttt{setup\_current\_feedback/measure\_current\_feedback\_risetime.py} will test the current feedback on the given channel. The feedback controller parameters are set within the script to the values above. The output of this script will result in a plot like the one shown in figure \ref{fig:current_feedback}, which allows us to verify that the feedback controller is working correctly (i.e. no oscillation, reasonable response time).
+The script \texttt{setup\_current\_feedback/measure.py} will test the current feedback on the given channel.
+The feedback controller parameters are set within the script to the values above.
+The output of this script will result in a plot like the one shown in figure \ref{fig:current_feedback}, which allows us to verify that the feedback controller is working correctly (i.e. no oscillation, reasonable response time).
 
 \begin{figure}
     \center
-    \includegraphics[scale=1]{figures/current_feedback_risetime_data_1.pdf} 
-    \caption{Example data for seting up the current controller parameters.}
+    \includegraphics[scale=1]{figures/current_feedback_risetime_data_1.pdf}
+    \caption{Example data for setting up the current controller parameters.}
     \label{fig:current_feedback}
 \end{figure}
 
-With the desired current feedback parameters known, program them into the microcontroller with the script in \texttt{calibration\_settings/set\_current\_controller\_settings.py}. This script also asks for the following parameters:
-\begin{enumerate}
-\item Min/max duty cycle soft limits
-\item Maximum setpoint (A)
-\item Maximum setpoint slew rate (A/s)
-\end{enumerate}
-
+Once satisfied with the current feedback parameters (changing the values hardcoded within the script to try different settings if desired), you can edit the values in the \texttt{configs:current\_<channel>} field of the settings file.
 
 \clearpage
 \section{Setup temperature feedback}
 
+Setting of the temperature feedback coefficients is exactly analogous to that of the current feedback.
+Use \texttt{setup\_temperature\_feedback/measure.py} to measure the temperature characteristics.
+We have found 0.08, 0.008, -0.1 and 9 to work well for the P, I, D gains and sample decimation respectively.
 
 
 \end{document}
