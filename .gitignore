@@ -12,3 +12,4 @@ __pycache__
 *.synctex.gz
 *.pdf
 *.pkl
+*.out
