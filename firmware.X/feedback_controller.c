@@ -83,12 +83,24 @@ controller_t* fbc_get_by_name(char* name) {
 }
 
 
-// Returns 1 if value is above max limit
-// 0 otherwise
-uint32_t fbc_check_limits(controller_t* c) {
-    if(c->value > c->s->value_limit_max)
-        return 1;
-    return 0;
+float fbc_get_limited_setpoint(controller_t* c) {
+    // If a value limit is set and exceeded by the current value, make sure the setpoint
+    // does not exceed the value limit.
+    //
+    // This concept is grandfathered in from an old version of the code. After a change
+    // unceremoniously made during some refactoring, the version used in production for
+    // >5 years had value_limit_max acting in a strange way where it would also
+    // _increase_ the setpoint to the limit value if the current value exceeded it
+    // (presumably causing an initial overshoot to turn into some kind of oscillation
+    // depending on input noise). Now, at least the setpoint is not raised anymore. It
+    // is still unclear whether this behaviour is desirable over just limiting the
+    // setpoint range, but it could allow experimenting with a pre-emphasis of the
+    // setpoint to speed up the linear controller response.
+    const float value_max = c->s->value_limit_max;
+    if (c->value > value_max && c->setpoint > value_max) {
+        return value_max;
+    }
+    return c->setpoint;
 }
 
 
@@ -142,15 +154,8 @@ void fbc_update(controller_t* c) {
     // Keep the last error value, for calculating the derivative
     float old_error = c->error;
 
-    // Check if we should limit the output
-    c->limiting = fbc_check_limits(c);
-
-    if(c->limiting == 0) {
-        // Calculate the error value
-        c->error = c->setpoint - c->value;
-    } else {
-        c->error = c->s->value_limit_max - c->value;
-    }
+    // Calculate the error value
+    c->error = fbc_get_limited_setpoint(c) - c->value;
 
     float new_cv = 0;
 

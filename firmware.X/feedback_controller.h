@@ -58,7 +58,6 @@ typedef struct {
 extern controller_t* fbc_init();
 extern void fbc_enable(controller_t* c);
 extern void fbc_disable(controller_t* c);
-extern uint32_t fbc_check_limits(controller_t* c);
 extern void fbc_update(controller_t* c);
 
 extern controller_t* fbc_get_by_name(char* name);
