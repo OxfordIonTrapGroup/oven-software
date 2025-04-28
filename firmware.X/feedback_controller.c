@@ -1,3 +1,4 @@
+#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -256,14 +257,21 @@ controller_t* temperature_controller_1 = NULL;
 
 
 // The temperature controller regulates the setpoint
-// of the current controller
+// of the current controller; the sqrt() linearises P = I^2 * R.
+static float linearise_current_power(float cv) {
+    if (cv < 0) {
+        return 0.0;
+    }
+    return sqrt(cv);
+}
+
 void temperature_controller_setter_0(float new_cv) {
-    current_controller_0->target_setpoint = new_cv*new_cv;
+    current_controller_0->target_setpoint = linearise_current_power(new_cv);
 }
 
 
 void temperature_controller_setter_1(float new_cv) {
-    current_controller_1->target_setpoint = new_cv*new_cv;
+    current_controller_1->target_setpoint = linearise_current_power(new_cv);
 }
 
 
