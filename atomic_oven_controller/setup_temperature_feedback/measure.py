@@ -19,11 +19,8 @@ current_controller = "current_{}".format(args.channel)
 temperature_controller = "temperature_{}".format(args.channel)
 
 t_start = 1
-t_on = 10
-t_off = 5
-
 t_on = 20
-t_off = 10
+t_off = 5
 
 # Temperature to regulate to
 test_setpoint = 150
@@ -38,14 +35,14 @@ try:
 
     temperature_limits = {}
     temperature_limits['cv_min'] = 0
-    temperature_limits['cv_max'] = np.sqrt(current_limits['value_max'])
+    temperature_limits['cv_max'] = current_limits['value_max'] ** 2
     temperature_limits['value_max'] = 450
     temperature_limits['setpoint_slewrate'] = 400 # C/s
     p.fb_set_limits(temperature_controller, temperature_limits)
 
     temperature_config = {}
-    temperature_config['p'] = 0.08
-    temperature_config['i'] = 0.0008
+    temperature_config['p'] = 0.3
+    temperature_config['i'] = 0.0006
     temperature_config['d'] = -0.1
     temperature_config['sample_decimation'] = 9 # 100 Hz update rate
 
