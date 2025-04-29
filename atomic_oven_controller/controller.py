@@ -23,7 +23,7 @@ class OvenController:
     High level interface to the oven controllers. This is designed to be pretty
     safe - the maximum temperature is flashed into the PIC (via the 
     write_settings script), hence if one goes crazy with the setpoint here
-    nothing will likely explode. The maximum oven burn time is set my a value
+    nothing will likely explode. The maximum oven burn time is set by a value
     flashed into the PIC (again, write_settings) - the oven
     interlock will trip if the oven is on for longer than this.
     """
@@ -55,6 +55,7 @@ class OvenController:
         return channel_id
 
     def check_interlocks(self, channel):
+        """Raise an InterlockTripped error if any interlocks tripped on the given channel."""
         channel_id = self._channel_sanitiser(channel)
         self._check_interlocks(channel_id)
 
