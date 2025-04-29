@@ -6,4 +6,4 @@
 #include <xc.h>
 #include <sys/attribs.h>
 
-#define VERSION_STRING "1.3"
+#define VERSION_STRING "1.4"
