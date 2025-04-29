@@ -19,7 +19,7 @@ controller_name = "current_{}".format(args.channel)
 
 dt = 0.05
 
-p.set_pwm_duty(args.channel, 0)
+p.pwm_set_duty(args.channel, 0)
 
 
 print(p.fb_read_status(controller_name))
@@ -61,7 +61,7 @@ time.sleep(dt)
 p.fb_stop(controller_name)
 print(p.fb_read_status(controller_name))
 
-p.set_pwm_duty(args.channel, 0)
+p.pwm_set_duty(args.channel, 0)
 
 p.safety_status()
 

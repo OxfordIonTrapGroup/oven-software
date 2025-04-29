@@ -9,6 +9,8 @@
 #include "pwm.h"
 #include "timer.h"
 #include "leds.h"
+#include "settings.h"
+#include "safety.h"
 
 #pragma config FPLLICLK = PLL_FRC // PLL source is FRC (8MHz)
 #pragma config FPLLRNG = RANGE_5_10_MHZ

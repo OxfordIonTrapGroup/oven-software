@@ -14,6 +14,7 @@ extern uint8_t adc_check_samples(uint32_t* data);
 extern void adc_convert_samples(uint32_t* data, float* floatData);
 extern void adc_streaming_start(uint8_t channels);
 extern void adc_streaming_stop();
+void adc_set_streaming_decimation(uint32_t decimation);
 
 extern uint32_t last_samples[8];
 extern int32_t last_samples_signed[8];

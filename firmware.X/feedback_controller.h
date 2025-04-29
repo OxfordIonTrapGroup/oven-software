@@ -71,3 +71,4 @@ extern controller_t* fbc_get_by_name(char* name);
 
 
 extern void configure_controllers();
+extern void update_controllers();

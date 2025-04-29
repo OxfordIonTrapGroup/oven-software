@@ -8,9 +8,11 @@
 #include "feedback_controller.h"
 #include "interface.h"
 #include "settings.h"
+#include "AD7770.h"
 #include "calibration.h"
-
 #include "commands.h"
+#include "pwm.h"
+#include "settings.h"
 
 #define ERROR -1
 
@@ -32,6 +34,38 @@ void cmd_version(char* line, uint32_t length) {
 
 
 // PWM commands
+
+
+void cmd_pwm_get_duty(char* line, uint32_t length) {
+    uint32_t channel;
+
+    // Read in the values
+    sscanf(line, "%i", &channel);
+
+    if(channel > 1) {
+        uart_printf("! Bad channel: %i\n", channel);
+        return;
+    }
+
+    float duty = pwm_get_duty(channel);
+    uart_printf(">%i %f\n", channel, duty);
+}
+
+
+void cmd_pwm_is_enabled(char* line, uint32_t length) {
+    uint32_t channel;
+
+    // Read in the values
+    sscanf(line, "%i", &channel);
+
+    if(channel > 1) {
+        uart_printf("! Bad channel: %i\n", channel);
+        return;
+    }
+
+    uint32_t enabled = pwm_is_enabled(channel);
+    uart_printf(">%i %i\n", channel, enabled);
+}
 
 
 void cmd_pwm_set_duty(char* line, uint32_t length) {

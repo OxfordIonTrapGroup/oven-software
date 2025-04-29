@@ -45,7 +45,7 @@ try:
 
     p.fb_set_setpoint(current_controller, 0)
     p.fb_set_setpoint(temperature_controller, 0)
-    p.set_pwm_duty(channel, 0)
+    p.pwm_set_duty(channel, 0)
 
     print(p.fb_read_status(temperature_controller))
     print(p.fb_read_status(current_controller))
@@ -61,13 +61,13 @@ finally:
 
         p.fb_set_setpoint(temperature_controller, 0)
         p.fb_set_setpoint(current_controller, 0)
-        p.set_pwm_duty(channel, 0)
+        p.pwm_set_duty(channel, 0)
     finally:
         p.fb_stop(temperature_controller)
 
         p.fb_set_setpoint(temperature_controller, 0)
         p.fb_set_setpoint(current_controller, 0)
-        p.set_pwm_duty(channel, 0)
+        p.pwm_set_duty(channel, 0)
         print("Oven duty set to 0")
         time.sleep(1)
         values = p.adc_read_calibrated_sample()

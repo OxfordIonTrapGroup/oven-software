@@ -27,7 +27,7 @@ temperatures = np.zeros(n_steps)
 voltages = np.zeros(n_steps)
 
 for i in range(n_steps):
-    p.set_pwm_duty(args.channel, duties[i])
+    p.pwm_set_duty(args.channel, duties[i])
     time.sleep(t_per_step)
     values = p.adc_read_calibrated_sample()
     currents[i] = values[args.channel]["current"]
@@ -40,7 +40,7 @@ for i in range(n_steps):
         values[args.channel]["temperature"],
         values[args.channel]["output_voltage"])
 
-p.set_pwm_duty(args.channel, 0)
+p.pwm_set_duty(args.channel, 0)
 
 
 np.savetxt("current_vs_duty_{}.txt".format(args.channel), np.c_[duties, currents, temperatures, voltages])

@@ -114,7 +114,7 @@ class OvenController:
         self.pic.fb_stop("current_{}".format(channel_id))
 
         # Turn pwm off
-        self.pic.set_pwm_duty(channel_id, 0)
+        self.pic.pwm_set_duty(channel_id, 0)
 
     def read_status(self, channel):
         """Read the temperature and current of a given channel

@@ -163,7 +163,7 @@ class Interface:
         version_str = response.decode().strip().split(" ")[1].strip()
         return version_str
 
-    def set_pwm_duty(self, channel, duty):
+    def pwm_set_duty(self, channel, duty):
         """Set the pwm duty cycle on the given channel.
         channel = 0 or 1
         duty = 0.0 -> 1.0
@@ -175,8 +175,24 @@ class Interface:
         if duty > 1 or duty < 0:
             raise PICError("Bad duty cycle: {}".format(duty))
 
-        line = c.CMD_SET_PWM_DUTY + " {:d} {:f}".format(channel, duty)
+        line = c.CMD_PWM_SET_DUTY + " {:d} {:f}".format(channel, duty)
         response = self._send_command(line)
+
+    def pwm_get_duty(self, channel):
+        if channel not in [0,1]:
+            raise PICError("Bad channel: {}".format(channel))
+
+        line = c.CMD_PWM_GET_DUTY + " {:d} {:f}".format(channel)
+        response = self._send_command(line)
+        return float(response.decode().strip().split(" ")[1].strip())
+
+    def pwm_is_enabled(self, channel):
+        if channel not in [0,1]:
+            raise PICError("Bad channel: {}".format(channel))
+
+        line = c.CMD_PWM_IS_ENABLED + " {:d} {:f}".format(channel)
+        response = self._send_command(line)
+        return int(response.decode().strip().split(" ")[1].strip()) != 0
 
     def adc_read_sample(self):
         """Read the last set of adc samples"""

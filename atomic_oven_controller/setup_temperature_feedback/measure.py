@@ -83,5 +83,5 @@ try:
 finally:
     p.fb_set_setpoint(temperature_controller, 0)
     p.fb_set_setpoint(current_controller, 0)
-    p.set_pwm_duty(args.channel, 0)
+    p.pwm_set_duty(args.channel, 0)
 

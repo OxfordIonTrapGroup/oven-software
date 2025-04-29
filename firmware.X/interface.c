@@ -75,8 +75,14 @@ void ins_process_line(char* data, uint32_t length) {
     // --------------------------------------------------------------
     // PWM commands
     // --------------------------------------------------------------
-    else if(strcmp(command, CMD_SET_PWM_DUTY) == 0) {
+    else if(strcmp(command, CMD_PWM_SET_DUTY) == 0) {
         cmd_pwm_set_duty(residual_line, residual_line_length);
+    }
+    else if(strcmp(command, CMD_PWM_GET_DUTY) == 0) {
+        cmd_pwm_get_duty(residual_line, residual_line_length);
+    }
+    else if(strcmp(command, CMD_PWM_IS_ENABLED) == 0) {
+        cmd_pwm_is_enabled(residual_line, residual_line_length);
     }
 
 

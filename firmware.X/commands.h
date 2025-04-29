@@ -3,7 +3,9 @@
 #define CMD_ECHO                        "echo"
 #define CMD_VERSION                     "version"
 
-#define CMD_SET_PWM_DUTY                "set_pwm_duty"
+#define CMD_PWM_SET_DUTY                "pwm_set_duty"
+#define CMD_PWM_GET_DUTY                "pwm_get_duty"
+#define CMD_PWM_IS_ENABLED              "pwm_is_enabled"
 
 #define CMD_ADC_STREAM                  "adc_stream_channels"
 #define CMD_ADC_DECIMATE                "adc_set_decimation"
@@ -31,3 +33,32 @@
 
 #define CMD_CALIBRATION_READ_CHANNEL "calibration_read_channel"
 #define CMD_CALIBRATION_SET_CHANNEL "calibration_set_channel"
+
+
+void cmd_echo(char* line, uint32_t length);
+void cmd_version(char* line, uint32_t length);
+void cmd_pwm_get_duty(char* line, uint32_t length);
+void cmd_pwm_is_enabled(char* line, uint32_t length);
+void cmd_pwm_set_duty(char* line, uint32_t length);
+void cmd_adc_stream(char* line, uint32_t length);
+void cmd_adc_decimate(char* line, uint32_t length);
+void cmd_adc_read_last_conversion(char* line, uint32_t length);
+void cmd_adc_read_last_calibrated_data(char* line, uint32_t length);
+void cmd_feedback_set_config(char* line, uint32_t length);
+void cmd_feedback_get_config(char* line, uint32_t length);
+void cmd_feedback_start(char* line, uint32_t length);
+void cmd_feedback_stop(char* line, uint32_t length);
+void cmd_feedback_setpoint(char* line, uint32_t length);
+void cmd_feedback_setpoint_immediate(char* line, uint32_t length);
+void cmd_feedback_read_status(char* line, uint32_t length);
+void cmd_feedback_set_limits(char* line, uint32_t length);
+void cmd_feedback_get_limits(char* line, uint32_t length);
+void cmd_settings_load(char* line, uint32_t length);
+void cmd_settings_set_to_factory(char* line, uint32_t length);
+void cmd_settings_save(char* line, uint32_t length);
+void cmd_settings_print(char* line, uint32_t length);
+void cmd_safety_status(char* line, uint32_t length);
+void cmd_safety_read_channel(char* line, uint32_t length);
+void cmd_safety_set_channel(char* line, uint32_t length);
+void cmd_calibration_read_channel(char* line, uint32_t length);
+void cmd_calibration_set_channel(char* line, uint32_t length);

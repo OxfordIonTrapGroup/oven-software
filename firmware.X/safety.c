@@ -6,6 +6,7 @@
 #include "safety.h"
 #include "pwm.h"
 #include "timer.h"
+#include "uart.h"
 #include "AD7770.h"
 
 /*

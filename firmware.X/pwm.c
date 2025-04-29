@@ -37,26 +37,29 @@ void __ISR(_TIMER_3_VECTOR, IPL4AUTO) t3_interrupt() {
     IFS0bits.T3IF = 0; // Clear T3 interrupt
 }
 
+uint32_t pwm_is_enabled(uint32_t channel) {
+    if(channel==0) return OC5CONbits.ON;
+    else return OC4CONbits.ON;
+}
 
 // Ensure the LED for <channel> represents the state of the channel
 // i.e. on if duty != 0 and PWM enabled
-void _make_channel_led_consistent(channel)
-{
-    uint32_t pwm_en;
-    if(channel==0) pwm_en = OC5CONbits.ON;
-    else pwm_en = OC4CONbits.ON;
-    leds_channel_set(channel, pwm_duty[channel] != 0 && pwm_en);
+void _make_channel_led_consistent(uint32_t channel) {
+    leds_channel_set(channel, pwm_duty[channel] != 0 && pwm_is_enabled(channel));
 }
 
+float pwm_get_duty(uint32_t channel) {
+    return pwm_duty[channel];
+}
 
 void pwm_set_duty(uint32_t channel, float duty) {
     if(channel > 1) {
         return;
     }
 
-    if(duty > settings.safety_settings.duty_max[channel])
+    if(duty > settings.safety_settings.duty_max[channel]) {
         duty = settings.safety_settings.duty_max[channel];
-    else if(duty < 0) {
+    } else if(duty < 0) {
         duty = 0;
     }
 

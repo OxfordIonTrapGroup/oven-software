@@ -4,6 +4,9 @@
 #include "AD7770.h"
 #include "interface.h"
 #include "calibration.h"
+#include "feedback_controller.h"
+#include "safety.h"
+#include "uart.h"
 
 #define ADC_RESET LATBbits.LATB14
 
@@ -83,7 +86,7 @@ void adc_streaming_interrupt() {
     for(i = 0; i < 8; i++) {
         if(streaming_channels & (1<<i)) {
             // Cat the data to the uart if the channel is enabled
-            uart_write_data(&last_samples[i], 4);
+            uart_write_data((uint8_t*)&last_samples[i], 4);
         }
     }
 }

@@ -1,6 +1,7 @@
 #include <string.h>
 #include "settings.h"
 #include "calibration.h"
+#include "uart.h"
 #include "AD7770.h"
 
 #define CHANNEL_0_TEMPERATURE 3

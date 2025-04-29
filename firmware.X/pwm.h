@@ -1,7 +1,9 @@
 #pragma once
 
 extern void pwm_config();
+extern float pwm_get_duty(uint32_t channel);
 extern void pwm_set_duty(uint32_t channel, float duty);
+extern uint32_t pwm_is_enabled(uint32_t channel);
 extern void pwm_enable(uint32_t channel);
 extern void pwm_disable(uint32_t channel);
 extern void pwm_shutdown();

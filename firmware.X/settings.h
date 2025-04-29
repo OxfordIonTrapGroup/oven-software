@@ -30,3 +30,8 @@ extern void nvm_clear_errors();
 extern void nvm_erase_page(void* page_address);
 extern void nvm_program_word(void* destination, uint32_t value);
 extern void nvm_program(void* destination, void* data, uint32_t n_bytes);
+
+void settings_read();
+void settings_write();
+void settings_printout();
+void settings_set_to_factory();

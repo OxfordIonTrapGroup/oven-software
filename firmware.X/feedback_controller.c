@@ -6,6 +6,7 @@
 #include "feedback_controller.h"
 #include "settings.h"
 #include "calibration.h"
+#include "pwm.h"
 
 // Sampling rate of ADC
 #define ADC_SAMPLE_RATE 1000.0

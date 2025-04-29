@@ -3,7 +3,9 @@
 CMD_ECHO = "echo"
 CMD_VERSION = "version"
 
-CMD_SET_PWM_DUTY = "set_pwm_duty"
+CMD_PWM_IS_ENABLED = "pwm_is_enabled"
+CMD_PWM_GET_DUTY = "pwm_get_duty"
+CMD_PWM_SET_DUTY = "pwm_set_duty"
 
 CMD_ADC_STREAM = "adc_stream_channels"
 CMD_ADC_DECIMATE = "adc_set_decimation"

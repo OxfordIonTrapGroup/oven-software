@@ -6,6 +6,7 @@
 #include "settings.h"
 #include "feedback_controller.h"
 #include "timer.h"
+#include "uart.h"
 
 // Flash page size for pic32mz is 16kb
 #define PAGE_SIZE 16*1024
