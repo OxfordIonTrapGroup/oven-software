@@ -13,7 +13,7 @@
 
 // Array of pointers to controllers
 controller_t* fbc_controllers[N_MAX_CONTROLLERS] = {NULL};
-uint32_t n_fbc_controllers = 0; // Number of valid controller pointsers
+uint32_t n_fbc_controllers = 0; // Number of valid controller pointers
 
 
 // Initialise feedback controller, using the settings with index
